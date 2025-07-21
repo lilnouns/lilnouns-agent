@@ -17,7 +17,8 @@
     "lint:fix": "biome lint --write .",
     "check": "biome check .",
     "check:fix": "biome check --write .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "cf-typegen": "wrangler types --include-runtime=false --strict-vars=false"
   },
   "packageManager": "pnpm@10.12.1",
   "keywords": [],
