@@ -40,7 +40,7 @@
     ]
   },
   "dependencies": {
-    "@nekofar/warpcast": "2.0.0-alpha.27",
+    "@nekofar/warpcast": "2.0.0-alpha.30",
     "remeda": "2.26.0"
   }
 }
