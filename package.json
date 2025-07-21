@@ -6,7 +6,7 @@
   "author": "",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "vite build",
+    "build": "wrangler deploy --dry-run",
     "dev": "wrangler dev --test-scheduled",
     "deploy": "wrangler deploy",
     "start": "wrangler dev --test-scheduled",
