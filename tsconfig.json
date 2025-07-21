@@ -19,7 +19,11 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "forceConsistentCasingInFileNames": true,
-    "types": ["@cloudflare/workers-types", "vitest/globals"]
+    "types": [
+      "@cloudflare/workers-types/experimental",
+      "@cloudflare/vitest-pool-workers",
+      "vitest/globals"
+    ]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
