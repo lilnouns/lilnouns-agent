@@ -5,4 +5,5 @@ declare namespace Cloudflare {
     AI: Ai;
   }
 }
+
 interface Env extends Cloudflare.Env {}
