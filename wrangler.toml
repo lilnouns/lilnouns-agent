@@ -1,7 +1,6 @@
 name = "lilnouns-agent"
 main = "src/index.ts"
-compatibility_date = "2024-09-23"
-compatibility_flags = ["nodejs_compat"]
+compatibility_date = "2025-07-19"
 
 # Uncomment and configure these sections as needed:
 # [vars]
