@@ -1,14 +1,11 @@
-import { defineConfig } from 'vitest/config';
+import { defineWorkersConfig } from '@cloudflare/vitest-pool-workers/config';
 
-export default defineConfig({
+export default defineWorkersConfig({
   test: {
-    // Use standard Node.js environment for basic unit tests
-    environment: 'node',
-    // Include test files
-    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    // Exclude node_modules and dist
-    exclude: ['node_modules', 'dist'],
-    // Enable globals for easier testing
-    globals: true,
+    poolOptions: {
+      workers: {
+        wrangler: { configPath: './wrangler.toml' },
+      },
+    },
   },
 });
