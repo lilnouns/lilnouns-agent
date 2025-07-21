@@ -18,6 +18,7 @@
   "keywords": [],
   "devDependencies": {
     "@biomejs/biome": "^2.1.2",
+    "@cloudflare/workers-types": "^4.20250715.0",
     "@types/node": "^24.0.15",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
