@@ -1,4 +1,8 @@
-import { client as farcasterClient } from '@nekofar/warpcast';
+import {
+  getDirectCastConversationRecentMessages,
+  getDirectCastInbox,
+} from '@nekofar/warpcast';
+import { filter, forEach, pipe } from 'remeda';
 
 /**
  * Welcome to Cloudflare Workers!
@@ -14,7 +18,7 @@ import { client as farcasterClient } from '@nekofar/warpcast';
  * Bind resources to your Worker in `wrangler.jsonc`. After adding bindings, a type definition for the
  * `Env` object can be regenerated with `npm run cf-typegen`.
  *
- * Learn more at https://developers.cloudflare.com/workers/
+ * Learn more at https://developers.cloudflare.s/workers/
  */
 
 export default {
@@ -30,19 +34,42 @@ export default {
   // The scheduled handler is invoked at the interval set in our wrangler.jsonc's
   // [[triggers]] configuration.
   async scheduled(event, env, ctx): Promise<void> {
-    farcasterClient.setConfig({
+    const { data, error, response } = await getDirectCastInbox({
       auth: () => env.FARCASTER_AUTH_TOKEN,
     });
 
-    // A Cron Trigger can make requests to other endpoints on the Internet,
-    // publish to a Queue, query a D1 Database, and much more.
-    //
-    // We'll keep it simple and make an API call to a Cloudflare API:
-    const resp = await fetch('https://api.cloudflare.com/client/v4/ips');
-    const wasSuccessful = resp.ok ? 'success' : 'fail';
+    if (response.ok !== true) {
+      console.log(error);
+      return;
+    }
+
+    const conversations = pipe(
+      data?.result?.conversations ?? [],
+      filter(c => c.isGroup && (c.viewerContext?.unreadMentionsCount ?? 0) > 0)
+    );
+
+    forEach(conversations, async ({ conversationId }) => {
+      console.log({ conversationId });
+
+      const { data, response, error } =
+        await getDirectCastConversationRecentMessages({
+          auth: () => env.FARCASTER_AUTH_TOKEN,
+          query: {
+            conversationId,
+          },
+        });
+
+      console.log({ data, response, error });
+
+      if (response.ok !== true) {
+        return;
+      }
+
+      console.log(data?.result?.messages ?? []);
+    });
 
     // You could store this result in KV, write to a D1 Database, or publish to a Queue.
     // In this template, we'll just log the result:
-    console.log(`trigger fired at ${event.cron}: ${wasSuccessful}`);
+    console.log(`trigger fired at ${event.cron}`);
   },
 } satisfies ExportedHandler<Env>;
