@@ -32,7 +32,7 @@
     "lint-staged": "^16.1.2",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4",
-    "wrangler": "^4.24.4"
+    "wrangler": "4.16.1"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,css,scss,md,yaml,yml}": [
