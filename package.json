@@ -6,9 +6,9 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "vite build",
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --test-scheduled",
     "deploy": "wrangler deploy",
-    "start": "wrangler dev",
+    "start": "wrangler dev --test-scheduled",
     "test": "vitest --config vitest.config.ts",
     "test:run": "vitest run --config vitest.config.ts",
     "format": "biome format --write .",
