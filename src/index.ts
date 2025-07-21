@@ -1,11 +1,8 @@
 /**
- * Welcome to Cloudflare Workers! This is your first worker.
+ * Lil Nouns Agent - Scheduled Worker
  *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
+ * This worker runs on a scheduled basis to perform automated tasks
+ * for the Lil Nouns ecosystem.
  */
 
 export interface Env extends Record<string, unknown> {
@@ -14,54 +11,24 @@ export interface Env extends Record<string, unknown> {
 }
 
 export default {
-  async fetch(
-    request: Request,
-    _env: Env,
-    _ctx: ExecutionContext
-  ): Promise<Response> {
-    const url = new URL(request.url);
+  async scheduled(
+    controller: ScheduledController,
+    env: Env,
+    ctx: ExecutionContext
+  ): Promise<void> {
+    console.log(
+      'Lil Nouns Agent scheduled task executed at:',
+      new Date().toISOString()
+    );
 
-    // Handle different routes
-    switch (url.pathname) {
-      case '/':
-        return new Response('Hello from Lil Nouns Agent! 🎩', {
-          headers: {
-            'Content-Type': 'text/plain',
-            'Access-Control-Allow-Origin': '*',
-          },
-        });
+    // TODO: Add your scheduled task logic here
+    // This could include:
+    // - Fetching data from APIs
+    // - Processing blockchain data
+    // - Sending notifications
+    // - Updating databases
+    // - etc.
 
-      case '/health':
-        return Response.json({
-          status: 'healthy',
-          timestamp: new Date().toISOString(),
-          worker: 'lilnouns-agent',
-        });
-
-      case '/api/info':
-        return Response.json({
-          name: 'Lil Nouns Agent',
-          version: '1.0.0-alpha.0',
-          description: 'A TypeScript Cloudflare Worker for Lil Nouns',
-          endpoints: [
-            { path: '/', method: 'GET', description: 'Welcome message' },
-            { path: '/health', method: 'GET', description: 'Health check' },
-            {
-              path: '/api/info',
-              method: 'GET',
-              description: 'API information',
-            },
-          ],
-        });
-
-      default:
-        return new Response('Not Found', {
-          status: 404,
-          headers: {
-            'Content-Type': 'text/plain',
-            'Access-Control-Allow-Origin': '*',
-          },
-        });
-    }
+    console.log('Scheduled task completed successfully');
   },
 } satisfies ExportedHandler<Env>;
