@@ -2,7 +2,6 @@
   "name": "lilnouns-agent",
   "version": "1.0.0-alpha.0",
   "description": "",
-  "keywords": [],
   "author": "",
   "license": "Apache-2.0",
   "scripts": {
@@ -11,6 +10,7 @@
     "format:check": "prettier --check ."
   },
   "packageManager": "pnpm@10.12.1",
+  "keywords": [],
   "devDependencies": {
     "prettier": "^3.6.2",
     "prettier-plugin-sort-package-json": "^1.1.0"
