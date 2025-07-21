@@ -1,8 +1,9 @@
 import {
+  getDirectCastConversation,
   getDirectCastConversationRecentMessages,
   getDirectCastInbox,
 } from '@nekofar/warpcast';
-import { filter, forEach, pipe } from 'remeda';
+import { filter, forEach, pipe, sortBy } from 'remeda';
 
 /**
  * Welcome to Cloudflare Workers!
@@ -38,17 +39,12 @@ export default {
       auth: () => env.FARCASTER_AUTH_TOKEN,
     });
 
-    if (response.ok !== true) {
-      console.log(error);
-      return;
-    }
-
     const conversations = pipe(
       data?.result?.conversations ?? [],
       filter(c => c.isGroup && (c.viewerContext?.unreadMentionsCount ?? 0) > 0)
     );
 
-    forEach(conversations, async ({ conversationId }) => {
+    for (const { conversationId } of conversations) {
       console.log({ conversationId });
 
       const { data, response, error } =
@@ -59,14 +55,14 @@ export default {
           },
         });
 
-      console.log({ data, response, error });
+      const messages = pipe(
+        data?.result?.messages ?? [],
+        filter(m => m.hasMention),
+        sortBy(m => m.serverTimestamp)
+      );
 
-      if (response.ok !== true) {
-        return;
-      }
-
-      console.log(data?.result?.messages ?? []);
-    });
+      console.log({ messages });
+    }
 
     // You could store this result in KV, write to a D1 Database, or publish to a Queue.
     // In this template, we'll just log the result:
