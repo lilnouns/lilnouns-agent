@@ -8,5 +8,8 @@
   "keywords": [],
   "author": "",
   "license": "Apache-2.0",
-  "packageManager": "pnpm@10.12.1"
+  "packageManager": "pnpm@10.12.1",
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  }
 }
