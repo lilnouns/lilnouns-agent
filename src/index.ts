@@ -5,17 +5,17 @@
  * for the Lil Nouns ecosystem.
  */
 
-export interface Env extends Record<string, unknown> {
-  // Add your environment variables here
-  // Example: MY_VAR?: string;
-}
-
 export default {
-  async scheduled(
-    controller: ScheduledController,
-    env: Env,
-    ctx: ExecutionContext
-  ): Promise<void> {
+  async fetch(req) {
+    const url = new URL(req.url);
+    url.pathname = '/__scheduled';
+    url.searchParams.append('cron', '* * * * *');
+    return new Response(
+      `To test the scheduled handler, ensure you have used the "--test-scheduled" then try running "curl ${url.href}".`
+    );
+  },
+
+  async scheduled(event, env, ctx): Promise<void> {
     console.log(
       'Lil Nouns Agent scheduled task executed at:',
       new Date().toISOString()
