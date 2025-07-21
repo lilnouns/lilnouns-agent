@@ -18,5 +18,5 @@ command = "pnpm run build"
 # binding = "MY_BUCKET"
 # bucket_name = "my-bucket"
 
-# [triggers]
-# crons = ["0 0 * * *"]
+[triggers]
+crons = ["0 0 * * *"]
