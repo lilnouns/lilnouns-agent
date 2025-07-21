@@ -1,3 +1,5 @@
+import { client as farcasterClient } from '@nekofar/warpcast';
+
 /**
  * Welcome to Cloudflare Workers!
  *
@@ -28,6 +30,8 @@ export default {
   // The scheduled handler is invoked at the interval set in our wrangler.jsonc's
   // [[triggers]] configuration.
   async scheduled(event, env, ctx): Promise<void> {
+    farcasterClient.setConfig({});
+
     // A Cron Trigger can make requests to other endpoints on the Internet,
     // publish to a Queue, query a D1 Database, and much more.
     //
