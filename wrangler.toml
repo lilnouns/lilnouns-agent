@@ -1,0 +1,22 @@
+name = "lilnouns-agent"
+main = "src/index.ts"
+compatibility_date = "2024-07-15"
+compatibility_flags = ["nodejs_compat"]
+
+[build]
+command = "pnpm run build"
+
+# Uncomment and configure these sections as needed:
+# [vars]
+# MY_VAR = "production_value"
+
+# [[kv_namespaces]]
+# binding = "MY_KV_NAMESPACE"
+# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# [[r2_buckets]]
+# binding = "MY_BUCKET"
+# bucket_name = "my-bucket"
+
+# [triggers]
+# crons = ["0 0 * * *"]
