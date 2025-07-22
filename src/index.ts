@@ -37,6 +37,11 @@ async function retrieveLilNounsRelatedMessages(
       // Check if a message has mentions and specifically mentions 'lilnouns'
       const lilNounsFid = 20146;
 
+      // Skip all messages sent BY lilnouns
+      if (m.senderFid === lilNounsFid) {
+        return false;
+      }
+
       const hasLilNounsMention =
         m.hasMention &&
         m.mentions?.some(mention => mention.user.fid === lilNounsFid);
