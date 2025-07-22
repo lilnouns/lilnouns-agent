@@ -1,4 +1,3 @@
-import { runWithTools } from '@cloudflare/ai-utils';
 import {
   getDirectCastConversation,
   getDirectCastConversationRecentMessages,
@@ -101,10 +100,10 @@ export default {
       for (const message of messages) {
         console.log({ message });
 
-        const response = await runWithTools(
-          env.AI,
+        const response = await env.AI.run(
           '@hf/nousresearch/hermes-2-pro-mistral-7b',
           {
+            max_tokens: 100,
             messages: [
               {
                 role: 'system',
@@ -125,7 +124,13 @@ export default {
                 content: message.message,
               },
             ],
-            tools: [],
+          },
+          {
+            gateway: {
+              id: 'default',
+              skipCache: false,
+              cacheTtl: 3360,
+            },
           }
         );
 
