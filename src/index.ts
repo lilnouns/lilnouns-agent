@@ -1,3 +1,4 @@
+import { runWithTools } from '@cloudflare/ai-utils';
 import {
   getDirectCastConversation,
   getDirectCastConversationRecentMessages,
@@ -81,14 +82,28 @@ export default {
       for (const message of messages) {
         console.log({ message });
 
-        const { response, error, data } = await sendDirectCastMessage({
+        const response = await runWithTools(
+          env.AI,
+          '@hf/nousresearch/hermes-2-pro-mistral-7b',
+          {
+            messages: [
+              {
+                role: 'user',
+                content: message.message,
+              },
+            ],
+            tools: [],
+          }
+        );
+
+        const { error, data } = await sendDirectCastMessage({
           auth: () => env.FARCASTER_AUTH_TOKEN,
           body: {
             conversationId,
             recipientFids: [message.senderFid],
             messageId: crypto.randomUUID().replace(/-/g, ''),
             type: 'text',
-            message: message.message,
+            message: response.response ?? "I don't know",
             inReplyToId: message.messageId,
           },
         });
