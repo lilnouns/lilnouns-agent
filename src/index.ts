@@ -2,6 +2,7 @@ import {
   getDirectCastConversation,
   getDirectCastConversationRecentMessages,
   getDirectCastInbox,
+  sendDirectCastMessage,
 } from '@nekofar/warpcast';
 import { filter, forEach, pipe, sortBy } from 'remeda';
 
@@ -78,7 +79,21 @@ export default {
       );
 
       for (const message of messages) {
-        console.log(message);
+        console.log({ message });
+
+        const { response, error, data } = await sendDirectCastMessage({
+          auth: () => env.FARCASTER_AUTH_TOKEN,
+          body: {
+            conversationId,
+            recipientFids: [message.senderFid],
+            messageId: crypto.randomUUID().replace(/-/g, ''),
+            type: 'text',
+            message: message.message,
+            inReplyToId: message.messageId,
+          },
+        });
+
+        console.log({ response, error, data });
       }
     }
 
