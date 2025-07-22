@@ -19,7 +19,7 @@ async function retrieveUnreadMentionsInGroups(env: Env) {
   return conversations;
 }
 
-async function retrieveMentionsFromConversation(
+async function retrieveLilNounsRelatedMessages(
   env: Env,
   conversationId: string
 ) {
@@ -33,7 +33,21 @@ async function retrieveMentionsFromConversation(
 
   const messages = pipe(
     data?.result?.messages ?? [],
-    filter(m => m.hasMention),
+    filter(m => {
+      // Check if a message has mentions and specifically mentions 'lilnouns'
+      const lilNounsFid = 20146;
+
+      const hasLilNounsMention =
+        m.hasMention &&
+        m.mentions?.some(mention => mention.user.fid === lilNounsFid);
+
+      // Check if a message is a reply to 'lilnouns' user
+      const isReplyToLilNouns =
+        m.inReplyTo?.senderFid === lilNounsFid &&
+        m.senderContext.fid !== lilNounsFid;
+
+      return hasLilNounsMention || isReplyToLilNouns;
+    }),
     sortBy(m => m.serverTimestamp)
   );
   return messages;
@@ -74,7 +88,7 @@ export default {
     for (const { conversationId } of conversations) {
       console.log({ conversationId });
 
-      const messages = await retrieveMentionsFromConversation(
+      const messages = await retrieveLilNounsRelatedMessages(
         env,
         conversationId
       );
