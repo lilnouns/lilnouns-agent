@@ -1,7 +1,11 @@
+enablePrePostScripts: true
+
 onlyBuiltDependencies:
+  - bufferutil
   - esbuild
+  - keccak
   - sharp
+  - utf-8-validate
   - workerd
 
 saveExact: true
-enablePrePostScripts: true
