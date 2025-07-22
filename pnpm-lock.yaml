@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@cloudflare/ai-utils':
+        specifier: 1.0.1
+        version: 1.0.1
       '@nekofar/warpcast':
         specifier: 2.0.0-alpha.34
         version: 2.0.0-alpha.34
@@ -97,6 +100,9 @@ packages:
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [win32]
+
+  '@cloudflare/ai-utils@1.0.1':
+    resolution: {integrity: sha512-gmn16AvVqtMLcaBYvPkwEWui39E4hlcFPqXuVamKbGleIDO6hVpvAy3KCvbnoPVT7KqRcfdLLpHRIBQDwI9tWQ==}
 
   '@cloudflare/kv-asset-handler@0.4.0':
     resolution: {integrity: sha512-+tv3z+SPp+gqTIcImN9o0hqE9xyfQjI1XD9pL6NuKjua9B1y7mNYv0S9cP+QEbA4ppVgGZEmKOvHX5G5Ei1CVA==}
@@ -1419,6 +1425,11 @@ snapshots:
 
   '@biomejs/cli-win32-x64@2.1.2':
     optional: true
+
+  '@cloudflare/ai-utils@1.0.1':
+    dependencies:
+      yaml: 2.8.0
+      zod: 3.25.76
 
   '@cloudflare/kv-asset-handler@0.4.0':
     dependencies:

@@ -40,6 +40,7 @@
     ]
   },
   "dependencies": {
+    "@cloudflare/ai-utils": "1.0.1",
     "@nekofar/warpcast": "2.0.0-alpha.34",
     "remeda": "2.26.0"
   }
