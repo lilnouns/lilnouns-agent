@@ -5,6 +5,38 @@ import {
 } from '@nekofar/warpcast';
 import { filter, forEach, pipe, sortBy } from 'remeda';
 
+async function retrieveUnreadMentionsInGroups(env: Env) {
+  const { data, error, response } = await getDirectCastInbox({
+    auth: () => env.FARCASTER_AUTH_TOKEN,
+  });
+
+  const conversations = pipe(
+    data?.result?.conversations ?? [],
+    filter(c => c.isGroup && (c.viewerContext?.unreadMentionsCount ?? 0) > 0)
+  );
+  return conversations;
+}
+
+async function retrieveMentionsFromConversation(
+  env: Env,
+  conversationId: string
+) {
+  const { data, response, error } =
+    await getDirectCastConversationRecentMessages({
+      auth: () => env.FARCASTER_AUTH_TOKEN,
+      query: {
+        conversationId,
+      },
+    });
+
+  const messages = pipe(
+    data?.result?.messages ?? [],
+    filter(m => m.hasMention),
+    sortBy(m => m.serverTimestamp)
+  );
+  return messages;
+}
+
 /**
  * Welcome to Cloudflare Workers!
  *
@@ -35,33 +67,19 @@ export default {
   // The scheduled handler is invoked at the interval set in our wrangler.jsonc's
   // [[triggers]] configuration.
   async scheduled(event, env, ctx): Promise<void> {
-    const { data, error, response } = await getDirectCastInbox({
-      auth: () => env.FARCASTER_AUTH_TOKEN,
-    });
-
-    const conversations = pipe(
-      data?.result?.conversations ?? [],
-      filter(c => c.isGroup && (c.viewerContext?.unreadMentionsCount ?? 0) > 0)
-    );
+    const conversations = await retrieveUnreadMentionsInGroups(env);
 
     for (const { conversationId } of conversations) {
       console.log({ conversationId });
 
-      const { data, response, error } =
-        await getDirectCastConversationRecentMessages({
-          auth: () => env.FARCASTER_AUTH_TOKEN,
-          query: {
-            conversationId,
-          },
-        });
-
-      const messages = pipe(
-        data?.result?.messages ?? [],
-        filter(m => m.hasMention),
-        sortBy(m => m.serverTimestamp)
+      const messages = await retrieveMentionsFromConversation(
+        env,
+        conversationId
       );
 
-      console.log({ messages });
+      for (const message of messages) {
+        console.log(message);
+      }
     }
 
     // You could store this result in KV, write to a D1 Database, or publish to a Queue.
