@@ -1,3 +1,4 @@
+import { readLilNounsAuctionFetchNextNoun } from '@nekofar/lilnouns/contracts';
 import type { Query } from '@nekofar/lilnouns/subgraphs';
 import {
   getDirectCastConversationRecentMessages,
@@ -7,14 +8,19 @@ import {
 import { gql, request } from 'graphql-request';
 import { DateTime } from 'luxon';
 import { filter, last, map, pipe, sortBy } from 'remeda';
-import { createPublicClient, http } from 'viem';
-import { mainnet } from 'viem/chains';
+import { formatEther } from 'viem';
+import { createConfig, http } from 'wagmi';
+import { getBlockNumber } from 'wagmi/actions';
+import { mainnet } from 'wagmi/chains';
 
-// Create a public Ethereum client to interact with mainnet
-const publicClient = createPublicClient({
-  chain: mainnet,
-  transport: http(),
-});
+function createWagmiConfig(env: Env) {
+  const wagmiConfig = createConfig({
+    chains: [mainnet],
+    transports: { [mainnet.id]: http(env.ETHEREUM_RPC_URL) },
+  });
+
+  return wagmiConfig;
+}
 
 // Retrieves group conversations with unread mentions for the Lil Nouns bot
 async function retrieveUnreadMentionsInGroups(env: Env) {
@@ -95,9 +101,30 @@ async function retrieveLilNounsRelatedMessages(
   return messages;
 }
 
+async function fetchCurrentAuction(env: Env) {
+  console.log('[DEBUG] Fetching current auction');
+
+  const wagmiConfig = createWagmiConfig(env);
+  const [nounId, seed, svg, price, hash, blockNumber] =
+    await readLilNounsAuctionFetchNextNoun(wagmiConfig, {});
+
+  const auction = {
+    nounId: Number(nounId),
+    price: `${formatEther(price)} ETH`,
+  };
+
+  console.log(
+    '[DEBUG] Retrieved current auction: ',
+    JSON.stringify(auction, null, 2)
+  );
+
+  return { auction };
+}
+
 async function fetchActiveProposals(env: Env) {
   console.log('[DEBUG] Fetching active proposals');
-  const blockNumber = await publicClient.getBlockNumber(); // Get current Ethereum block number
+  const wagmiConfig = createWagmiConfig(env);
+  const blockNumber = await getBlockNumber(wagmiConfig); // Get current Ethereum block number
   console.log(`[DEBUG] Current Ethereum block number: ${blockNumber}`);
 
   // Query the Lil Nouns subgraph for active proposals using current block number
@@ -227,6 +254,12 @@ async function processConversations(env: Env) {
               description: 'Fetch Lil Nouns active proposals',
               parameters: {},
             },
+            {
+              type: 'function',
+              name: 'fetchLilNounsCurrentAuction',
+              description: 'Fetch Lil Nouns current auction',
+              parameters: {},
+            },
           ],
         },
         { ...gatewayConfig }
@@ -249,6 +282,15 @@ async function processConversations(env: Env) {
                 role: 'tool',
                 name: toolCall.name,
                 content: JSON.stringify({ proposals }),
+              });
+              break;
+            }
+            case 'fetchLilNounsCurrentAuction': {
+              const { auction } = await fetchCurrentAuction(env);
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify({ auction }),
               });
               break;
             }
