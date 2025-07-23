@@ -98,7 +98,7 @@ async function fetchActiveProposals(env: Env) {
     { blockNumber: blockNumber.toString() }
   );
 
-  console.log({ proposals });
+  return { proposals };
 }
 
 // Main function that processes all conversations with unread mentions
@@ -165,7 +165,8 @@ async function processConversations(env: Env) {
           switch (toolCall.name) {
             case 'fetchLilNounsActiveProposals': {
               console.log({ toolCall });
-              await fetchActiveProposals(env);
+              const { proposals } = await fetchActiveProposals(env);
+              console.log({ proposals });
               break;
             }
             default:
