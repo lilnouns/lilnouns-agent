@@ -198,7 +198,7 @@ async function processConversations(env: Env) {
   // Gateway configuration for AI model calls:
   const gatewayConfig = {
     gateway: {
-      id: 'default',
+      id: 'lilnouns-agent',
       skipCache: false,
       cacheTtl: 3360, // Cache responses for performance
     },
