@@ -73,9 +73,36 @@ async function retrieveLilNounsRelatedMessages(
   return messages;
 }
 
+async function fetchActiveProposals(env: Env) {
+  const blockNumber = await publicClient.getBlockNumber(); // Get current Ethereum block number
+
+  // Query the Lil Nouns subgraph for active proposals using current block number
+  const { proposals } = await request<Query>(
+    env.LILNOUNS_SUBGRAPH_URL,
+    gql`
+        query GetProposals($blockNumber: BigInt!) {
+          proposals(
+            orderBy: createdBlock,
+            orderDirection: desc,
+            where: {
+              status_not_in: [CANCELLED],
+              endBlock_gte: $blockNumber
+            }
+          ) {
+            id
+            title
+            createdTimestamp
+          }
+        }
+      `,
+    { blockNumber: blockNumber.toString() }
+  );
+
+  console.log({ proposals });
+}
+
 // Main function that processes all conversations with unread mentions
 async function processConversations(env: Env) {
-  const blockNumber = await publicClient.getBlockNumber(); // Get current Ethereum block number
   const conversations = await retrieveUnreadMentionsInGroups(env); // Get conversations to process
 
   // Process each conversation individually
@@ -138,28 +165,7 @@ async function processConversations(env: Env) {
           switch (toolCall.name) {
             case 'fetchLilNounsActiveProposals': {
               console.log({ toolCall });
-              // Query the Lil Nouns subgraph for active proposals using current block number
-              const { proposals } = await request<Query>(
-                env.LILNOUNS_SUBGRAPH_URL,
-                gql`
-                query GetProposals($blockNumber: BigInt!) {
-                  proposals(
-                    orderBy: createdBlock,
-                    orderDirection: desc,
-                    where: {
-                      status_not_in: [CANCELLED],
-                      endBlock_gte: $blockNumber
-                    }
-                  ) {
-                    id
-                    title
-                    createdTimestamp
-                  }
-                }
-              `,
-                { blockNumber: blockNumber.toString() }
-              );
-              console.log({ proposals });
+              await fetchActiveProposals(env);
               break;
             }
             default:
