@@ -10,16 +10,20 @@ import { filter, forEach, pipe, sortBy } from 'remeda';
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
 
+// Create a public Ethereum client to interact with mainnet
 const publicClient = createPublicClient({
   chain: mainnet,
   transport: http(),
 });
 
+// Retrieves group conversations with unread mentions for the Lil Nouns bot
 async function retrieveUnreadMentionsInGroups(env: Env) {
+  // Fetch the DirectCast inbox using Farcaster authentication
   const { data, error, response } = await getDirectCastInbox({
     auth: () => env.FARCASTER_AUTH_TOKEN,
   });
 
+  // Filter conversations to only include groups with unread mentions
   const conversations = pipe(
     data?.result?.conversations ?? [],
     filter(c => c.isGroup && (c.viewerContext?.unreadMentionsCount ?? 0) > 0)
@@ -27,10 +31,12 @@ async function retrieveUnreadMentionsInGroups(env: Env) {
   return conversations;
 }
 
+// Retrieves messages from a conversation that are related to Lil Nouns
 async function retrieveLilNounsRelatedMessages(
   env: Env,
   conversationId: string
 ) {
+  // Get recent messages from the specified conversation
   const { data, response, error } =
     await getDirectCastConversationRecentMessages({
       auth: () => env.FARCASTER_AUTH_TOKEN,
@@ -43,41 +49,47 @@ async function retrieveLilNounsRelatedMessages(
     data?.result?.messages ?? [],
     filter(m => {
       // Check if a message has mentions and specifically mentions 'lilnouns'
-      const lilNounsFid = 20146;
+      const lilNounsFid = 20146; // Farcaster ID for the lilnouns account
 
-      // Skip all messages sent BY lilnouns
+      // Skip all messages sent BY lilnouns to avoid self-responses
       if (m.senderFid === lilNounsFid) {
         return false;
       }
 
+      // Check if message mentions the lilnouns account
       const hasLilNounsMention =
         m.hasMention &&
         m.mentions?.some(mention => mention.user.fid === lilNounsFid);
 
-      // Check if a message is a reply to 'lilnouns' user
+      // Check if message is a reply to lilnouns (but not from lilnouns itself)
       const isReplyToLilNouns =
         m.inReplyTo?.senderFid === lilNounsFid &&
         m.senderContext.fid !== lilNounsFid;
 
       return hasLilNounsMention || isReplyToLilNouns;
     }),
-    sortBy(m => m.serverTimestamp)
+    sortBy(m => m.serverTimestamp) // Sort messages by timestamp
   );
   return messages;
 }
 
+// Main function that processes all conversations with unread mentions
 async function processConversations(env: Env) {
-  const blockNumber = await publicClient.getBlockNumber();
-  const conversations = await retrieveUnreadMentionsInGroups(env);
+  const blockNumber = await publicClient.getBlockNumber(); // Get current Ethereum block number
+  const conversations = await retrieveUnreadMentionsInGroups(env); // Get conversations to process
 
+  // Process each conversation individually
   for (const { conversationId } of conversations) {
     console.log({ conversationId });
 
+    // Get Lil Nouns related messages from this conversation
     const messages = await retrieveLilNounsRelatedMessages(env, conversationId);
 
+    // Process each relevant message
     for (const message of messages) {
       console.log({ message });
 
+      // Generate AI response using Cloudflare AI with specific system prompt
       const response = await env.AI.run(
         '@hf/nousresearch/hermes-2-pro-mistral-7b',
         {
@@ -115,7 +127,7 @@ async function processConversations(env: Env) {
           gateway: {
             id: 'default',
             skipCache: false,
-            cacheTtl: 3360,
+            cacheTtl: 3360, // Cache responses for performance
           },
         }
       );
@@ -156,6 +168,7 @@ async function processConversations(env: Env) {
         }
       }
 
+      // Send response back to the conversation (currently commented out)
       const { error, data } = await sendDirectCastMessage({
         auth: () => env.FARCASTER_AUTH_TOKEN,
         body: {
@@ -174,22 +187,21 @@ async function processConversations(env: Env) {
 }
 
 export default {
+  // Handle regular HTTP requests (used for testing scheduled functions)
   async fetch(req) {
     const url = new URL(req.url);
-    url.pathname = '/__scheduled';
-    url.searchParams.append('cron', '* * * * *');
+    url.pathname = '/__scheduled'; // Redirect to scheduled endpoint
+    url.searchParams.append('cron', '* * * * *'); // Add cron parameter
     return new Response(
       `To test the scheduled handler, ensure you have used the "--test-scheduled" then try running "curl ${url.href}".`
     );
   },
 
-  // The scheduled handler is invoked at the interval set in our wrangler.jsonc's
-  // [[triggers]] configuration.
+  // The scheduled handler runs at intervals defined in wrangler.jsonc triggers
   async scheduled(event, env, ctx): Promise<void> {
-    await processConversations(env);
+    await processConversations(env); // Process all relevant conversations
 
-    // You could store this result in KV, write to a D1 Database, or publish to a Queue.
-    // In this template, we'll just log the result:
+    // Log when the scheduled task was triggered
     console.log(`trigger fired at ${event.cron}`);
   },
 } satisfies ExportedHandler<Env>;
