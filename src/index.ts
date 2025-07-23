@@ -4,12 +4,17 @@ import {
   sendDirectCastMessage,
 } from '@nekofar/warpcast';
 import { DateTime } from 'luxon';
-import { filter, last, pipe, sortBy } from 'remeda';
+import { filter, flatMap, join, last, map, pipe, sortBy } from 'remeda';
 import { createConfig, http } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { getConfig } from './config';
 import { agentSystemMessage } from './prompts';
-import { aiTools, fetchActiveProposals, fetchCurrentAuction } from './tools';
+import {
+  aiTools,
+  fetchActiveProposals,
+  fetchCurrentAuction,
+  fetchLilNounsTokenTotalSupply,
+} from './tools';
 
 export function createWagmiConfig(config: ReturnType<typeof getConfig>) {
   const wagmiConfig = createConfig({
@@ -157,7 +162,25 @@ async function processConversations(env: Env) {
       );
       const toolsMessage = [];
 
-      // Generate AI response using Cloudflare AI with specific system prompt
+      // Search for relevant context using AutoRAG based on the user's message content
+      const answer = await env.AI.autorag(config.agent.autoRagId).search({
+        query: message.message,
+        rewrite_query: true,
+        max_num_results: 2,
+        ranking_options: {
+          score_threshold: 0.3,
+        },
+      });
+
+      const contextContent = pipe(
+        answer.data,
+        flatMap(i => i.content),
+        contents => filter(contents, c => c.type === 'text'),
+        texts => map(texts, c => c.text),
+        join('\n')
+      );
+
+      // Generate AI response using Cloudflare AI with a specific system prompt
       const { tool_calls } = await env.AI.run(
         config.agent.aiModel,
         {
@@ -201,7 +224,18 @@ async function processConversations(env: Env) {
               });
               break;
             }
+            case 'fetchLilNounsTokenTotalSupply': {
+              const { totalSupply } =
+                await fetchLilNounsTokenTotalSupply(config);
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify({ totalSupply }),
+              });
+              break;
+            }
             default:
+              console.log(`[DEBUG] Unhandled tool call: ${toolCall.name}`);
               break;
           }
         }
@@ -212,7 +246,12 @@ async function processConversations(env: Env) {
         config.agent.aiModel,
         {
           messages: [
-            { role: 'system', content: agentSystemMessage },
+            {
+              role: 'system',
+              content: !contextContent
+                ? agentSystemMessage
+                : `${agentSystemMessage}\nHere is some context from relevant documents:\n${contextContent}`,
+            },
             // The actual message content to respond to
             { role: 'user', content: message.message },
             ...toolsMessage,
