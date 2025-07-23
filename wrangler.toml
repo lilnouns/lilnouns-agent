@@ -9,6 +9,9 @@ enabled = true
 [triggers]
 crons = ["0/5 * * * *"]
 
+[placement]
+mode = "smart"
+
 [ai]
 binding = "AI"
 
