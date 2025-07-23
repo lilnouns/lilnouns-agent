@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.6] - 2025-07-23
+
+### 🚜 Refactor
+
+- *(config)* Simplify `getConfig` logic
+- *(config)* Enhance validation and error handling
+
+### ⚙️ Miscellaneous Tasks
+
+- *(types)* Add `NODE_ENV` to `Env` interface
+
 ## [1.0.0-alpha.5] - 2025-07-23
 
 ### ⚙️ Miscellaneous Tasks
