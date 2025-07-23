@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.2] - 2025-07-23
+
+### 🚜 Refactor
+
+- *(index)* Update gateway `id` for improved context
+
 ## [1.0.0-alpha.1] - 2025-07-23
 
 ### ⚙️ Miscellaneous Tasks
