@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.7] - 2025-07-23
+
+### 🚀 Features
+
+- *(agent)* Integrate AutoRAG for context-based responses
+- *(agent)* Enhance AutoRAG query configuration
+- *(agent)* Add fetchLilNounsTokenTotalSupply tool
+
 ## [1.0.0-alpha.6] - 2025-07-23
 
 ### 🚜 Refactor
