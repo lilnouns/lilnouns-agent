@@ -5,6 +5,13 @@ import {
   sendDirectCastMessage,
 } from '@nekofar/warpcast';
 import { filter, forEach, pipe, sortBy } from 'remeda';
+import { createPublicClient, http } from 'viem';
+import { mainnet } from 'viem/chains';
+
+const publicClient = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+});
 
 async function retrieveUnreadMentionsInGroups(env: Env) {
   const { data, error, response } = await getDirectCastInbox({
@@ -58,6 +65,7 @@ async function retrieveLilNounsRelatedMessages(
 }
 
 async function processConversations(env: Env) {
+  const blockNumber = await publicClient.getBlockNumber();
   const conversations = await retrieveUnreadMentionsInGroups(env);
 
   for (const { conversationId } of conversations) {
