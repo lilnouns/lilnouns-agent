@@ -1,21 +1,16 @@
 name = "lilnouns-agent"
 main = "src/index.ts"
 compatibility_date = "2025-07-19"
+workers_dev = false
 
-# Uncomment and configure these sections as needed:
-# [vars]
-# MY_VAR = "production_value"
-
-# [[kv_namespaces]]
-# binding = "MY_KV_NAMESPACE"
-# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-
-# [[r2_buckets]]
-# binding = "MY_BUCKET"
-# bucket_name = "my-bucket"
+[observability]
+enabled = true
 
 [triggers]
-crons = ["0 0 * * *"]
+crons = ["0/5 * * * *"]
+
+[placement]
+mode = "smart"
 
 [ai]
 binding = "AI"
