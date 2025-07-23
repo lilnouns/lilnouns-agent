@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.4] - 2025-07-23
+
+### 🚀 Features
+
+- *(config)* Add `getConfig` utility for env parsing
+- *(agent)* Refactor and expand agent configuration
+
+### 🐛 Bug Fixes
+
+- *(config)* Update `aiModel` to specific model identifier
+
+### 🚜 Refactor
+
+- *(index)* Rename functions for clarity and consistency
+- *(index)* Simplify `agentSystemMessage` structure
+
 ## [1.0.0-alpha.3] - 2025-07-23
 
 ### 🚜 Refactor
