@@ -19,6 +19,7 @@ const envSchema = z.object({
 // Add validation for agent configuration
 const agentConfigSchema = z.object({
   fid: z.number().positive('Agent FID must be a positive number'),
+  autoRagId: z.string().min(1, 'AutoRAG ID cannot be empty'),
   gatewayId: z.string().min(1, 'Gateway ID cannot be empty'),
   cacheTtl: z.number().positive('Cache TTL must be positive'),
   aiModel: z.literal('@hf/nousresearch/hermes-2-pro-mistral-7b'),
@@ -86,6 +87,7 @@ export function getConfig(env: Env): Config {
 
     const agentConfig = {
       fid: 20146,
+      autoRagId: 'lilnouns-agent',
       gatewayId: 'lilnouns-agent',
       cacheTtl: 3360,
       aiModel: '@hf/nousresearch/hermes-2-pro-mistral-7b' as const,

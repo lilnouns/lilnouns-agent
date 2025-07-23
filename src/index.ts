@@ -4,7 +4,7 @@ import {
   sendDirectCastMessage,
 } from '@nekofar/warpcast';
 import { DateTime } from 'luxon';
-import { filter, last, pipe, sortBy } from 'remeda';
+import { filter, flatMap, join, last, map, pipe, sortBy } from 'remeda';
 import { createConfig, http } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { getConfig } from './config';
@@ -157,7 +157,20 @@ async function processConversations(env: Env) {
       );
       const toolsMessage = [];
 
-      // Generate AI response using Cloudflare AI with specific system prompt
+      // Search for relevant context using AutoRAG based on the user's message content
+      const answer = await env.AI.autorag(config.agent.autoRagId).search({
+        query: message.message,
+      });
+
+      const contextContent = pipe(
+        answer.data,
+        flatMap(i => i.content),
+        contents => filter(contents, c => c.type === 'text'),
+        texts => map(texts, c => c.text),
+        join('\n')
+      );
+
+      // Generate AI response using Cloudflare AI with a specific system prompt
       const { tool_calls } = await env.AI.run(
         config.agent.aiModel,
         {
@@ -212,7 +225,12 @@ async function processConversations(env: Env) {
         config.agent.aiModel,
         {
           messages: [
-            { role: 'system', content: agentSystemMessage },
+            {
+              role: 'system',
+              content: !contextContent
+                ? agentSystemMessage
+                : `${agentSystemMessage}\nHere is some context from relevant documents:\n${contextContent}`,
+            },
             // The actual message content to respond to
             { role: 'user', content: message.message },
             ...toolsMessage,
