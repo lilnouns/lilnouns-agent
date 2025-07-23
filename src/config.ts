@@ -1,4 +1,3 @@
-import { pick, pipe } from 'remeda';
 import type { Simplify } from 'type-fest';
 import { z } from 'zod';
 
@@ -6,14 +5,12 @@ import { z } from 'zod';
  * Environment variable validation schema
  * Defines the expected environment variables with their types and transformations
  */
-const envSchema = z
-  .object({
-    NODE_ENV: z.enum(['development', 'staging', 'production']),
-    FARCASTER_AUTH_TOKEN: z.string().min(1),
-    LILNOUNS_SUBGRAPH_URL: z.url(),
-    ETHEREUM_RPC_URL: z.url(),
-  })
-  .strict();
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'staging', 'production']),
+  FARCASTER_AUTH_TOKEN: z.string().min(1),
+  LILNOUNS_SUBGRAPH_URL: z.url(),
+  ETHEREUM_RPC_URL: z.url(),
+});
 
 /**
  * Raw environment type inferred from schema
@@ -61,53 +58,45 @@ let cachedConfig: Config | null = null;
  * @example
  * ```typescript
  * const config = getConfig(env);
- * console.log(`Running in ${config.env} mode on port ${config.port}`);
+ * console.log(`Running in ${config.env} mode`);
  * ```
  */
 export function getConfig(env: Env): Config {
   if (!cachedConfig) {
     try {
-      const parsed = envSchema.parse(env);
+      // Parse only the required environment variables, ignore additional ones
+      const parsed = envSchema.parse({
+        NODE_ENV: env.NODE_ENV,
+        FARCASTER_AUTH_TOKEN: env.FARCASTER_AUTH_TOKEN,
+        LILNOUNS_SUBGRAPH_URL: env.LILNOUNS_SUBGRAPH_URL,
+        ETHEREUM_RPC_URL: env.ETHEREUM_RPC_URL,
+      });
 
-      // Use remeda's pipe and pick for functional data transformation
-      cachedConfig = pipe(
-        parsed,
-        pick([
-          'NODE_ENV',
-          'FARCASTER_AUTH_TOKEN',
-          'LILNOUNS_SUBGRAPH_URL',
-          'ETHEREUM_RPC_URL',
-        ]),
-        ({
-          NODE_ENV,
-          FARCASTER_AUTH_TOKEN,
-          LILNOUNS_SUBGRAPH_URL,
-          ETHEREUM_RPC_URL,
-        }) => ({
-          env: NODE_ENV,
-          farcasterAuthToken: FARCASTER_AUTH_TOKEN,
-          lilNounsSubgraphUrl: LILNOUNS_SUBGRAPH_URL,
-          ethereumRpcUrl: ETHEREUM_RPC_URL,
-          agent: {
-            fid: 20146, // Farcaster ID for the lilnouns account
-            gatewayId: 'lilnouns-agent',
-            cacheTtl: 3360, // Cache responses for performance (in seconds)
-            aiModel: '@hf/nousresearch/hermes-2-pro-mistral-7b',
-            maxTokens: 100,
-            cacheKeys: {
-              lastFetch: 'conversations:last-fetch',
-            },
-            defaults: {
-              fallbackDate: '1970-01-01T00:00:00.000Z',
-            },
+      // Transform the parsed data into the configuration object
+      cachedConfig = {
+        env: parsed.NODE_ENV,
+        farcasterAuthToken: parsed.FARCASTER_AUTH_TOKEN,
+        lilNounsSubgraphUrl: parsed.LILNOUNS_SUBGRAPH_URL,
+        ethereumRpcUrl: parsed.ETHEREUM_RPC_URL,
+        agent: {
+          fid: 20146, // Farcaster ID for the lilnouns account
+          gatewayId: 'lilnouns-agent',
+          cacheTtl: 3360, // Cache responses for performance (in seconds)
+          aiModel: '@hf/nousresearch/hermes-2-pro-mistral-7b' as const,
+          maxTokens: 100,
+          cacheKeys: {
+            lastFetch: 'conversations:last-fetch',
           },
-        })
-      );
+          defaults: {
+            fallbackDate: '1970-01-01T00:00:00.000Z',
+          },
+        },
+      };
     } catch (error) {
-      // Enhance an error message for better debugging
+      // Enhance error message for better debugging
       if (error instanceof z.ZodError) {
         const errorMessage = error.issues
-          .map((e: z.core.$ZodIssue) => `${e.path.join('.')}: ${e.message}`)
+          .map(issue => `${issue.path.join('.')}: ${issue.message}`)
           .join(', ');
         throw new Error(`Environment validation failed: ${errorMessage}`);
       }
