@@ -9,7 +9,12 @@ import { createConfig, http } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { getConfig } from './config';
 import { agentSystemMessage } from './prompts';
-import { aiTools, fetchActiveProposals, fetchCurrentAuction } from './tools';
+import {
+  aiTools,
+  fetchActiveProposals,
+  fetchCurrentAuction,
+  fetchLilNounsTokenTotalSupply,
+} from './tools';
 
 export function createWagmiConfig(config: ReturnType<typeof getConfig>) {
   const wagmiConfig = createConfig({
@@ -219,7 +224,18 @@ async function processConversations(env: Env) {
               });
               break;
             }
+            case 'fetchLilNounsTokenTotalSupply': {
+              const { totalSupply } =
+                await fetchLilNounsTokenTotalSupply(config);
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify({ totalSupply }),
+              });
+              break;
+            }
             default:
+              console.log(`[DEBUG] Unhandled tool call: ${toolCall.name}`);
               break;
           }
         }

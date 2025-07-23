@@ -1,4 +1,7 @@
-import { readLilNounsAuctionFetchNextNoun } from '@nekofar/lilnouns/contracts';
+import {
+  readLilNounsAuctionFetchNextNoun,
+  readLilNounsTokenTotalSupply,
+} from '@nekofar/lilnouns/contracts';
 import type { Query } from '@nekofar/lilnouns/subgraphs';
 import { gql, request } from 'graphql-request';
 import { DateTime } from 'luxon';
@@ -23,6 +26,11 @@ export const aiTools = [
     name: 'fetchLilNounsCurrentAuction',
     description: 'Fetch Lil Nouns current auction',
     parameters: {},
+  },
+  {
+    type: 'function',
+    name: 'fetchLilNounsTokenTotalSupply',
+    description: 'Fetch Lil Nouns token total supply',
   },
 ] as const;
 
@@ -93,4 +101,19 @@ export async function fetchActiveProposals(
     `[DEBUG] Retrieved ${formattedProposals.length} active proposals`
   );
   return { proposals: formattedProposals };
+}
+
+export async function fetchLilNounsTokenTotalSupply(
+  config: ReturnType<typeof getConfig>
+) {
+  console.log('[DEBUG] Fetching token total supply');
+
+  const wagmiConfig = createWagmiConfig(config);
+  const totalSupply = await readLilNounsTokenTotalSupply(wagmiConfig, {});
+
+  console.log(
+    `[DEBUG] Retrieved token total supply: ${formatEther(totalSupply)}`
+  );
+
+  return { totalSupply: Number(totalSupply) };
 }
