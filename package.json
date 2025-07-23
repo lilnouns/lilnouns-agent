@@ -45,6 +45,7 @@
     "@nekofar/warpcast": "2.0.0-alpha.35",
     "graphql": "16.11.0",
     "graphql-request": "7.2.0",
-    "remeda": "2.26.1"
+    "remeda": "2.26.1",
+    "viem": "2.33.0"
   }
 }
