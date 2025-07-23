@@ -1,12 +1,11 @@
 import type { Query } from '@nekofar/lilnouns/subgraphs';
 import {
-  getDirectCastConversation,
   getDirectCastConversationRecentMessages,
   getDirectCastInbox,
-  sendDirectCastMessage,
 } from '@nekofar/warpcast';
 import { gql, request } from 'graphql-request';
-import { filter, forEach, pipe, sortBy } from 'remeda';
+import { DateTime } from 'luxon';
+import { filter, map, pipe, sortBy } from 'remeda';
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
 
@@ -98,7 +97,18 @@ async function fetchActiveProposals(env: Env) {
     { blockNumber: blockNumber.toString() }
   );
 
-  return { proposals };
+  // Format timestamps to ISO using luxon and remeda
+  const formattedProposals = pipe(
+    proposals,
+    map(proposal => ({
+      ...proposal,
+      createdTimestamp: DateTime.fromSeconds(
+        Number(proposal.createdTimestamp)
+      ).toISO(),
+    }))
+  );
+
+  return { proposals: formattedProposals };
 }
 
 // Main function that processes all conversations with unread mentions
@@ -174,7 +184,7 @@ async function processConversations(env: Env) {
               toolsMessage.push({
                 role: 'tool',
                 name: toolCall.name,
-                content: JSON.stringify(proposals),
+                content: JSON.stringify({ proposals }),
               });
               break;
             }
