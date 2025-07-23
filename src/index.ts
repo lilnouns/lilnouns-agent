@@ -6,7 +6,7 @@ import {
 } from '@nekofar/warpcast';
 import { gql, request } from 'graphql-request';
 import { DateTime } from 'luxon';
-import { filter, map, pipe, sortBy } from 'remeda';
+import { filter, last, map, pipe, sortBy } from 'remeda';
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
 
@@ -26,9 +26,11 @@ async function retrieveUnreadMentionsInGroups(env: Env) {
   // Filter conversations to only include groups with unread mentions
   const conversations = pipe(
     data?.result?.conversations ?? [],
-    filter(c => c.isGroup && (c.viewerContext?.unreadMentionsCount ?? 0) > 0)
+    filter(c => c.isGroup && (c.viewerContext?.unreadMentionsCount ?? 0) > 0),
+    sortBy(c => c.lastMessage?.serverTimestamp ?? 0)
   );
-  return conversations;
+
+  return { conversations };
 }
 
 // Retrieves messages from a conversation that are related to Lil Nouns
@@ -114,7 +116,14 @@ async function fetchActiveProposals(env: Env) {
 
 // Main function that processes all conversations with unread mentions
 async function processConversations(env: Env) {
-  const conversations = await retrieveUnreadMentionsInGroups(env); // Get conversations to process
+  // Retrieve the last processed timestamp (or epoch if none)
+  const lastRetrievalKey = 'conversations:last-fetch';
+  const fallbackDate = '1970-01-01T00:00:00.000Z';
+  const lastRetrievalDate =
+    (await env.AGENT_CACHE.get(lastRetrievalKey)) ?? fallbackDate;
+  const lastRetrievalTime = DateTime.fromISO(lastRetrievalDate)
+    .toUTC()
+    .toMillis();
 
   // Define the AI system message that establishes the bot's personality and guidelines
   const systemMessage = {
@@ -141,13 +150,23 @@ async function processConversations(env: Env) {
     },
   };
 
+  const { conversations } = await retrieveUnreadMentionsInGroups(env); // Get conversations to process
+  const filteredConversations = pipe(
+    conversations,
+    filter(c => (c.lastMessage?.serverTimestamp ?? 0) > lastRetrievalTime)
+  );
+
   // Process each conversation individually
-  for (const { conversationId } of conversations) {
+  for (const { conversationId } of filteredConversations) {
     // Get Lil Nouns related messages from this conversation
     const messages = await retrieveLilNounsRelatedMessages(env, conversationId);
+    const filteredMessages = pipe(
+      messages,
+      filter(m => (m.serverTimestamp ?? 0) > lastRetrievalTime)
+    );
 
     // Process each relevant message
-    for (const message of messages) {
+    for (const message of filteredMessages) {
       const toolsMessage = [];
 
       // Generate AI response using Cloudflare AI with specific system prompt
@@ -225,9 +244,19 @@ async function processConversations(env: Env) {
           inReplyToId: message.messageId,
         },
       });
-
-      console.log({ response, error, data });
     }
+  }
+
+  const lastConversation = last(filteredConversations);
+
+  if (lastConversation?.lastMessage?.serverTimestamp) {
+    const formattedLastMessageDate = DateTime.fromMillis(
+      Number(lastConversation.lastMessage.serverTimestamp)
+    ).toISO();
+    await env.AGENT_CACHE.put(
+      lastRetrievalKey,
+      formattedLastMessageDate ?? fallbackDate
+    );
   }
 }
 
