@@ -90,7 +90,7 @@ async function processConversations(env: Env) {
       console.log({ message });
 
       // Generate AI response using Cloudflare AI with specific system prompt
-      const response = await env.AI.run(
+      const { tool_calls } = await env.AI.run(
         '@hf/nousresearch/hermes-2-pro-mistral-7b',
         {
           max_tokens: 100,
@@ -133,8 +133,8 @@ async function processConversations(env: Env) {
       );
 
       // Handle any tool calls made by the AI (e.g., fetching proposals)
-      if (response.tool_calls !== undefined) {
-        for (const toolCall of response.tool_calls) {
+      if (tool_calls !== undefined) {
+        for (const toolCall of tool_calls) {
           switch (toolCall.name) {
             case 'fetchLilNounsActiveProposals': {
               console.log({ toolCall });
