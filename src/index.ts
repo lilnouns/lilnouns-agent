@@ -1,9 +1,11 @@
+import type { Query } from '@nekofar/lilnouns/subgraphs';
 import {
   getDirectCastConversation,
   getDirectCastConversationRecentMessages,
   getDirectCastInbox,
   sendDirectCastMessage,
 } from '@nekofar/warpcast';
+import { gql, request } from 'graphql-request';
 import { filter, forEach, pipe, sortBy } from 'remeda';
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
@@ -97,7 +99,15 @@ async function processConversations(env: Env) {
             },
             {
               role: 'user',
-              content: message.message,
+              content: message.message, // The actual message content to respond to
+            },
+          ],
+          tools: [
+            {
+              type: 'function',
+              name: 'fetchLilNounsActiveProposals',
+              description: 'Fetch Lil Nouns active proposals',
+              parameters: {},
             },
           ],
         },
@@ -109,6 +119,42 @@ async function processConversations(env: Env) {
           },
         }
       );
+
+      // Handle any tool calls made by the AI (e.g., fetching proposals)
+      if (response.tool_calls !== undefined) {
+        for (const toolCall of response.tool_calls) {
+          switch (toolCall.name) {
+            case 'fetchLilNounsActiveProposals': {
+              console.log({ toolCall });
+              // Query the Lil Nouns subgraph for active proposals using current block number
+              const { proposals } = await request<Query>(
+                env.LILNOUNS_SUBGRAPH_URL,
+                gql`
+                query GetProposals($blockNumber: BigInt!) {
+                  proposals(
+                    orderBy: createdBlock,
+                    orderDirection: desc,
+                    where: {
+                      status_not_in: [CANCELLED],
+                      endBlock_gte: $blockNumber
+                    }
+                  ) {
+                    id
+                    title
+                    createdTimestamp
+                  }
+                }
+              `,
+                { blockNumber: blockNumber.toString() }
+              );
+              console.log({ proposals });
+              break;
+            }
+            default:
+              break;
+          }
+        }
+      }
 
       const { error, data } = await sendDirectCastMessage({
         auth: () => env.FARCASTER_AUTH_TOKEN,
