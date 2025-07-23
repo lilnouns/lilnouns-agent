@@ -19,3 +19,7 @@ crons = ["0 0 * * *"]
 
 [ai]
 binding = "AI"
+
+[[kv_namespaces]]
+binding = "AGENT_CACHE"
+id = "95fdf988b59f4a2a965c39aea0934f5d"
