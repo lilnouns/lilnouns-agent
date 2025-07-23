@@ -18,10 +18,16 @@ const publicClient = createPublicClient({
 
 // Retrieves group conversations with unread mentions for the Lil Nouns bot
 async function retrieveUnreadMentionsInGroups(env: Env) {
+  console.log('[DEBUG] Starting retrieveUnreadMentionsInGroups');
   // Fetch the DirectCast inbox using Farcaster authentication
   const { data, error, response } = await getDirectCastInbox({
     auth: () => env.FARCASTER_AUTH_TOKEN,
   });
+
+  console.log(
+    `[DEBUG] DirectCast inbox fetched. Found ${data?.result?.conversations?.length ?? 0} conversations`
+  );
+  if (error) console.log(`[DEBUG] DirectCast inbox error:`, error);
 
   // Filter conversations to only include groups with unread mentions
   const conversations = pipe(
@@ -30,6 +36,9 @@ async function retrieveUnreadMentionsInGroups(env: Env) {
     sortBy(c => c.lastMessage?.serverTimestamp ?? 0)
   );
 
+  console.log(
+    `[DEBUG] Found ${conversations.length} group conversations with unread mentions`
+  );
   return { conversations };
 }
 
@@ -38,6 +47,9 @@ async function retrieveLilNounsRelatedMessages(
   env: Env,
   conversationId: string
 ) {
+  console.log(
+    `[DEBUG] Retrieving messages for conversation: ${conversationId}`
+  );
   // Get recent messages from the specified conversation
   const { data, response, error } =
     await getDirectCastConversationRecentMessages({
@@ -46,6 +58,11 @@ async function retrieveLilNounsRelatedMessages(
         conversationId,
       },
     });
+
+  console.log(
+    `[DEBUG] Retrieved ${data?.result?.messages?.length ?? 0} messages from conversation`
+  );
+  if (error) console.log(`[DEBUG] Error retrieving messages:`, error);
 
   const messages = pipe(
     data?.result?.messages ?? [],
@@ -72,11 +89,16 @@ async function retrieveLilNounsRelatedMessages(
     }),
     sortBy(m => m.serverTimestamp) // Sort messages by timestamp
   );
+  console.log(
+    `[DEBUG] Filtered to ${messages.length} Lil Nouns related messages`
+  );
   return messages;
 }
 
 async function fetchActiveProposals(env: Env) {
+  console.log('[DEBUG] Fetching active proposals');
   const blockNumber = await publicClient.getBlockNumber(); // Get current Ethereum block number
+  console.log(`[DEBUG] Current Ethereum block number: ${blockNumber}`);
 
   // Query the Lil Nouns subgraph for active proposals using current block number
   const { proposals } = await request<Query>(
@@ -111,11 +133,15 @@ async function fetchActiveProposals(env: Env) {
     }))
   );
 
+  console.log(
+    `[DEBUG] Retrieved ${formattedProposals.length} active proposals`
+  );
   return { proposals: formattedProposals };
 }
 
 // Main function that processes all conversations with unread mentions
 async function processConversations(env: Env) {
+  console.log('[DEBUG] Starting processConversations');
   // Retrieve the last processed timestamp (or epoch if none)
   const lastRetrievalKey = 'conversations:last-fetch';
   const fallbackDate = '1970-01-01T00:00:00.000Z';
@@ -151,22 +177,35 @@ async function processConversations(env: Env) {
   };
 
   const { conversations } = await retrieveUnreadMentionsInGroups(env); // Get conversations to process
+  console.log(
+    `[DEBUG] Last retrieval time: ${new Date(lastRetrievalTime).toISOString()}`
+  );
   const filteredConversations = pipe(
     conversations,
     filter(c => (c.lastMessage?.serverTimestamp ?? 0) > lastRetrievalTime)
   );
+  console.log(
+    `[DEBUG] Filtered to ${filteredConversations.length} new conversations since last check`
+  );
 
   // Process each conversation individually
   for (const { conversationId } of filteredConversations) {
+    console.log(`[DEBUG] Processing conversation: ${conversationId}`);
     // Get Lil Nouns related messages from this conversation
     const messages = await retrieveLilNounsRelatedMessages(env, conversationId);
     const filteredMessages = pipe(
       messages,
       filter(m => (m.serverTimestamp ?? 0) > lastRetrievalTime)
     );
+    console.log(
+      `[DEBUG] Found ${filteredMessages.length} unprocessed messages in conversation`
+    );
 
     // Process each relevant message
     for (const message of filteredMessages) {
+      console.log(
+        `[DEBUG] Processing message: ${message.messageId} from sender: ${message.senderFid}`
+      );
       const toolsMessage = [];
 
       // Generate AI response using Cloudflare AI with specific system prompt
@@ -191,6 +230,11 @@ async function processConversations(env: Env) {
           ],
         },
         { ...gatewayConfig }
+      );
+
+      console.log(
+        `[DEBUG] AI tool_calls:`,
+        tool_calls ? JSON.stringify(tool_calls) : 'none'
       );
 
       // Handle any tool calls made by the AI (e.g., fetching proposals)
@@ -230,6 +274,8 @@ async function processConversations(env: Env) {
         { ...gatewayConfig }
       );
 
+      console.log(`[DEBUG] AI response: "${response}"`);
+
       // Send response back to the conversation (currently commented out)
       // Send the AI-generated response back to the conversation on Farcaster
       // Includes the original message ID for proper threading and mentions the original sender
@@ -244,6 +290,14 @@ async function processConversations(env: Env) {
           inReplyToId: message.messageId,
         },
       });
+
+      if (error) {
+        console.log(`[DEBUG] Error sending message:`, error);
+      } else {
+        console.log(
+          `[DEBUG] Message sent successfully, messageId: ${data?.result?.messageId}`
+        );
+      }
     }
   }
 
@@ -253,9 +307,16 @@ async function processConversations(env: Env) {
     const formattedLastMessageDate = DateTime.fromMillis(
       Number(lastConversation.lastMessage.serverTimestamp)
     ).toISO();
+    console.log(
+      `[DEBUG] Updating last retrieval date to: ${formattedLastMessageDate}`
+    );
     await env.AGENT_CACHE.put(
       lastRetrievalKey,
       formattedLastMessageDate ?? fallbackDate
+    );
+  } else {
+    console.log(
+      `[DEBUG] No last conversation found, keeping last retrieval date: ${lastRetrievalDate}`
     );
   }
 }
@@ -273,9 +334,14 @@ export default {
 
   // The scheduled handler runs at intervals defined in wrangler.jsonc triggers
   async scheduled(event, env, ctx): Promise<void> {
-    await processConversations(env); // Process all relevant conversations
-
-    // Log when the scheduled task was triggered
-    console.log(`trigger fired at ${event.cron}`);
+    console.log(
+      `[DEBUG] Lil Nouns Agent scheduled task executed at: ${new Date().toISOString()}`
+    );
+    try {
+      await processConversations(env); // Process all relevant conversations
+      console.log(`[DEBUG] Scheduled task completed successfully`);
+    } catch (error) {
+      console.error(`[ERROR] Scheduled task failed:`, error);
+    }
   },
 } satisfies ExportedHandler<Env>;
