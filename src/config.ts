@@ -34,7 +34,7 @@ export type Config = Simplify<{
     fid: number;
     gatewayId: string;
     cacheTtl: number;
-    aiModel: keyof AiModels;
+    aiModel: '@hf/nousresearch/hermes-2-pro-mistral-7b';
     maxTokens: number;
     cacheKeys: {
       lastFetch: string;
