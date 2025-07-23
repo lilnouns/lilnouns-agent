@@ -132,15 +132,11 @@ async function processConversations(env: Env) {
 
   // Process each conversation individually
   for (const { conversationId } of conversations) {
-    console.log({ conversationId });
-
     // Get Lil Nouns related messages from this conversation
     const messages = await retrieveLilNounsRelatedMessages(env, conversationId);
 
     // Process each relevant message
     for (const message of messages) {
-      console.log({ message });
-
       const toolsMessage = [];
 
       // Generate AI response using Cloudflare AI with specific system prompt
@@ -174,14 +170,12 @@ async function processConversations(env: Env) {
         for (const toolCall of tool_calls) {
           switch (toolCall.name) {
             case 'fetchLilNounsActiveProposals': {
-              console.log({ toolCall });
               const { proposals } = await fetchActiveProposals(env);
               toolsMessage.push({
                 role: 'tool',
                 name: toolCall.name,
                 content: JSON.stringify(proposals),
               });
-              console.log({ proposals });
               break;
             }
             default:
