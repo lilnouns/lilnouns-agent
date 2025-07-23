@@ -2,6 +2,7 @@ import type { Query } from '@nekofar/lilnouns/subgraphs';
 import {
   getDirectCastConversationRecentMessages,
   getDirectCastInbox,
+  sendDirectCastMessage,
 } from '@nekofar/warpcast';
 import { gql, request } from 'graphql-request';
 import { DateTime } from 'luxon';
