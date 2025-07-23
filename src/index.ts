@@ -165,7 +165,7 @@ async function processConversations(env: Env) {
       // Search for relevant context using AutoRAG based on the user's message content
       const answer = await env.AI.autorag(config.agent.autoRagId).search({
         query: message.message,
-        rewrite_query: true,
+        rewrite_query: false,
         max_num_results: 2,
         ranking_options: {
           score_threshold: 0.3,
