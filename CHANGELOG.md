@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.5] - 2025-07-23
+
+### ⚙️ Miscellaneous Tasks
+
+- *(config)* Add `NODE_ENV` variable to `wrangler.toml`
+
 ## [1.0.0-alpha.4] - 2025-07-23
 
 ### 🚀 Features
