@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "lilnouns-agent",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.4",
   "description": "",
   "author": "",
   "license": "Apache-2.0",
@@ -50,7 +50,9 @@
     "luxon": "3.7.1",
     "pino": "9.7.0",
     "remeda": "2.26.1",
+    "type-fest": "4.41.0",
     "viem": "2.33.0",
-    "wagmi": "2.16.0"
+    "wagmi": "2.16.0",
+    "zod": "4.0.5"
   }
 }
