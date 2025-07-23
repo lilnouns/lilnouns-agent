@@ -163,11 +163,9 @@ async function processConversations(env: Env) {
         {
           max_tokens: config.agent.maxTokens,
           messages: [
-            ...[agentSystemMessage],
-            {
-              role: 'user',
-              content: message.message, // The actual message content to respond to
-            },
+            { role: 'system', content: agentSystemMessage },
+            // The actual message content to respond to
+            { role: 'user', content: message.message },
           ],
           tools: aiTools,
         },
@@ -214,11 +212,9 @@ async function processConversations(env: Env) {
         config.agent.aiModel,
         {
           messages: [
-            ...[agentSystemMessage],
-            {
-              role: 'user',
-              content: message.message, // The actual message content to respond to
-            },
+            { role: 'system', content: agentSystemMessage },
+            // The actual message content to respond to
+            { role: 'user', content: message.message },
             ...toolsMessage,
           ],
         },
