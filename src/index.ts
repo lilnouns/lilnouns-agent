@@ -21,10 +21,10 @@ export function createWagmiConfig(config: ReturnType<typeof getConfig>) {
 }
 
 // Retrieves group conversations with unread mentions for the Lil Nouns bot
-async function retrieveUnreadMentionsInGroups(
+async function fetchUnreadMentionsInGroups(
   config: ReturnType<typeof getConfig>
 ) {
-  console.log('[DEBUG] Starting retrieveUnreadMentionsInGroups');
+  console.log('[DEBUG] Starting fetchUnreadMentionsInGroups');
   // Fetch the DirectCast inbox using Farcaster authentication
   const { data, error, response } = await getDirectCastInbox({
     auth: () => config.farcasterAuthToken,
@@ -49,7 +49,7 @@ async function retrieveUnreadMentionsInGroups(
 }
 
 // Retrieves messages from a conversation that are related to Lil Nouns
-async function retrieveLilNounsRelatedMessages(
+async function fetchLilNounsRelatedMessages(
   config: ReturnType<typeof getConfig>,
   conversationId: string
 ) {
@@ -125,7 +125,7 @@ async function processConversations(env: Env) {
     },
   };
 
-  const { conversations } = await retrieveUnreadMentionsInGroups(config); // Get conversations to process
+  const { conversations } = await fetchUnreadMentionsInGroups(config); // Get conversations to process
   console.log(
     `[DEBUG] Last retrieval time: ${new Date(lastRetrievalTime).toISOString()}`
   );
@@ -141,10 +141,7 @@ async function processConversations(env: Env) {
   for (const { conversationId } of filteredConversations) {
     console.log(`[DEBUG] Processing conversation: ${conversationId}`);
     // Get Lil Nouns related messages from this conversation
-    const messages = await retrieveLilNounsRelatedMessages(
-      config,
-      conversationId
-    );
+    const messages = await fetchLilNounsRelatedMessages(config, conversationId);
     const filteredMessages = pipe(
       messages,
       filter(m => (m.serverTimestamp ?? 0) > lastRetrievalTime)
