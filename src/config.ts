@@ -9,12 +9,9 @@ import { z } from 'zod';
 const envSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'staging', 'production']),
-    PORT: z
-      .string()
-      .transform(Number)
-      .pipe(z.number().int().positive())
-      .default(3000),
-    DATABASE_URL: z.url(),
+    FARCASTER_AUTH_TOKEN: z.string().min(1),
+    LILNOUNS_SUBGRAPH_URL: z.url(),
+    ETHEREUM_RPC_URL: z.url(),
   })
   .strict();
 
@@ -29,8 +26,23 @@ type RawEnv = z.infer<typeof envSchema>;
  */
 export type Config = Simplify<{
   env: RawEnv['NODE_ENV'];
-  port: RawEnv['PORT'];
-  dbUrl: RawEnv['DATABASE_URL'];
+  farcasterAuthToken: RawEnv['FARCASTER_AUTH_TOKEN'];
+  lilNounsSubgraphUrl: RawEnv['LILNOUNS_SUBGRAPH_URL'];
+  ethereumRpcUrl: RawEnv['ETHEREUM_RPC_URL'];
+  // Agent configuration
+  agent: {
+    fid: number;
+    gatewayId: string;
+    cacheTtl: number;
+    aiModel: keyof AiModels;
+    maxTokens: number;
+    cacheKeys: {
+      lastFetch: string;
+    };
+    defaults: {
+      fallbackDate: string;
+    };
+  };
 }>;
 
 /**
@@ -60,11 +72,35 @@ export function getConfig(env: Env): Config {
       // Use remeda's pipe and pick for functional data transformation
       cachedConfig = pipe(
         parsed,
-        pick(['NODE_ENV', 'PORT', 'DATABASE_URL']),
-        ({ NODE_ENV, PORT, DATABASE_URL }) => ({
+        pick([
+          'NODE_ENV',
+          'FARCASTER_AUTH_TOKEN',
+          'LILNOUNS_SUBGRAPH_URL',
+          'ETHEREUM_RPC_URL',
+        ]),
+        ({
+          NODE_ENV,
+          FARCASTER_AUTH_TOKEN,
+          LILNOUNS_SUBGRAPH_URL,
+          ETHEREUM_RPC_URL,
+        }) => ({
           env: NODE_ENV,
-          port: PORT,
-          dbUrl: DATABASE_URL,
+          farcasterAuthToken: FARCASTER_AUTH_TOKEN,
+          lilNounsSubgraphUrl: LILNOUNS_SUBGRAPH_URL,
+          ethereumRpcUrl: ETHEREUM_RPC_URL,
+          agent: {
+            fid: 20146, // Farcaster ID for the lilnouns account
+            gatewayId: 'lilnouns-agent',
+            cacheTtl: 3360, // Cache responses for performance (in seconds)
+            aiModel: '@hf/nousresearch/hermes-2-pro-mistral-7b',
+            maxTokens: 100,
+            cacheKeys: {
+              lastFetch: 'conversations:last-fetch',
+            },
+            defaults: {
+              fallbackDate: '1970-01-01T00:00:00.000Z',
+            },
+          },
         })
       );
     } catch (error) {

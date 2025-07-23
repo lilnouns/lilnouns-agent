@@ -1,33 +1,33 @@
-import { readLilNounsAuctionFetchNextNoun } from '@nekofar/lilnouns/contracts';
-import type { Query } from '@nekofar/lilnouns/subgraphs';
 import {
   getDirectCastConversationRecentMessages,
   getDirectCastInbox,
   sendDirectCastMessage,
 } from '@nekofar/warpcast';
-import { gql, request } from 'graphql-request';
 import { DateTime } from 'luxon';
-import { filter, last, map, pipe, sortBy } from 'remeda';
-import { formatEther } from 'viem';
+import { filter, last, pipe, sortBy } from 'remeda';
 import { createConfig, http } from 'wagmi';
-import { getBlockNumber } from 'wagmi/actions';
 import { mainnet } from 'wagmi/chains';
+import { getConfig } from './config';
+import { agentSystemMessage } from './prompts';
+import { aiTools, fetchActiveProposals, fetchCurrentAuction } from './tools';
 
-function createWagmiConfig(env: Env) {
+export function createWagmiConfig(config: ReturnType<typeof getConfig>) {
   const wagmiConfig = createConfig({
     chains: [mainnet],
-    transports: { [mainnet.id]: http(env.ETHEREUM_RPC_URL) },
+    transports: { [mainnet.id]: http(config.ethereumRpcUrl) },
   });
 
   return wagmiConfig;
 }
 
 // Retrieves group conversations with unread mentions for the Lil Nouns bot
-async function retrieveUnreadMentionsInGroups(env: Env) {
+async function retrieveUnreadMentionsInGroups(
+  config: ReturnType<typeof getConfig>
+) {
   console.log('[DEBUG] Starting retrieveUnreadMentionsInGroups');
   // Fetch the DirectCast inbox using Farcaster authentication
   const { data, error, response } = await getDirectCastInbox({
-    auth: () => env.FARCASTER_AUTH_TOKEN,
+    auth: () => config.farcasterAuthToken,
   });
 
   console.log(
@@ -50,7 +50,7 @@ async function retrieveUnreadMentionsInGroups(env: Env) {
 
 // Retrieves messages from a conversation that are related to Lil Nouns
 async function retrieveLilNounsRelatedMessages(
-  env: Env,
+  config: ReturnType<typeof getConfig>,
   conversationId: string
 ) {
   console.log(
@@ -59,7 +59,7 @@ async function retrieveLilNounsRelatedMessages(
   // Get recent messages from the specified conversation
   const { data, response, error } =
     await getDirectCastConversationRecentMessages({
-      auth: () => env.FARCASTER_AUTH_TOKEN,
+      auth: () => config.farcasterAuthToken,
       query: {
         conversationId,
       },
@@ -74,7 +74,7 @@ async function retrieveLilNounsRelatedMessages(
     data?.result?.messages ?? [],
     filter(m => {
       // Check if a message has mentions and specifically mentions 'lilnouns'
-      const lilNounsFid = 20146; // Farcaster ID for the lilnouns account
+      const lilNounsFid = config.agent.fid;
 
       // Skip all messages sent BY lilnouns to avoid self-responses
       if (m.senderFid === lilNounsFid) {
@@ -101,124 +101,31 @@ async function retrieveLilNounsRelatedMessages(
   return messages;
 }
 
-async function fetchCurrentAuction(env: Env) {
-  console.log('[DEBUG] Fetching current auction');
-
-  const wagmiConfig = createWagmiConfig(env);
-  const [nounId, seed, svg, price, hash, blockNumber] =
-    await readLilNounsAuctionFetchNextNoun(wagmiConfig, {});
-
-  const auction = {
-    nounId: Number(nounId),
-    price: `${formatEther(price)} ETH`,
-  };
-
-  console.log(
-    '[DEBUG] Retrieved current auction: ',
-    JSON.stringify(auction, null, 2)
-  );
-
-  return { auction };
-}
-
-async function fetchActiveProposals(env: Env) {
-  console.log('[DEBUG] Fetching active proposals');
-  const wagmiConfig = createWagmiConfig(env);
-  const blockNumber = await getBlockNumber(wagmiConfig); // Get current Ethereum block number
-  console.log(`[DEBUG] Current Ethereum block number: ${blockNumber}`);
-
-  // Query the Lil Nouns subgraph for active proposals using current block number
-  const { proposals } = await request<Query>(
-    env.LILNOUNS_SUBGRAPH_URL,
-    gql`
-        query GetProposals($blockNumber: BigInt!) {
-          proposals(
-            orderBy: createdBlock,
-            orderDirection: desc,
-            where: {
-              status_not_in: [CANCELLED],
-              endBlock_gte: $blockNumber
-            }
-          ) {
-            id
-            title
-            createdTimestamp
-          }
-        }
-      `,
-    { blockNumber: blockNumber.toString() }
-  );
-
-  // Format timestamps to ISO using luxon and remeda
-  const formattedProposals = pipe(
-    proposals,
-    map(proposal => ({
-      ...proposal,
-      createdTimestamp: DateTime.fromSeconds(
-        Number(proposal.createdTimestamp)
-      ).toISO(),
-    }))
-  );
-
-  console.log(
-    `[DEBUG] Retrieved ${formattedProposals.length} active proposals`
-  );
-  return { proposals: formattedProposals };
-}
-
 // Main function that processes all conversations with unread mentions
 async function processConversations(env: Env) {
   console.log('[DEBUG] Starting processConversations');
+
+  const config = getConfig(env);
+
   // Retrieve the last processed timestamp (or epoch if none)
-  const lastRetrievalKey = 'conversations:last-fetch';
-  const fallbackDate = '1970-01-01T00:00:00.000Z';
+  const lastRetrievalKey = config.agent.cacheKeys.lastFetch;
+  const fallbackDate = config.agent.defaults.fallbackDate;
   const lastRetrievalDate =
     (await env.AGENT_CACHE.get(lastRetrievalKey)) ?? fallbackDate;
   const lastRetrievalTime = DateTime.fromISO(lastRetrievalDate)
     .toUTC()
     .toMillis();
 
-  // Define the AI system message that establishes the bot's personality and guidelines
-  const systemMessage = {
-    role: 'system',
-    content: [
-      'You are Lil Nouns Agent, an expert assistant for Lil Nouns DAO governance, proposals, community engagement, and technical questions.',
-      '',
-      'CORE GUIDELINES:',
-      '• Stay strictly within Lil Nouns DAO topics (governance, proposals, auctions, community, tech stack)',
-      '• Provide accurate, helpful information with a friendly, engaging tone',
-      '• Keep responses concise: ≤2 sentences or 50 words maximum',
-      '• Use tools when real-time data is needed (proposals, auctions)',
-      '',
-      'OFF-TOPIC RESPONSES (choose one randomly):',
-      '• "Sorry, I only handle Lil Nouns DAO topics! How can I help with governance or proposals?"',
-      '• "That\'s outside my Lil Nouns expertise. Got questions about the DAO or current auctions?"',
-      '• "I focus on Lil Nouns DAO only. Need help with proposals, voting, or community info?"',
-      '• "Oops, I\'m tuned specifically for Lil Nouns DAO! What can I help you with regarding governance?"',
-      '',
-      'COMMON ACTIONS:',
-      '• Voting/reviewing proposals: "Visit lilnouns.camp or lilnouns.wtf to vote and review proposals."',
-      '• Auction participation: "Join auctions at lilnouns.auction or lilnouns.wtf to bid on new Lil Nouns."',
-      '• Community engagement: Direct users to official Discord, Twitter, or Farcaster channels.',
-      '',
-      'RESPONSE QUALITY:',
-      '• If uncertain about facts: "I\'m not certain about that. Let me check the latest information."',
-      '• For structured data: Return valid JSON format only',
-      '• Be conversational but authoritative on DAO matters',
-      '• Acknowledge when information might be time-sensitive',
-    ].join('\n'),
-  };
-
   // Gateway configuration for AI model calls:
   const gatewayConfig = {
     gateway: {
-      id: 'lilnouns-agent',
+      id: config.agent.gatewayId,
       skipCache: false,
-      cacheTtl: 3360, // Cache responses for performance
+      cacheTtl: config.agent.cacheTtl,
     },
   };
 
-  const { conversations } = await retrieveUnreadMentionsInGroups(env); // Get conversations to process
+  const { conversations } = await retrieveUnreadMentionsInGroups(config); // Get conversations to process
   console.log(
     `[DEBUG] Last retrieval time: ${new Date(lastRetrievalTime).toISOString()}`
   );
@@ -234,7 +141,10 @@ async function processConversations(env: Env) {
   for (const { conversationId } of filteredConversations) {
     console.log(`[DEBUG] Processing conversation: ${conversationId}`);
     // Get Lil Nouns related messages from this conversation
-    const messages = await retrieveLilNounsRelatedMessages(env, conversationId);
+    const messages = await retrieveLilNounsRelatedMessages(
+      config,
+      conversationId
+    );
     const filteredMessages = pipe(
       messages,
       filter(m => (m.serverTimestamp ?? 0) > lastRetrievalTime)
@@ -252,30 +162,17 @@ async function processConversations(env: Env) {
 
       // Generate AI response using Cloudflare AI with specific system prompt
       const { tool_calls } = await env.AI.run(
-        '@hf/nousresearch/hermes-2-pro-mistral-7b',
+        config.agent.aiModel,
         {
-          max_tokens: 100,
+          max_tokens: config.agent.maxTokens,
           messages: [
-            ...[systemMessage],
+            ...[agentSystemMessage],
             {
               role: 'user',
               content: message.message, // The actual message content to respond to
             },
           ],
-          tools: [
-            {
-              type: 'function',
-              name: 'fetchLilNounsActiveProposals',
-              description: 'Fetch Lil Nouns active proposals',
-              parameters: {},
-            },
-            {
-              type: 'function',
-              name: 'fetchLilNounsCurrentAuction',
-              description: 'Fetch Lil Nouns current auction',
-              parameters: {},
-            },
-          ],
+          tools: aiTools,
         },
         { ...gatewayConfig }
       );
@@ -292,7 +189,7 @@ async function processConversations(env: Env) {
         for (const toolCall of tool_calls) {
           switch (toolCall.name) {
             case 'fetchLilNounsActiveProposals': {
-              const { proposals } = await fetchActiveProposals(env);
+              const { proposals } = await fetchActiveProposals(config);
               toolsMessage.push({
                 role: 'tool',
                 name: toolCall.name,
@@ -301,7 +198,7 @@ async function processConversations(env: Env) {
               break;
             }
             case 'fetchLilNounsCurrentAuction': {
-              const { auction } = await fetchCurrentAuction(env);
+              const { auction } = await fetchCurrentAuction(config);
               toolsMessage.push({
                 role: 'tool',
                 name: toolCall.name,
@@ -317,10 +214,10 @@ async function processConversations(env: Env) {
 
       // Generate a final AI response incorporating any tool call results
       const { response } = await env.AI.run(
-        '@hf/nousresearch/hermes-2-pro-mistral-7b',
+        config.agent.aiModel,
         {
           messages: [
-            ...[systemMessage],
+            ...[agentSystemMessage],
             {
               role: 'user',
               content: message.message, // The actual message content to respond to
@@ -337,7 +234,7 @@ async function processConversations(env: Env) {
       // Send the AI-generated response back to the conversation on Farcaster
       // Includes the original message ID for proper threading and mentions the original sender
       const { error, data } = await sendDirectCastMessage({
-        auth: () => env.FARCASTER_AUTH_TOKEN,
+        auth: () => config.farcasterAuthToken,
         body: {
           conversationId,
           recipientFids: [message.senderFid],
