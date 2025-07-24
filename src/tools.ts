@@ -1,5 +1,6 @@
 import {
   readLilNounsAuctionFetchNextNoun,
+  readLilNounsGovernorState,
   readLilNounsTokenTotalSupply,
 } from '@nekofar/lilnouns/contracts';
 import type { Query } from '@nekofar/lilnouns/subgraphs';
@@ -20,6 +21,22 @@ export const aiTools = [
     name: 'fetchLilNounsActiveProposals',
     description: 'Fetch Lil Nouns active proposals',
     parameters: {},
+  },
+  {
+    type: 'function',
+    name: 'fetchLilNounsProposalsState',
+    description: 'Fetch Lil Nouns proposal state from chain',
+    parameters: {
+      type: 'object',
+      properties: {
+        proposalId: {
+          type: 'number',
+          description: 'Proposal ID',
+        },
+      },
+      required: ['proposalId'],
+      additionalProperties: false,
+    },
   },
   {
     type: 'function',
@@ -65,7 +82,7 @@ export const aiTools = [
  */
 export async function fetchCurrentAuction(
   config: ReturnType<typeof getConfig>
-): Promise<object> {
+) {
   console.log('[DEBUG] Fetching current auction');
 
   const wagmiConfig = createWagmiConfig(config);
@@ -96,9 +113,7 @@ export async function fetchCurrentAuction(
  */
 export async function fetchActiveProposals(
   config: ReturnType<typeof getConfig>
-): Promise<{
-  proposals: Array<{ id: string; title: string; createdTimestamp: string }>;
-}> {
+) {
   console.log('[DEBUG] Fetching active proposals');
   const wagmiConfig = createWagmiConfig(config);
   const blockNumber = await getBlockNumber(wagmiConfig); // Get current Ethereum block number
@@ -151,7 +166,7 @@ export async function fetchActiveProposals(
  */
 export async function fetchLilNounsTokenTotalSupply(
   config: ReturnType<typeof getConfig>
-): Promise<object> {
+) {
   console.log('[DEBUG] Fetching token total supply');
 
   const wagmiConfig = createWagmiConfig(config);
@@ -174,7 +189,7 @@ export async function fetchLilNounsTokenTotalSupply(
 export async function fetchLilNounsProposalSummary(
   config: ReturnType<typeof getConfig>,
   proposalId: number
-): Promise<object> {
+) {
   console.log('[DEBUG] Fetching proposal summary');
 
   const { proposal } = await request<Query>(
@@ -185,7 +200,6 @@ export async function fetchLilNounsProposalSummary(
           id
           title
           description
-          status
           createdTimestamp
         }
       }
@@ -201,9 +215,12 @@ export async function fetchLilNounsProposalSummary(
     })}`
   );
 
+  const state = await fetchLilNounsProposalsState(config, proposalId);
+
   return {
     proposal: {
       ...proposal,
+      status: state.stateText,
       createdTimestamp: DateTime.fromSeconds(
         Number(proposal?.createdTimestamp)
       ).toISO(),
@@ -218,4 +235,48 @@ export async function fetchLilNounsProposalSummary(
  */
 export function getCurrentIsoDateTimeUtc(): string {
   return DateTime.utc().toISO();
+}
+
+/**
+ * Enum representing the different states a proposal can be in.
+ */
+export enum ProposalState {
+  Pending,
+  Active,
+  Canceled,
+  Defeated,
+  Succeeded,
+  Queued,
+  Expired,
+  Executed,
+  Vetoed,
+}
+
+/**
+ * Fetches the on-chain state of a specific Lil Nouns proposal.
+ *
+ * @param {Object} config - The configuration object obtained from the getConfig function.
+ * @param {number} proposalId - The ID of the proposal to fetch the state for.
+ * @return {Promise<Object>} An object containing the proposal state as both numeric value and string representation.
+ */
+export async function fetchLilNounsProposalsState(
+  config: ReturnType<typeof getConfig>,
+  proposalId: number
+) {
+  console.log('[DEBUG] Fetching proposal state for ID:', proposalId);
+
+  const wagmiConfig = createWagmiConfig(config);
+  const state = await readLilNounsGovernorState(wagmiConfig, {
+    args: [BigInt(proposalId)],
+  });
+
+  const stateNumber = Number(state);
+  const stateText = ProposalState[stateNumber];
+
+  console.log('[DEBUG] Retrieved proposal state:', stateNumber, stateText);
+
+  return {
+    state: stateNumber,
+    stateText: stateText,
+  };
 }

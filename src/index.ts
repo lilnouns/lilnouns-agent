@@ -14,6 +14,7 @@ import {
   fetchActiveProposals,
   fetchCurrentAuction,
   fetchLilNounsProposalSummary,
+  fetchLilNounsProposalsState,
   fetchLilNounsTokenTotalSupply,
   getCurrentIsoDateTimeUtc,
 } from './tools';
@@ -276,6 +277,29 @@ async function processConversations(env: Env) {
                 content: JSON.stringify({
                   proposal: { ...proposal, description: response.summary },
                 }),
+              });
+              break;
+            }
+            case 'fetchLilNounsProposalsState': {
+              const { proposalId } = toolCall?.arguments as {
+                proposalId: number;
+              };
+
+              if (!proposalId) {
+                console.log(
+                  `[DEBUG] fetchProposalsState tool call missing required argument: proposalId`
+                );
+              }
+
+              const result = await fetchLilNounsProposalsState(
+                config,
+                proposalId ?? 0
+              );
+
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify(result),
               });
               break;
             }
