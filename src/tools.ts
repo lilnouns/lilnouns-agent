@@ -65,7 +65,7 @@ export const aiTools = [
  */
 export async function fetchCurrentAuction(
   config: ReturnType<typeof getConfig>
-) {
+): Promise<object> {
   console.log('[DEBUG] Fetching current auction');
 
   const wagmiConfig = createWagmiConfig(config);
@@ -96,7 +96,9 @@ export async function fetchCurrentAuction(
  */
 export async function fetchActiveProposals(
   config: ReturnType<typeof getConfig>
-) {
+): Promise<{
+  proposals: Array<{ id: string; title: string; createdTimestamp: string }>;
+}> {
   console.log('[DEBUG] Fetching active proposals');
   const wagmiConfig = createWagmiConfig(config);
   const blockNumber = await getBlockNumber(wagmiConfig); // Get current Ethereum block number
@@ -149,7 +151,7 @@ export async function fetchActiveProposals(
  */
 export async function fetchLilNounsTokenTotalSupply(
   config: ReturnType<typeof getConfig>
-) {
+): Promise<object> {
   console.log('[DEBUG] Fetching token total supply');
 
   const wagmiConfig = createWagmiConfig(config);
@@ -172,7 +174,7 @@ export async function fetchLilNounsTokenTotalSupply(
 export async function fetchLilNounsProposalSummary(
   config: ReturnType<typeof getConfig>,
   proposalId: number
-) {
+): Promise<object> {
   console.log('[DEBUG] Fetching proposal summary');
 
   const { proposal } = await request<Query>(
@@ -214,6 +216,6 @@ export async function fetchLilNounsProposalSummary(
  *
  * @return {string} The current date and time as an ISO 8601 formatted string in UTC.
  */
-export function getCurrentIsoDateTimeUtc() {
+export function getCurrentIsoDateTimeUtc(): string {
   return DateTime.utc().toISO();
 }
