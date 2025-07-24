@@ -92,6 +92,7 @@ export async function fetchCurrentAuction(
   const auction = {
     nounId: Number(nounId),
     price: `${formatEther(price)} ETH`,
+    link: `https://lilnouns.auction`,
   };
 
   console.log(
@@ -149,6 +150,7 @@ export async function fetchActiveProposals(
       createdTimestamp: DateTime.fromSeconds(
         Number(proposal.createdTimestamp)
       ).toISO(),
+      link: `https://lilnouns.camp/proposals/${proposal.id}`,
     }))
   );
 
@@ -224,6 +226,7 @@ export async function fetchLilNounsProposalSummary(
       createdTimestamp: DateTime.fromSeconds(
         Number(proposal?.createdTimestamp)
       ).toISO(),
+      link: `https://lilnouns.camp/proposals/${proposal?.id}`,
     },
   };
 }
