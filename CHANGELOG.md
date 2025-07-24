@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.11] - 2025-07-24
+
+### 🚀 Features
+
+- *(tools)* Add `link` properties for auction and proposals
+
 ## [1.0.0-alpha.10] - 2025-07-24
 
 ### 🚀 Features
