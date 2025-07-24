@@ -13,6 +13,7 @@ import {
   aiTools,
   fetchActiveProposals,
   fetchCurrentAuction,
+  fetchLilNounsProposalSummary,
   fetchLilNounsTokenTotalSupply,
 } from './tools';
 
@@ -231,6 +232,40 @@ async function processConversations(env: Env) {
                 role: 'tool',
                 name: toolCall.name,
                 content: JSON.stringify({ totalSupply }),
+              });
+              break;
+            }
+            case 'fetchLilNounsProposalSummary': {
+              const { proposalId } = toolCall?.arguments as {
+                proposalId: number;
+              };
+
+              if (!proposalId) {
+                console.log(
+                  `[DEBUG] fetchLilNounsProposalSummary tool call missing required argument: proposalId`
+                );
+              }
+
+              const { proposal } = await fetchLilNounsProposalSummary(
+                config,
+                proposalId ?? 0
+              );
+
+              const response = await env.AI.run(
+                '@cf/facebook/bart-large-cnn',
+                {
+                  input_text: `# ${proposal?.title}${proposal?.description}`,
+                  max_length: 200,
+                },
+                { ...gatewayConfig }
+              );
+
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify({
+                  proposal: { ...proposal, description: response.summary },
+                }),
               });
               break;
             }

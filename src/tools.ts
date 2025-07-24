@@ -33,6 +33,22 @@ export const aiTools = [
     description: 'Fetch Lil Nouns token total supply',
     parameters: {},
   },
+  {
+    type: 'function',
+    name: 'fetchLilNounsProposalSummary',
+    description: 'Fetch Lil Nouns proposal summary',
+    parameters: {
+      type: 'object',
+      properties: {
+        proposalId: {
+          type: 'number',
+          description: 'Proposal ID',
+        },
+      },
+      required: ['proposalId'],
+      additionalProperties: false,
+    },
+  },
 ] as const;
 
 export async function fetchCurrentAuction(
@@ -69,21 +85,21 @@ export async function fetchActiveProposals(
   const { proposals } = await request<Query>(
     config.lilNounsSubgraphUrl,
     gql`
-            query GetProposals($blockNumber: BigInt!) {
-                proposals(
-                    orderBy: createdBlock,
-                    orderDirection: desc,
-                    where: {
-                        status_not_in: [CANCELLED],
-                        endBlock_gte: $blockNumber
-                    }
-                ) {
-                    id
-                    title
-                    createdTimestamp
-                }
-            }
-        `,
+      query GetProposals($blockNumber: BigInt!) {
+        proposals(
+          orderBy: createdBlock,
+          orderDirection: desc,
+          where: {
+            status_not_in: [CANCELLED],
+            endBlock_gte: $blockNumber
+          }
+        ) {
+          id
+          title
+          createdTimestamp
+        }
+      }
+    `,
     { blockNumber: blockNumber.toString() }
   );
 
@@ -117,4 +133,37 @@ export async function fetchLilNounsTokenTotalSupply(
   );
 
   return { totalSupply: Number(totalSupply) };
+}
+
+export async function fetchLilNounsProposalSummary(
+  config: ReturnType<typeof getConfig>,
+  proposalId: number
+) {
+  console.log('[DEBUG] Fetching proposal summary');
+
+  const { proposal } = await request<Query>(
+    config.lilNounsSubgraphUrl,
+    gql`
+      query GetProposal($proposalId: ID!) {
+        proposal(id: $proposalId) {
+          id
+          title
+          description
+          status
+          createdTimestamp
+        }
+      }
+    `,
+    { proposalId }
+  );
+
+  console.log(
+    `[DEBUG] Retrieved proposal summary: ${JSON.stringify({
+      proposal: {
+        title: proposal?.title,
+      },
+    })}`
+  );
+
+  return { proposal };
 }
