@@ -183,7 +183,7 @@ async function processConversations(env: Env) {
 
       // Generate AI response using Cloudflare AI with a specific system prompt
       const { tool_calls } = await env.AI.run(
-        config.agent.aiModel,
+        config.agent.aiModels.functionCalling,
         {
           max_tokens: config.agent.maxTokens,
           messages: [
@@ -252,7 +252,7 @@ async function processConversations(env: Env) {
               );
 
               const response = await env.AI.run(
-                '@cf/facebook/bart-large-cnn',
+                config.agent.aiModels.summarization,
                 {
                   input_text: `# ${proposal?.title}${proposal?.description}`,
                   max_length: 200,
@@ -278,7 +278,7 @@ async function processConversations(env: Env) {
 
       // Generate a final AI response incorporating any tool call results
       const { response } = await env.AI.run(
-        config.agent.aiModel,
+        config.agent.aiModels.functionCalling,
         {
           messages: [
             {
