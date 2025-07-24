@@ -171,7 +171,14 @@ export async function fetchLilNounsProposalSummary(
     })}`
   );
 
-  return { proposal };
+  return {
+    proposal: {
+      ...proposal,
+      createdTimestamp: DateTime.fromSeconds(
+        Number(proposal?.createdTimestamp)
+      ).toISO(),
+    },
+  };
 }
 
 /**
