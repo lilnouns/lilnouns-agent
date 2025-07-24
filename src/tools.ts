@@ -49,6 +49,12 @@ export const aiTools = [
       additionalProperties: false,
     },
   },
+  {
+    type: 'function',
+    name: 'getCurrentIsoDateTimeUtc',
+    description: 'Get current date and time in ISO format in UTC timezone',
+    parameters: {},
+  },
 ] as const;
 
 export async function fetchCurrentAuction(
@@ -166,4 +172,11 @@ export async function fetchLilNounsProposalSummary(
   );
 
   return { proposal };
+}
+
+/**
+ * Returns the current date and time in ISO format in UTC timezone
+ */
+export function getCurrentIsoDateTimeUtc() {
+  return DateTime.utc().toISO();
 }

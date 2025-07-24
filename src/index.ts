@@ -15,6 +15,7 @@ import {
   fetchCurrentAuction,
   fetchLilNounsProposalSummary,
   fetchLilNounsTokenTotalSupply,
+  getCurrentIsoDateTimeUtc,
 } from './tools';
 
 export function createWagmiConfig(config: ReturnType<typeof getConfig>) {
@@ -232,6 +233,15 @@ async function processConversations(env: Env) {
                 role: 'tool',
                 name: toolCall.name,
                 content: JSON.stringify({ totalSupply }),
+              });
+              break;
+            }
+            case 'getCurrentIsoDateTimeUtc': {
+              const currentDateTime = getCurrentIsoDateTimeUtc();
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify({ currentDateTime }),
               });
               break;
             }
