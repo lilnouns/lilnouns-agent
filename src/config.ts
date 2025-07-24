@@ -25,6 +25,7 @@ const agentConfigSchema = z.object({
   aiModels: z.object({
     functionCalling: z.literal('@hf/nousresearch/hermes-2-pro-mistral-7b'),
     summarization: z.literal('@cf/facebook/bart-large-cnn'),
+    textEmbedding: z.literal('@cf/baai/bge-m3'),
   }),
   maxTokens: z.number().positive('Max tokens must be positive'),
   cacheKeys: z.object({
@@ -96,6 +97,7 @@ export function getConfig(env: Env): Config {
       aiModels: {
         functionCalling: '@hf/nousresearch/hermes-2-pro-mistral-7b' as const,
         summarization: '@cf/facebook/bart-large-cnn' as const,
+        textEmbedding: '@cf/baai/bge-m3' as const,
       },
       maxTokens: 100,
       cacheKeys: {
