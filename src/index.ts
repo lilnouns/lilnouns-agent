@@ -314,6 +314,7 @@ async function processConversations(env: Env) {
       const { response } = await env.AI.run(
         config.agent.aiModels.functionCalling,
         {
+          max_tokens: config.agent.maxTokens,
           messages: [
             {
               role: 'system',
