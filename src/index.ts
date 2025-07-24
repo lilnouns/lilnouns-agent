@@ -13,7 +13,10 @@ import {
   aiTools,
   fetchActiveProposals,
   fetchCurrentAuction,
+  fetchLilNounsProposalSummary,
+  fetchLilNounsProposalsState,
   fetchLilNounsTokenTotalSupply,
+  getCurrentIsoDateTimeUtc,
 } from './tools';
 
 export function createWagmiConfig(config: ReturnType<typeof getConfig>) {
@@ -182,7 +185,7 @@ async function processConversations(env: Env) {
 
       // Generate AI response using Cloudflare AI with a specific system prompt
       const { tool_calls } = await env.AI.run(
-        config.agent.aiModel,
+        config.agent.aiModels.functionCalling,
         {
           max_tokens: config.agent.maxTokens,
           messages: [
@@ -234,6 +237,72 @@ async function processConversations(env: Env) {
               });
               break;
             }
+            case 'getCurrentIsoDateTimeUtc': {
+              const currentDateTime = getCurrentIsoDateTimeUtc();
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify({ currentDateTime }),
+              });
+              break;
+            }
+            case 'fetchLilNounsProposalSummary': {
+              const { proposalId } = toolCall?.arguments as {
+                proposalId: number;
+              };
+
+              if (!proposalId) {
+                console.log(
+                  `[DEBUG] fetchLilNounsProposalSummary tool call missing required argument: proposalId`
+                );
+              }
+
+              const { proposal } = await fetchLilNounsProposalSummary(
+                config,
+                proposalId ?? 0
+              );
+
+              const response = await env.AI.run(
+                config.agent.aiModels.summarization,
+                {
+                  input_text: `# ${proposal?.title}${proposal?.description}`,
+                  max_length: 200,
+                },
+                { ...gatewayConfig }
+              );
+
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify({
+                  proposal: { ...proposal, description: response.summary },
+                }),
+              });
+              break;
+            }
+            case 'fetchLilNounsProposalsState': {
+              const { proposalId } = toolCall?.arguments as {
+                proposalId: number;
+              };
+
+              if (!proposalId) {
+                console.log(
+                  `[DEBUG] fetchProposalsState tool call missing required argument: proposalId`
+                );
+              }
+
+              const result = await fetchLilNounsProposalsState(
+                config,
+                proposalId ?? 0
+              );
+
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify(result),
+              });
+              break;
+            }
             default:
               console.log(`[DEBUG] Unhandled tool call: ${toolCall.name}`);
               break;
@@ -243,7 +312,7 @@ async function processConversations(env: Env) {
 
       // Generate a final AI response incorporating any tool call results
       const { response } = await env.AI.run(
-        config.agent.aiModel,
+        config.agent.aiModels.functionCalling,
         {
           messages: [
             {

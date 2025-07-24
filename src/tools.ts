@@ -1,5 +1,6 @@
 import {
   readLilNounsAuctionFetchNextNoun,
+  readLilNounsGovernorState,
   readLilNounsTokenTotalSupply,
 } from '@nekofar/lilnouns/contracts';
 import type { Query } from '@nekofar/lilnouns/subgraphs';
@@ -23,6 +24,22 @@ export const aiTools = [
   },
   {
     type: 'function',
+    name: 'fetchLilNounsProposalsState',
+    description: 'Fetch Lil Nouns proposal state from chain',
+    parameters: {
+      type: 'object',
+      properties: {
+        proposalId: {
+          type: 'number',
+          description: 'Proposal ID',
+        },
+      },
+      required: ['proposalId'],
+      additionalProperties: false,
+    },
+  },
+  {
+    type: 'function',
     name: 'fetchLilNounsCurrentAuction',
     description: 'Fetch Lil Nouns current auction',
     parameters: {},
@@ -31,9 +48,38 @@ export const aiTools = [
     type: 'function',
     name: 'fetchLilNounsTokenTotalSupply',
     description: 'Fetch Lil Nouns token total supply',
+    parameters: {},
+  },
+  {
+    type: 'function',
+    name: 'fetchLilNounsProposalSummary',
+    description: 'Fetch Lil Nouns proposal summary',
+    parameters: {
+      type: 'object',
+      properties: {
+        proposalId: {
+          type: 'number',
+          description: 'Proposal ID',
+        },
+      },
+      required: ['proposalId'],
+      additionalProperties: false,
+    },
+  },
+  {
+    type: 'function',
+    name: 'getCurrentIsoDateTimeUtc',
+    description: 'Get current date and time in ISO format in UTC timezone',
+    parameters: {},
   },
 ] as const;
 
+/**
+ * Fetches the current auction data for Lil Nouns.
+ *
+ * @param {Object} config - The configuration object returned by the `getConfig` function.
+ * @return {Promise<Object>} A promise that resolves to an object containing the current auction details.
+ */
 export async function fetchCurrentAuction(
   config: ReturnType<typeof getConfig>
 ) {
@@ -50,12 +96,21 @@ export async function fetchCurrentAuction(
 
   console.log(
     '[DEBUG] Retrieved current auction: ',
-    JSON.stringify(auction, null, 2)
+    JSON.stringify({ auction })
   );
 
   return { auction };
 }
 
+/**
+ * Fetches active proposals from the Lil Nouns subgraph based on the current Ethereum block number.
+ *
+ * Active proposals are those which have not been cancelled and have an ending block greater than or equal to the current block.
+ * The retrieved proposals include their id, title, and creation timestamp, with timestamps formatted to ISO format.
+ *
+ * @param {ReturnType<typeof getConfig>} config - The configuration object used to initialize the Wagmi settings and subgraph query.
+ * @return {Promise<{ proposals: Array<{ id: string, title: string, createdTimestamp: string }> }>} A promise that resolves to an object containing an array of active proposals. Each proposal includes its id, title, and formatted creation timestamp.
+ */
 export async function fetchActiveProposals(
   config: ReturnType<typeof getConfig>
 ) {
@@ -68,21 +123,21 @@ export async function fetchActiveProposals(
   const { proposals } = await request<Query>(
     config.lilNounsSubgraphUrl,
     gql`
-            query GetProposals($blockNumber: BigInt!) {
-                proposals(
-                    orderBy: createdBlock,
-                    orderDirection: desc,
-                    where: {
-                        status_not_in: [CANCELLED],
-                        endBlock_gte: $blockNumber
-                    }
-                ) {
-                    id
-                    title
-                    createdTimestamp
-                }
-            }
-        `,
+      query GetProposals($blockNumber: BigInt!) {
+        proposals(
+          orderBy: createdBlock,
+          orderDirection: desc,
+          where: {
+            status_not_in: [CANCELLED],
+            endBlock_gte: $blockNumber
+          }
+        ) {
+          id
+          title
+          createdTimestamp
+        }
+      }
+    `,
     { blockNumber: blockNumber.toString() }
   );
 
@@ -103,6 +158,12 @@ export async function fetchActiveProposals(
   return { proposals: formattedProposals };
 }
 
+/**
+ * Fetches the total supply of Lil Nouns tokens.
+ *
+ * @param {Object} config - The configuration object obtained from the getConfig function.
+ * @return {Promise<Object>} An object containing the total supply of tokens as a number.
+ */
 export async function fetchLilNounsTokenTotalSupply(
   config: ReturnType<typeof getConfig>
 ) {
@@ -116,4 +177,106 @@ export async function fetchLilNounsTokenTotalSupply(
   );
 
   return { totalSupply: Number(totalSupply) };
+}
+
+/**
+ * Fetches the summary of a specific "Lil Nouns" proposal by its ID.
+ *
+ * @param {object} config - The configuration object for the subgraph, obtained by calling the `getConfig` function. It contains the `lilNounsSubgraphUrl` for querying data.
+ * @param {number} proposalId - The unique identifier of the proposal whose summary is to be fetched.
+ * @return {Promise<object>} A promise that resolves to an object containing the proposal's summary, including id, title, description, status, and a formatted `createdTimestamp`.
+ */
+export async function fetchLilNounsProposalSummary(
+  config: ReturnType<typeof getConfig>,
+  proposalId: number
+) {
+  console.log('[DEBUG] Fetching proposal summary');
+
+  const { proposal } = await request<Query>(
+    config.lilNounsSubgraphUrl,
+    gql`
+      query GetProposal($proposalId: ID!) {
+        proposal(id: $proposalId) {
+          id
+          title
+          description
+          createdTimestamp
+        }
+      }
+    `,
+    { proposalId }
+  );
+
+  console.log(
+    `[DEBUG] Retrieved proposal summary: ${JSON.stringify({
+      proposal: {
+        title: proposal?.title,
+      },
+    })}`
+  );
+
+  const state = await fetchLilNounsProposalsState(config, proposalId);
+
+  return {
+    proposal: {
+      ...proposal,
+      status: state.stateText,
+      createdTimestamp: DateTime.fromSeconds(
+        Number(proposal?.createdTimestamp)
+      ).toISO(),
+    },
+  };
+}
+
+/**
+ * Gets the current date and time in ISO 8601 format in UTC.
+ *
+ * @return {string} The current date and time as an ISO 8601 formatted string in UTC.
+ */
+export function getCurrentIsoDateTimeUtc(): string {
+  return DateTime.utc().toISO();
+}
+
+/**
+ * Enum representing the different states a proposal can be in.
+ */
+export enum ProposalState {
+  Pending,
+  Active,
+  Canceled,
+  Defeated,
+  Succeeded,
+  Queued,
+  Expired,
+  Executed,
+  Vetoed,
+}
+
+/**
+ * Fetches the on-chain state of a specific Lil Nouns proposal.
+ *
+ * @param {Object} config - The configuration object obtained from the getConfig function.
+ * @param {number} proposalId - The ID of the proposal to fetch the state for.
+ * @return {Promise<Object>} An object containing the proposal state as both numeric value and string representation.
+ */
+export async function fetchLilNounsProposalsState(
+  config: ReturnType<typeof getConfig>,
+  proposalId: number
+) {
+  console.log('[DEBUG] Fetching proposal state for ID:', proposalId);
+
+  const wagmiConfig = createWagmiConfig(config);
+  const state = await readLilNounsGovernorState(wagmiConfig, {
+    args: [BigInt(proposalId)],
+  });
+
+  const stateNumber = Number(state);
+  const stateText = ProposalState[stateNumber];
+
+  console.log('[DEBUG] Retrieved proposal state:', stateNumber, stateText);
+
+  return {
+    state: stateNumber,
+    stateText: stateText,
+  };
 }

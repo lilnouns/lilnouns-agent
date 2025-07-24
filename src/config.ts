@@ -22,7 +22,12 @@ const agentConfigSchema = z.object({
   autoRagId: z.string().min(1, 'AutoRAG ID cannot be empty'),
   gatewayId: z.string().min(1, 'Gateway ID cannot be empty'),
   cacheTtl: z.number().positive('Cache TTL must be positive'),
-  aiModel: z.literal('@hf/nousresearch/hermes-2-pro-mistral-7b'),
+  aiModels: z.object({
+    functionCalling: z.literal('@hf/nousresearch/hermes-2-pro-mistral-7b'),
+    summarization: z.literal('@cf/facebook/bart-large-cnn'),
+    textEmbedding: z.literal('@cf/baai/bge-m3'),
+    translation: z.literal('@cf/meta/m2m100-1.2b@cf/meta/m2m100-1.2b'),
+  }),
   maxTokens: z.number().positive('Max tokens must be positive'),
   cacheKeys: z.object({
     lastFetch: z.string().min(1),
@@ -90,7 +95,12 @@ export function getConfig(env: Env): Config {
       autoRagId: 'lilnouns-agent',
       gatewayId: 'lilnouns-agent',
       cacheTtl: 3360,
-      aiModel: '@hf/nousresearch/hermes-2-pro-mistral-7b' as const,
+      aiModels: {
+        functionCalling: '@hf/nousresearch/hermes-2-pro-mistral-7b' as const,
+        summarization: '@cf/facebook/bart-large-cnn' as const,
+        textEmbedding: '@cf/baai/bge-m3' as const,
+        translation: '@cf/meta/m2m100-1.2b@cf/meta/m2m100-1.2b' as const,
+      },
       maxTokens: 100,
       cacheKeys: {
         lastFetch: 'conversations:last-fetch',
