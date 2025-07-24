@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.10] - 2025-07-24
+
+### 🚀 Features
+
+- *(agent)* Add `max_tokens` support in AI requests
+
 ## [1.0.0-alpha.9] - 2025-07-24
 
 ### 🚀 Features
