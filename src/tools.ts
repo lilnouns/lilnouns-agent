@@ -31,6 +31,7 @@ export const aiTools = [
     type: 'function',
     name: 'fetchLilNounsTokenTotalSupply',
     description: 'Fetch Lil Nouns token total supply',
+    parameters: {},
   },
 ] as const;
 
@@ -50,7 +51,7 @@ export async function fetchCurrentAuction(
 
   console.log(
     '[DEBUG] Retrieved current auction: ',
-    JSON.stringify(auction, null, 2)
+    JSON.stringify({ auction })
   );
 
   return { auction };
