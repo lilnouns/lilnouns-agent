@@ -26,6 +26,7 @@ const agentConfigSchema = z.object({
     functionCalling: z.literal('@hf/nousresearch/hermes-2-pro-mistral-7b'),
     summarization: z.literal('@cf/facebook/bart-large-cnn'),
     textEmbedding: z.literal('@cf/baai/bge-m3'),
+    translation: z.literal('@cf/meta/m2m100-1.2b@cf/meta/m2m100-1.2b'),
   }),
   maxTokens: z.number().positive('Max tokens must be positive'),
   cacheKeys: z.object({
@@ -98,6 +99,7 @@ export function getConfig(env: Env): Config {
         functionCalling: '@hf/nousresearch/hermes-2-pro-mistral-7b' as const,
         summarization: '@cf/facebook/bart-large-cnn' as const,
         textEmbedding: '@cf/baai/bge-m3' as const,
+        translation: '@cf/meta/m2m100-1.2b@cf/meta/m2m100-1.2b' as const,
       },
       maxTokens: 100,
       cacheKeys: {
