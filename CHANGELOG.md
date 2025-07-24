@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.9] - 2025-07-24
+
+### 🚀 Features
+
+- *(config)* Add `.editorconfig` for consistent formatting
+- *(agent)* Improve auction data logging
+- *(agent)* Add fetchLilNounsProposalSummary tool
+- *(config)* Support multiple AI models for tasks
+- *(config)* Add `textEmbedding` AI model support
+- *(config)* Add `translation` AI model support
+- *(agent)* Add `getCurrentIsoDateTimeUtc` tool
+- *(tools)* Add ISO timestamp parsing for proposals
+- *(tools)* Add utility methods for Lil Nouns data fetch
+- *(tools)* Add return types to utility functions
+- *(tools)* Add fetchLilNounsProposalsState function
+
 ## [1.0.0-alpha.8] - 2025-07-23
 
 ### 🐛 Bug Fixes
