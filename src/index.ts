@@ -18,6 +18,7 @@ import {
   fetchLilNounsTokenTotalSupply,
   getCurrentIsoDateTimeUtc,
 } from './tools';
+import { stripMarkdown } from './utils/text';
 
 export function createWagmiConfig(config: ReturnType<typeof getConfig>) {
   const wagmiConfig = createConfig({
@@ -332,7 +333,9 @@ async function processConversations(env: Env) {
 
       console.log(`[DEBUG] AI response: "${response}"`);
 
-      // Send response back to the conversation (currently commented out)
+      // Prepare plain text message without markdown
+      const messageContent = stripMarkdown(response ?? "I don't know");
+
       // Send the AI-generated response back to the conversation on Farcaster
       // Includes the original message ID for proper threading and mentions the original sender
       const { error, data } = await sendDirectCastMessage({
@@ -342,7 +345,7 @@ async function processConversations(env: Env) {
           recipientFids: [message.senderFid],
           messageId: crypto.randomUUID().replace(/-/g, ''),
           type: 'text',
-          message: response ?? "I don't know",
+          message: messageContent,
           inReplyToId: message.messageId,
         },
       });

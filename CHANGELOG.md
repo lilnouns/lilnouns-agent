@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.13] - 2025-07-25
+
+### 🚀 Features
+
+- *(uttils)* Sanitize AI responses (#2)
+
 ## [1.0.0-alpha.12] - 2025-07-25
 
 ### 🚀 Features
