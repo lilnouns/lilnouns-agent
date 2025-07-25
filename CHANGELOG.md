@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.12] - 2025-07-25
+
+### 🚀 Features
+
+- *(prompts)* Update response length guideline
+
+### 🐛 Bug Fixes
+
+- *(propmpts)* Clarify plain-text response guideline (#1)
+
 ## [1.0.0-alpha.11] - 2025-07-24
 
 ### 🚀 Features
