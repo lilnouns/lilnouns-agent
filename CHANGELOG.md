@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.14] - 2025-07-26
+
+### 🚀 Features
+
+- *(junie)* Added .junie workflow
+- *(junie)* Added .devcontainer.json
+
+### 🐛 Bug Fixes
+
+- *(utils)* Enhance `stripMarkdown` parsing logic
+- *(config)* Adjust `zod` schema validators
+
+### 🚜 Refactor
+
+- *(index)* Extract `generateContextText`
+- *(index)* Extract `processToolCalls`
+
+### 🧪 Testing
+
+- *(utils)* Enhance `stripMarkdown` test coverage
+
 ## [1.0.0-alpha.13] - 2025-07-25
 
 ### 🚀 Features
