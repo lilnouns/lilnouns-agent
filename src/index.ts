@@ -1,4 +1,5 @@
 import {
+  type DirectCastMessage,
   getDirectCastConversationRecentMessages,
   getDirectCastInbox,
   sendDirectCastMessage,
@@ -110,6 +111,32 @@ async function fetchLilNounsRelatedMessages(
   return messages;
 }
 
+async function generateContextText(
+  env: Env,
+  config: ReturnType<typeof getConfig>,
+  directCastMessage: DirectCastMessage
+) {
+  // Search for relevant context using AutoRAG based on the user's directCastMessage content
+  const answer = await env.AI.autorag(config.agent.autoRagId).search({
+    query: directCastMessage.message,
+    rewrite_query: false,
+    max_num_results: 2,
+    ranking_options: {
+      score_threshold: 0.3,
+    },
+  });
+
+  const contextContent = pipe(
+    answer.data,
+    flatMap(i => i.content),
+    contents => filter(contents, c => c.type === 'text'),
+    texts => map(texts, c => c.text),
+    join('\n')
+  );
+
+  return contextContent;
+}
+
 // Main function that processes all conversations with unread mentions
 async function processConversations(env: Env) {
   console.log('[DEBUG] Starting processConversations');
@@ -166,23 +193,7 @@ async function processConversations(env: Env) {
       );
       const toolsMessage = [];
 
-      // Search for relevant context using AutoRAG based on the user's message content
-      const answer = await env.AI.autorag(config.agent.autoRagId).search({
-        query: message.message,
-        rewrite_query: false,
-        max_num_results: 2,
-        ranking_options: {
-          score_threshold: 0.3,
-        },
-      });
-
-      const contextContent = pipe(
-        answer.data,
-        flatMap(i => i.content),
-        contents => filter(contents, c => c.type === 'text'),
-        texts => map(texts, c => c.text),
-        join('\n')
-      );
+      const contextText = await generateContextText(env, config, message);
 
       // Generate AI response using Cloudflare AI with a specific system prompt
       const { tool_calls } = await env.AI.run(
@@ -319,9 +330,9 @@ async function processConversations(env: Env) {
           messages: [
             {
               role: 'system',
-              content: !contextContent
+              content: !contextText
                 ? agentSystemMessage
-                : `${agentSystemMessage}\nHere is some context from relevant documents:\n${contextContent}`,
+                : `${agentSystemMessage}\nHere is some context from relevant documents:\n${contextText}`,
             },
             // The actual message content to respond to
             { role: 'user', content: message.message },
