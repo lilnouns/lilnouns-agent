@@ -12,8 +12,10 @@ const envSchema = z.object({
   FARCASTER_AUTH_TOKEN: z
     .string()
     .min(1, 'FARCASTER_AUTH_TOKEN cannot be empty'),
-  LILNOUNS_SUBGRAPH_URL: z.url('LILNOUNS_SUBGRAPH_URL must be a valid URL'),
-  ETHEREUM_RPC_URL: z.url('ETHEREUM_RPC_URL must be a valid URL'),
+  LILNOUNS_SUBGRAPH_URL: z
+    .string()
+    .url('LILNOUNS_SUBGRAPH_URL must be a valid URL'),
+  ETHEREUM_RPC_URL: z.string().url('ETHEREUM_RPC_URL must be a valid URL'),
 });
 
 // Add validation for agent configuration
@@ -33,7 +35,9 @@ const agentConfigSchema = z.object({
     lastFetch: z.string().min(1),
   }),
   defaults: z.object({
-    fallbackDate: z.iso.datetime('Fallback date must be a valid ISO datetime'),
+    fallbackDate: z
+      .string()
+      .datetime('Fallback date must be a valid ISO datetime'),
   }),
 });
 
