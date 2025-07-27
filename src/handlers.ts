@@ -1,6 +1,16 @@
 import { sendDirectCastMessage } from '@nekofar/warpcast';
 import { DateTime } from 'luxon';
-import { filter, isNot, isTruthy, last, pipe, take } from 'remeda';
+import {
+  filter,
+  flatMap,
+  isNot,
+  isTruthy,
+  join,
+  last,
+  map,
+  pipe,
+  take,
+} from 'remeda';
 import { generateContextText, handleAiToolCalls } from './ai';
 import { getLastFetchTime, setLastFetchTime } from './cache';
 import { getConfig } from './config';
@@ -183,75 +193,92 @@ async function handleNewOneToOneMessages(env: Env) {
       `[DEBUG] Found ${filteredMessages.length} unprocessed messages in conversation`
     );
 
-    // Process each relevant message
-    for (const message of filteredMessages) {
-      console.log(
-        `[DEBUG] Processing message: ${message.messageId} from sender: ${message.senderFid}`
-      );
-      const contextText = await generateContextText(env, config, message);
+    // Generate context text from message content using AutoRAG search
+    const contextText = await generateContextText(
+      env,
+      config,
+      pipe(
+        filteredMessages,
+        flatMap(m => m.message),
+        join('\n')
+      )
+    );
 
-      const toolsMessage = await handleAiToolCalls(env, config, message);
+    // Process AI tool calls with conversation messages formatted as assistant/user roles
+    const formattedMessages = pipe(
+      filteredMessages,
+      map(m => {
+        return {
+          role: m.senderFid === config.agent.fid ? 'assistant' : 'user',
+          content: m.message,
+        };
+      })
+    );
 
-      // Generate a final AI response incorporating any tool call results
-      const { response } = await env.AI.run(
-        config.agent.aiModels.functionCalling,
-        {
-          max_tokens: config.agent.maxTokens,
-          messages: [
-            {
-              role: 'system',
-              content: !contextText
-                ? agentSystemMessage
-                : `${agentSystemMessage}\nHere is some context from relevant documents:\n${contextText}`,
-            },
-            // The actual message content to respond to
-            { role: 'user', content: message.message },
-            ...toolsMessage,
-          ],
-        },
-        {
-          gateway: {
-            id: config.agent.gatewayId,
-            skipCache: false,
-            cacheTtl: config.agent.cacheTtl,
+    const toolsMessage = await handleAiToolCalls(
+      env,
+      config,
+      formattedMessages
+    );
+
+    // Generate a final AI response incorporating any tool call results
+    const { response } = await env.AI.run(
+      config.agent.aiModels.functionCalling,
+      {
+        max_tokens: config.agent.maxTokens,
+        messages: [
+          {
+            role: 'system',
+            content: !contextText
+              ? agentSystemMessage
+              : `${agentSystemMessage}\nRELEVANT CONTEXT:\n${contextText}`,
           },
-        }
-      );
-
-      console.log(`[DEBUG] AI response: "${response}"`);
-
-      // Prepare plain text message without markdown
-      const messageContent = stripMarkdown(response ?? "I don't know");
-
-      // Send the AI-generated response back to the conversation on Farcaster
-      // Includes the original message ID for proper threading and mentions the original sender
-      const { error, data } = await sendDirectCastMessage({
-        auth: () => config.farcasterAuthToken,
-        body: {
-          conversationId,
-          recipientFids: [message.senderFid],
-          messageId: crypto.randomUUID().replace(/-/g, ''),
-          type: 'text',
-          message: messageContent,
-          inReplyToId: message.messageId,
+          // The actual message content to respond to
+          ...formattedMessages,
+          ...toolsMessage,
+        ],
+      },
+      {
+        gateway: {
+          id: config.agent.gatewayId,
+          skipCache: false,
+          cacheTtl: config.agent.cacheTtl,
         },
-      });
-
-      if (error) {
-        console.log(`[DEBUG] Error sending message:`, error);
-      } else {
-        console.log(
-          `[DEBUG] Message sent successfully, messageId: ${data?.result?.messageId}`
-        );
       }
+    );
+
+    console.log(`[DEBUG] AI response: "${response}"`);
+
+    // Prepare a plain text message without markdown
+    const messageContent = stripMarkdown(response ?? "I don't know");
+
+    console.log(`[DEBUG] Sending message: "${messageContent}"`);
+
+    // Send the AI-generated response back to the conversation on Farcaster
+    // Includes the original message ID for proper threading and mentions the original sender
+    const { error, data } = await sendDirectCastMessage({
+      auth: () => config.farcasterAuthToken,
+      body: {
+        conversationId,
+        recipientFids: [Number(conversationId.split('-')[1])],
+        messageId: crypto.randomUUID().replace(/-/g, ''),
+        type: 'text',
+        message: messageContent,
+      },
+    });
+
+    if (error) {
+      console.log(`[DEBUG] Error sending message:`, error);
+    } else {
+      console.log(
+        `[DEBUG] Message sent successfully, messageId: ${data?.result?.messageId}`
+      );
     }
   }
 }
 
 // Main function that processes all conversations with unread mentions
 export async function handleGroupConversations(env: Env) {
-  return Promise.all([
-    // handleNewMentionsInGroups(env),
-    handleNewOneToOneMessages(env),
-  ]);
+  // handleNewMentionsInGroups(env),
+  await handleNewOneToOneMessages(env);
 }
