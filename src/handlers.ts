@@ -199,6 +199,7 @@ async function handleNewOneToOneMessages(env: Env) {
       config,
       pipe(
         filteredMessages,
+        filter(m => m.senderFid !== config.agent.fid),
         flatMap(m => m.message),
         join('\n')
       )
