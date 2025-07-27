@@ -255,7 +255,6 @@ async function handleNewOneToOneMessages(env: Env) {
     console.log(`[DEBUG] Sending message: "${messageContent}"`);
 
     // Send the AI-generated response back to the conversation on Farcaster
-    // Includes the original message ID for proper threading and mentions the original sender
     const { error } = await sendDirectCast({
       auth: () => config.farcasterApiKey,
       body: {
