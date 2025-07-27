@@ -1,7 +1,7 @@
 import { sendDirectCastMessage } from '@nekofar/warpcast';
 import { DateTime } from 'luxon';
 import { filter, last, pipe } from 'remeda';
-import { generateContextText, processToolCalls } from './ai';
+import { generateContextText, handleAiToolCalls } from './ai';
 import { getConfig } from './config';
 import {
   fetchLilNounsRelatedMessages,
@@ -56,7 +56,7 @@ async function handleNewMentionsInGroups(env: Env) {
       );
       const contextText = await generateContextText(env, config, message);
 
-      const toolsMessage = await processToolCalls(env, config, message);
+      const toolsMessage = await handleAiToolCalls(env, config, message);
 
       // Generate a final AI response incorporating any tool call results
       const { response } = await env.AI.run(

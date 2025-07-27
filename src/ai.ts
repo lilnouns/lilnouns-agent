@@ -38,7 +38,7 @@ export async function generateContextText(
   return contextContent;
 }
 
-export async function processToolCalls(
+export async function handleAiToolCalls(
   env: Env,
   config: ReturnType<typeof getConfig>,
   message: DirectCastMessage
