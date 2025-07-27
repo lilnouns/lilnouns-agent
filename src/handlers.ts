@@ -31,16 +31,8 @@ export async function handleUnreadConversations(env: Env) {
   const config = getConfig(env);
   const lastFetchTime = await getLastFetchTime(env, config);
 
-  console.log(
-    `[DEBUG] Last retrieval time: ${new Date(lastFetchTime).toISOString()}`
-  );
-
   // Fetch all conversations with unread messages
   const { conversations } = await fetchLilNounsUnreadConversations(config);
-
-  console.log(
-    `[DEBUG] Found ${conversations.length} conversations with unread messages`
-  );
 
   // Process each conversation individually
   const [groups, chats] = pipe(
