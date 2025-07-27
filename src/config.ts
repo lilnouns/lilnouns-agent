@@ -12,6 +12,7 @@ const envSchema = z.object({
   FARCASTER_AUTH_TOKEN: z
     .string()
     .min(1, 'FARCASTER_AUTH_TOKEN cannot be empty'),
+  FARCASTER_API_KEY: z.string().min(1, 'FARCASTER_API_KEY cannot be empty'),
   LILNOUNS_SUBGRAPH_URL: z
     .string()
     .url('LILNOUNS_SUBGRAPH_URL must be a valid URL'),
@@ -53,6 +54,7 @@ type RawEnv = z.infer<typeof envSchema>;
 export type Config = Simplify<{
   env: RawEnv['NODE_ENV'];
   farcasterAuthToken: RawEnv['FARCASTER_AUTH_TOKEN'];
+  farcasterApiKey: RawEnv['FARCASTER_API_KEY'];
   lilNounsSubgraphUrl: RawEnv['LILNOUNS_SUBGRAPH_URL'];
   ethereumRpcUrl: RawEnv['ETHEREUM_RPC_URL'];
   agent: z.infer<typeof agentConfigSchema>;
@@ -83,6 +85,7 @@ export function getConfig(env: Env): Config {
     const envResult = envSchema.safeParse({
       NODE_ENV: env.NODE_ENV,
       FARCASTER_AUTH_TOKEN: env.FARCASTER_AUTH_TOKEN,
+      FARCASTER_API_KEY: env.FARCASTER_API_KEY,
       LILNOUNS_SUBGRAPH_URL: env.LILNOUNS_SUBGRAPH_URL,
       ETHEREUM_RPC_URL: env.ETHEREUM_RPC_URL,
     });
@@ -128,6 +131,7 @@ export function getConfig(env: Env): Config {
     cachedConfig = {
       env: envResult.data.NODE_ENV,
       farcasterAuthToken: envResult.data.FARCASTER_AUTH_TOKEN,
+      farcasterApiKey: envResult.data.FARCASTER_API_KEY,
       lilNounsSubgraphUrl: envResult.data.LILNOUNS_SUBGRAPH_URL,
       ethereumRpcUrl: envResult.data.ETHEREUM_RPC_URL,
       agent: agentResult.data,
