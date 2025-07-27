@@ -5,6 +5,44 @@ import { getConfig } from './config';
 let loggerInstance: pino.Logger | null = null;
 
 /**
+ * Formats a log object into a human-readable string
+ */
+function formatLogForConsole(log: any): string {
+  const { level, msg, time, ...rest } = log;
+  const timestamp = new Date(time).toISOString();
+  const levelName = pino.levels.labels[level].toUpperCase();
+
+  // Format the additional data (if any)
+  const additionalData = Object.keys(rest).length
+    ? ` ${JSON.stringify(rest)}`
+    : '';
+
+  return `${timestamp} [${levelName}]: ${msg}${additionalData}`;
+}
+
+/**
+ * Writes formatted log to appropriate console method based on level
+ */
+function writeFormattedLogToConsole(obj: any, formattedLog: string): void {
+  switch (obj.level) {
+    case pino.levels.values.error:
+      console.error(formattedLog);
+      break;
+    case pino.levels.values.warn:
+      console.warn(formattedLog);
+      break;
+    case pino.levels.values.info:
+      console.info(formattedLog);
+      break;
+    case pino.levels.values.debug:
+      console.debug(formattedLog);
+      break;
+    default:
+      console.log(formattedLog);
+  }
+}
+
+/**
  * Creates and returns a configured Pino logger instance
  * Uses pino-pretty in development environment for better readability
  *
@@ -14,7 +52,6 @@ let loggerInstance: pino.Logger | null = null;
  */
 export function createLogger(env: Env, options: pino.LoggerOptions = {}) {
   if (loggerInstance) return loggerInstance;
-
   const config = getConfig(env);
 
   // Base options with sensible defaults
@@ -36,37 +73,8 @@ export function createLogger(env: Env, options: pino.LoggerOptions = {}) {
         asObject: true,
         // Custom write function to format logs readably
         write: obj => {
-          const formattedLog = (log => {
-            // @ts-ignore
-            const { level, msg, time, ...rest } = log;
-            const timestamp = new Date(time).toISOString();
-            const levelName = pino.levels.labels[level].toUpperCase();
-
-            // Format the additional data (if any)
-            const additionalData = Object.keys(rest).length
-              ? ` ${JSON.stringify(rest)}`
-              : '';
-
-            return `${timestamp} [${levelName}]: ${msg}${additionalData}`;
-          })(obj);
-
-          // @ts-ignore
-          switch (obj.level) {
-            case pino.levels.values.error:
-              console.error(formattedLog);
-              break;
-            case pino.levels.values.warn:
-              console.warn(formattedLog);
-              break;
-            case pino.levels.values.info:
-              console.info(formattedLog);
-              break;
-            case pino.levels.values.debug:
-              console.debug(formattedLog);
-              break;
-            default:
-              console.log(formattedLog);
-          }
+          const formattedLog = formatLogForConsole(obj);
+          writeFormattedLogToConsole(obj, formattedLog);
         },
       },
     }),
