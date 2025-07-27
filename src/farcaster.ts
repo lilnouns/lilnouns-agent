@@ -118,3 +118,33 @@ export async function fetchLilNounsOneToOneConversations(
 
   return { conversations };
 }
+
+export async function fetchLilNounsConversationMessages(
+  config: ReturnType<typeof getConfig>,
+  conversationId: string
+) {
+  console.log(`[DEBUG] Fetching messages for conversation: ${conversationId}`);
+
+  // Get recent messages from the specified conversation
+  const { data, error } = await getDirectCastConversationRecentMessages({
+    auth: () => config.farcasterAuthToken,
+    query: {
+      conversationId,
+    },
+  });
+
+  if (error) {
+    console.error(`[DEBUG] Error fetching conversation messages:`, error);
+    return { messages: [] };
+  }
+
+  const messages = pipe(
+    data?.result?.messages ?? [],
+    sortBy(m => m.serverTimestamp)
+  );
+
+  console.log(
+    `[DEBUG] Retrieved ${messages.length} messages from conversation`
+  );
+  return { messages };
+}
