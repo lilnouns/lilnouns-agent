@@ -1,6 +1,7 @@
 // Retrieves group conversations with unread mentions for the Lil Nouns bot
 
 import {
+  type DirectCastConversation,
   getDirectCastConversationRecentMessages,
   getDirectCastInbox,
 } from '@nekofar/warpcast';
@@ -147,4 +148,36 @@ export async function fetchLilNounsConversationMessages(
     `[DEBUG] Retrieved ${messages.length} messages from conversation`
   );
   return { messages };
+}
+
+export async function fetchLilNounsUnreadConversations(
+  config: ReturnType<typeof getConfig>
+) {
+  console.log('[DEBUG] Fetching Lil Nouns unread conversations');
+
+  let conversations: DirectCastConversation[] = [];
+
+  // Fetch the inbox
+  const { data, error } = await getDirectCastInbox({
+    auth: () => config.farcasterAuthToken,
+    query: {
+      limit: 100, // Fetch up to 100 conversations
+      category: 'default',
+      filter: 'unread',
+    },
+  });
+
+  if (error) {
+    console.error(`[DEBUG] Error fetching unread conversations:`, error);
+    return { conversations };
+  }
+
+  conversations = pipe(
+    data?.result?.conversations ?? [],
+    sortBy(c => c.lastMessage?.serverTimestamp ?? 0)
+  );
+
+  console.log(`[DEBUG] Found ${conversations.length} unread conversations`);
+
+  return { conversations };
 }
