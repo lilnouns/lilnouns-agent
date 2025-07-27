@@ -20,19 +20,21 @@ export const aiTools = [
   {
     type: 'function',
     name: 'fetchLilNounsActiveProposals',
-    description: 'Fetch Lil Nouns active proposals',
+    description:
+      'Fetch Lil Nouns active proposals that are currently open for voting, ordered by creation time',
     parameters: {},
   },
   {
     type: 'function',
     name: 'fetchLilNounsProposalsState',
-    description: 'Fetch Lil Nouns proposal state from chain',
+    description:
+      'Fetch the current on-chain state of a Lil Nouns governance proposal by its ID, returning both the numeric state value and text representation (Pending, Active, Canceled, etc.)',
     parameters: {
       type: 'object',
       properties: {
         proposalId: {
           type: 'number',
-          description: 'Proposal ID',
+          description: 'Unique identifier of the proposal to check state for',
         },
       },
       required: ['proposalId'],
@@ -42,25 +44,28 @@ export const aiTools = [
   {
     type: 'function',
     name: 'fetchLilNounsCurrentAuction',
-    description: 'Fetch Lil Nouns current auction',
+    description:
+      'Fetch details about the currently active Lil Nouns auction, including the Noun ID, current price in ETH, and auction link',
     parameters: {},
   },
   {
     type: 'function',
     name: 'fetchLilNounsTokenTotalSupply',
-    description: 'Fetch Lil Nouns token total supply',
+    description:
+      'Fetch the total supply of Lil Nouns tokens that have been minted to date',
     parameters: {},
   },
   {
     type: 'function',
     name: 'fetchLilNounsProposalSummary',
-    description: 'Fetch Lil Nouns proposal summary',
+    description:
+      'Fetch comprehensive details about a specific Lil Nouns governance proposal by its ID, including title, description (AI-summarized), status, creation timestamp, and link to the proposal page',
     parameters: {
       type: 'object',
       properties: {
         proposalId: {
           type: 'number',
-          description: 'Proposal ID',
+          description: 'Unique identifier of the proposal to fetch details for',
         },
       },
       required: ['proposalId'],
@@ -70,7 +75,8 @@ export const aiTools = [
   {
     type: 'function',
     name: 'getCurrentIsoDateTimeUtc',
-    description: 'Get current date and time in ISO format in UTC timezone',
+    description:
+      'Get the current date and time in ISO 8601 format in UTC timezone, useful for timestamping operations and determining time-based conditions',
     parameters: {},
   },
 ] as const;
