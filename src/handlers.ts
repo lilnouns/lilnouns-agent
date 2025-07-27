@@ -55,7 +55,12 @@ async function handleNewMentionsInGroups(env: Env) {
         message.message
       );
 
-      const toolsMessage = await handleAiToolCalls(env, config, message);
+      const toolsMessage = await handleAiToolCalls(env, config, [
+        {
+          role: message.senderFid === config.agent.fid ? 'assistant' : 'user',
+          content: message.message,
+        },
+      ]);
 
       // Generate a final AI response incorporating any tool call results
       const { response } = await env.AI.run(

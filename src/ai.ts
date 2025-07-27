@@ -1,4 +1,3 @@
-import type { DirectCastMessage } from '@nekofar/warpcast';
 import { filter, flatMap, join, map, pipe } from 'remeda';
 import type { getConfig } from './config';
 import { agentSystemMessage } from './prompts';
@@ -41,7 +40,7 @@ export async function generateContextText(
 export async function handleAiToolCalls(
   env: Env,
   config: ReturnType<typeof getConfig>,
-  message: DirectCastMessage
+  messages: { role: string; content: string }[]
 ) {
   const toolsMessage = [];
 
@@ -50,11 +49,7 @@ export async function handleAiToolCalls(
     config.agent.aiModels.functionCalling,
     {
       max_tokens: config.agent.maxTokens,
-      messages: [
-        { role: 'system', content: agentSystemMessage },
-        // The actual message content to respond to
-        { role: 'user', content: message.message },
-      ],
+      messages: [{ role: 'system', content: agentSystemMessage }, ...messages],
       tools: aiTools,
     },
     {
