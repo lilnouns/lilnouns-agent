@@ -4,7 +4,16 @@ import {
   sendDirectCastMessage,
 } from '@nekofar/warpcast';
 import { DateTime } from 'luxon';
-import { filter, flatMap, join, map, partition, pipe, takeLast } from 'remeda';
+import {
+  filter,
+  flatMap,
+  join,
+  last,
+  map,
+  partition,
+  pipe,
+  takeLast,
+} from 'remeda';
 import { generateContextText, handleAiToolCalls } from './ai';
 import { getLastFetchTime, setLastFetchTime } from './cache';
 import { getConfig } from './config';
@@ -70,6 +79,14 @@ async function handleNewOneToOneMessages(
       config,
       conversationId
     );
+
+    // If no messages found, skip this conversation or if the last message is from the agent
+    if (last(messages)?.senderFid === config.agent.fid) {
+      console.log(
+        `[DEBUG] Skipping conversation: ${conversationId} because it's already handled by the agent`
+      );
+      continue;
+    }
 
     // Filter messages to only include those since last retrieval
     const contextText = await generateContextText(
