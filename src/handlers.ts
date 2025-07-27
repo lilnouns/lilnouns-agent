@@ -145,7 +145,11 @@ async function handleNewOneToOneMessages(env: Env) {
   // Filter conversations to only include those with new messages since last retrieval
   const filteredConversations = pipe(
     conversations,
-    filter(c => (c.lastMessage?.serverTimestamp ?? 0) > lastFetchTime)
+    filter(
+      c =>
+        isNot(isTruthy)(c.isGroup) &&
+        Number(c.lastMessage?.serverTimestamp ?? 0n) > lastFetchTime
+    )
   );
   console.log(
     `[DEBUG] Filtered to ${filteredConversations.length} new conversations since last check`
