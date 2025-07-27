@@ -88,15 +88,14 @@ async function handleNewOneToOneMessages(
       continue;
     }
 
-    // Filter messages to only include those since last retrieval
+    // Filter messages to only include those since last retrieval for this conversation
+    // This ensures we only process new messages for generating context
     const contextText = await generateContextText(
       env,
       config,
       pipe(
-        pipe(
-          messages,
-          filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime)
-        ),
+        messages,
+        filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
         filter(m => m.senderFid !== config.agent.fid),
         flatMap(m => m.message),
         join('\n')
