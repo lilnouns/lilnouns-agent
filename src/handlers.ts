@@ -1,4 +1,4 @@
-import { sendDirectCastMessage } from '@nekofar/warpcast';
+import { sendDirectCast, sendDirectCastMessage } from '@nekofar/warpcast';
 import { DateTime } from 'luxon';
 import {
   filter,
@@ -256,13 +256,11 @@ async function handleNewOneToOneMessages(env: Env) {
 
     // Send the AI-generated response back to the conversation on Farcaster
     // Includes the original message ID for proper threading and mentions the original sender
-    const { error, data } = await sendDirectCastMessage({
-      auth: () => config.farcasterAuthToken,
+    const { error } = await sendDirectCast({
+      auth: () => config.farcasterApiKey,
       body: {
-        conversationId,
-        recipientFids: [Number(conversationId.split('-')[1])],
-        messageId: crypto.randomUUID().replace(/-/g, ''),
-        type: 'text',
+        recipientFid: Number(conversationId.split('-')[1]),
+        idempotencyKey: crypto.randomUUID().replace(/-/g, ''),
         message: messageContent,
       },
     });
@@ -270,9 +268,7 @@ async function handleNewOneToOneMessages(env: Env) {
     if (error) {
       console.log(`[DEBUG] Error sending message:`, error);
     } else {
-      console.log(
-        `[DEBUG] Message sent successfully, messageId: ${data?.result?.messageId}`
-      );
+      console.log(`[DEBUG] Message sent successfully.`);
     }
   }
 }
