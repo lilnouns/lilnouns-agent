@@ -6,32 +6,30 @@ export async function getLastFetchTime(
   config: ReturnType<typeof getConfig>
 ) {
   // Retrieve the last processed timestamp (or epoch if none)
-  const lastRetrievalKey = config.agent.cacheKeys.lastFetch;
+  const lastFetchKey = config.agent.cacheKeys.lastFetch;
   const fallbackDate = config.agent.defaults.fallbackDate;
-  const lastRetrievalDate =
-    (await env.AGENT_CACHE.get(lastRetrievalKey)) ?? fallbackDate;
-  const lastRetrievalTime = DateTime.fromISO(lastRetrievalDate)
-    .toUTC()
-    .toMillis();
+  const lastFetchDate =
+    (await env.AGENT_CACHE.get(lastFetchKey)) ?? fallbackDate;
+  const lastFetchMillis = DateTime.fromISO(lastFetchDate).toUTC().toMillis();
 
   console.log(
-    `[DEBUG] Last retrieval time: ${new Date(lastRetrievalTime).toISOString()}`
+    `[DEBUG] Last retrieval time: ${new Date(lastFetchMillis).toISOString()}`
   );
 
-  return lastRetrievalTime;
+  return lastFetchMillis;
 }
 
 export async function setLastFetchTime(
   env: Env,
   config: ReturnType<typeof getConfig>,
-  lastFetchTime?: string | null
+  lastFetchDate?: string | null
 ) {
-  const lastRetrievalKey = config.agent.cacheKeys.lastFetch;
+  const lastFetchKey = config.agent.cacheKeys.lastFetch;
   const fallbackDate = config.agent.defaults.fallbackDate;
 
   console.log(
-    `[DEBUG] Setting last fetch time to: ${lastFetchTime ?? fallbackDate}`
+    `[DEBUG] Setting last fetch time to: ${lastFetchDate ?? fallbackDate}`
   );
 
-  await env.AGENT_CACHE.put(lastRetrievalKey, lastFetchTime ?? fallbackDate);
+  await env.AGENT_CACHE.put(lastFetchKey, lastFetchDate ?? fallbackDate);
 }
