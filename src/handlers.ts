@@ -1,15 +1,10 @@
-import { sendDirectCast, sendDirectCastMessage } from '@nekofar/warpcast';
-import { DateTime } from 'luxon';
 import {
-  filter,
-  flatMap,
-  isNot,
-  isTruthy,
-  join,
-  map,
-  pipe,
-  takeLast,
-} from 'remeda';
+  type DirectCastConversation,
+  sendDirectCast,
+  sendDirectCastMessage,
+} from '@nekofar/warpcast';
+import { DateTime } from 'luxon';
+import { filter, flatMap, join, map, partition, pipe, takeLast } from 'remeda';
 import { generateContextText, handleAiToolCalls } from './ai';
 import { getLastFetchTime, setLastFetchTime } from './cache';
 import { getConfig } from './config';
@@ -21,6 +16,40 @@ import {
 } from './farcaster';
 import { agentSystemMessage } from './prompts';
 import { stripMarkdown } from './utils/text';
+
+export async function handleUnreadConversations(env: Env) {
+  console.log('[DEBUG] Starting handleUnreadConversations');
+
+  const config = getConfig(env);
+  const lastFetchTime = await getLastFetchTime(env, config);
+
+  console.log(
+    `[DEBUG] Last retrieval time: ${new Date(lastFetchTime).toISOString()}`
+  );
+
+  // Fetch all conversations with unread messages
+  const { conversations } = await fetchLilNounsUnreadConversations(config);
+
+  console.log(
+    `[DEBUG] Found ${conversations.length} conversations with unread messages`
+  );
+
+  // Process each conversation individually
+  const [groups, chats] = pipe(
+    conversations,
+    partition(c => c.isGroup)
+  );
+
+  console.log(
+    `[DEBUG] Processing ${groups.length} group conversations and ${chats.length} one-to-one conversations`
+  );
+
+  // Handle group conversations first
+  await handleNewOneToOneMessages(env, config, lastFetchTime, chats);
+
+  // Update the last fetch timestamp to current time for next iteration
+  await setLastFetchTime(env, config, DateTime.now().toISO());
+}
 
 async function handleNewMentionsInGroups(env: Env) {
   console.log('[DEBUG] Starting handleNewMentionsInGroups');
@@ -127,38 +156,16 @@ async function handleNewMentionsInGroups(env: Env) {
   }
 }
 
-async function handleNewOneToOneMessages(env: Env) {
+async function handleNewOneToOneMessages(
+  env: Env,
+  config: ReturnType<typeof getConfig>,
+  lastFetchTime: number,
+  conversations: DirectCastConversation[]
+) {
   console.log('[DEBUG] Starting handleNewOneToOneMessages');
 
-  const config = getConfig(env);
-  const lastFetchTime = await getLastFetchTime(env, config);
-
-  console.log(
-    `[DEBUG] Last retrieval time: ${new Date(lastFetchTime).toISOString()}`
-  );
-
-  // Fetch all conversations with unread messages
-  const { conversations } = await fetchLilNounsUnreadConversations(config);
-
-  console.log(
-    `[DEBUG] Found ${conversations.length} conversations with unread messages`
-  );
-
-  // Filter conversations to only include those with new messages since last retrieval
-  const filteredConversations = pipe(
-    conversations,
-    filter(
-      c =>
-        isNot(isTruthy)(c.isGroup) &&
-        Number(c.lastMessage?.serverTimestamp ?? 0n) > lastFetchTime
-    )
-  );
-  console.log(
-    `[DEBUG] Filtered to ${filteredConversations.length} new conversations since last check`
-  );
-
   // Process each conversation individually
-  for (const { conversationId } of filteredConversations) {
+  for (const { conversationId } of conversations) {
     console.log(`[DEBUG] Processing conversation: ${conversationId}`);
 
     // Fetch messages from this conversation
@@ -256,14 +263,6 @@ async function handleNewOneToOneMessages(env: Env) {
       console.log(`[DEBUG] Message sent successfully.`);
     }
   }
-}
 
-// Main function that processes all conversations with unread mentions
-export async function handleGroupConversations(env: Env) {
-  const config = getConfig(env);
-
-  // handleNewMentionsInGroups(env),
-  await handleNewOneToOneMessages(env);
-
-  await setLastFetchTime(env, config, DateTime.now().toISO());
+  console.log('[DEBUG] Completed handleNewOneToOneMessages');
 }
