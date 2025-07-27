@@ -96,7 +96,7 @@ export async function fetchLilNounsOneToOneConversations(
   const { data, error } = await getDirectCastInbox({
     auth: () => config.farcasterAuthToken,
     query: {
-      limit: 50, // Fetch up to 100 conversations
+      limit: 10, // Fetch up to 100 conversations
       category: 'default',
       filter: '1-1',
     },
