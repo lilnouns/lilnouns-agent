@@ -195,8 +195,8 @@ async function processToolCalls(
   return toolsMessage;
 }
 
-async function processGroupConversations(env: Env) {
-  console.log('[DEBUG] Starting processGroupConversations');
+async function handleNewMentionsInGroups(env: Env) {
+  console.log('[DEBUG] Starting handleNewMentionsInGroups');
 
   const config = getConfig(env);
 
@@ -319,6 +319,6 @@ async function processGroupConversations(env: Env) {
 }
 
 // Main function that processes all conversations with unread mentions
-export async function processConversations(env: Env) {
-  return Promise.all([processGroupConversations(env)]);
+export async function handleGroupConversations(env: Env) {
+  return Promise.all([handleNewMentionsInGroups(env)]);
 }
