@@ -1,6 +1,15 @@
 import { sendDirectCast, sendDirectCastMessage } from '@nekofar/warpcast';
 import { DateTime } from 'luxon';
-import { filter, flatMap, isNot, isTruthy, join, map, pipe } from 'remeda';
+import {
+  filter,
+  flatMap,
+  isNot,
+  isTruthy,
+  join,
+  map,
+  pipe,
+  takeLast,
+} from 'remeda';
 import { generateContextText, handleAiToolCalls } from './ai';
 import { getLastFetchTime, setLastFetchTime } from './cache';
 import { getConfig } from './config';
@@ -152,47 +161,41 @@ async function handleNewOneToOneMessages(env: Env) {
   for (const { conversationId } of filteredConversations) {
     console.log(`[DEBUG] Processing conversation: ${conversationId}`);
 
+    // Fetch messages from this conversation
     const { messages } = await fetchLilNounsConversationMessages(
       config,
       conversationId
     );
 
-    const filteredMessages = pipe(
-      messages,
-      filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime)
-    );
-
-    console.log(
-      `[DEBUG] Found ${filteredMessages.length} unprocessed messages in conversation`
-    );
-
-    // Generate context text from message content using AutoRAG search
+    // Filter messages to only include those since last retrieval
     const contextText = await generateContextText(
       env,
       config,
       pipe(
-        filteredMessages,
+        pipe(
+          messages,
+          filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime)
+        ),
         filter(m => m.senderFid !== config.agent.fid),
         flatMap(m => m.message),
         join('\n')
       )
     );
 
-    // Process AI tool calls with conversation messages formatted as assistant/user roles
-    const formattedMessages = pipe(
-      filteredMessages,
-      map(m => {
-        return {
-          role: m.senderFid === config.agent.fid ? 'assistant' : 'user',
-          content: m.message,
-        };
-      })
-    );
-
+    // Handle tool calls for the messages
     const toolsMessage = await handleAiToolCalls(
       env,
       config,
-      formattedMessages
+      pipe(
+        messages,
+        filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
+        map(m => {
+          return {
+            role: m.senderFid === config.agent.fid ? 'assistant' : 'user',
+            content: m.message,
+          };
+        })
+      )
     );
 
     // Generate a final AI response incorporating any tool call results
@@ -208,7 +211,16 @@ async function handleNewOneToOneMessages(env: Env) {
               : `${agentSystemMessage}\nRELEVANT CONTEXT:\n${contextText}`,
           },
           // The actual message content to respond to
-          ...formattedMessages,
+          ...pipe(
+            messages,
+            takeLast(10),
+            map(m => {
+              return {
+                role: m.senderFid === config.agent.fid ? 'assistant' : 'user',
+                content: m.message,
+              };
+            })
+          ),
           ...toolsMessage,
         ],
       },
