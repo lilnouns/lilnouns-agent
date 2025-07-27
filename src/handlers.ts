@@ -102,19 +102,18 @@ async function handleNewOneToOneMessages(
       )
     );
 
-    // Handle tool calls for the messages
+    // Filter messages to only include those since last and handle tool calls for the messages
+    // This ensures we only process new messages for generating AI response
     const toolsMessage = await handleAiToolCalls(
       env,
       config,
       pipe(
         messages,
         filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
-        map(m => {
-          return {
-            role: m.senderFid === config.agent.fid ? 'assistant' : 'user',
-            content: m.message,
-          };
-        })
+        map(m => ({
+          role: m.senderFid === config.agent.fid ? 'assistant' : 'user',
+          content: m.message,
+        }))
       )
     );
 
