@@ -9,7 +9,6 @@ import {
   last,
   map,
   pipe,
-  take,
 } from 'remeda';
 import { generateContextText, handleAiToolCalls } from './ai';
 import { getLastFetchTime, setLastFetchTime } from './cache';
@@ -185,8 +184,7 @@ async function handleNewOneToOneMessages(env: Env) {
 
     const filteredMessages = pipe(
       messages,
-      filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
-      take(10)
+      filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime)
     );
 
     console.log(
