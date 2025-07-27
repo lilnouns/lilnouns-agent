@@ -93,7 +93,7 @@ export async function fetchLilNounsOneToOneConversations(
   console.log('[DEBUG] Fetching Lil Nouns one-by-one conversations');
 
   // Fetch the inbox
-  const { data, response, error } = await getDirectCastInbox({
+  const { data, error } = await getDirectCastInbox({
     auth: () => config.farcasterAuthToken,
     query: {
       limit: 50, // Fetch up to 100 conversations
@@ -102,19 +102,19 @@ export async function fetchLilNounsOneToOneConversations(
     },
   });
 
+  if (error) {
+    console.error(`[DEBUG] Error fetching one-by-one conversations:`, error);
+    return { conversations: [] };
+  }
+
   const conversations = pipe(
     data?.result?.conversations ?? [],
-    filter(c => !c.isGroup && (c.viewerContext?.unreadMentionsCount ?? 0) > 0),
     sortBy(c => c.lastMessage?.serverTimestamp ?? 0)
   );
 
   console.log(
     `[DEBUG] Found ${conversations.length} one-by-one conversations with unread mentions`
   );
-
-  if (error) {
-    console.log(`[DEBUG] Error fetching one-by-one conversations:`, error);
-  }
 
   return { conversations };
 }
