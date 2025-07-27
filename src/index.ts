@@ -6,8 +6,6 @@ import {
 } from '@nekofar/warpcast';
 import { DateTime } from 'luxon';
 import { filter, flatMap, join, last, map, pipe, sortBy } from 'remeda';
-import { createConfig, http } from 'wagmi';
-import { mainnet } from 'wagmi/chains';
 import { getConfig } from './config';
 import { agentSystemMessage } from './prompts';
 import {
@@ -20,15 +18,6 @@ import {
   getCurrentIsoDateTimeUtc,
 } from './tools';
 import { stripMarkdown } from './utils/text';
-
-export function createWagmiConfig(config: ReturnType<typeof getConfig>) {
-  const wagmiConfig = createConfig({
-    chains: [mainnet],
-    transports: { [mainnet.id]: http(config.ethereumRpcUrl) },
-  });
-
-  return wagmiConfig;
-}
 
 // Retrieves group conversations with unread mentions for the Lil Nouns bot
 async function fetchUnreadMentionsInGroups(

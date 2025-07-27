@@ -10,7 +10,8 @@ import { map, pipe } from 'remeda';
 import { formatEther } from 'viem';
 import { getBlockNumber } from 'wagmi/actions';
 import type { getConfig } from './config';
-import { createWagmiConfig } from './index';
+
+import { createWagmiConfig } from './wagmi';
 
 /**
  * AI tools configuration for function calling
