@@ -166,7 +166,8 @@ async function handleNewOneToOneMessages(env: Env) {
 
     const filteredMessages = pipe(
       messages,
-      filter(m => (m.serverTimestamp ?? 0) > lastFetchTime)
+      filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
+      take(10)
     );
 
     console.log(
