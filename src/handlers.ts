@@ -43,117 +43,14 @@ export async function handleUnreadConversations(env: Env) {
     `[DEBUG] Processing ${groups.length} group conversations and ${chats.length} one-to-one conversations`
   );
 
-  // Handle group conversations first
-  await handleNewOneToOneMessages(env, config, lastFetchTime, chats);
+  // Handle new mentions in groups conversations
+  // await handleNewMentionsInGroups(env, config, lastFetchTime, groups);
 
-  // Handle new mentions in groups
-  await handleNewMentionsInGroups(env, config, lastFetchTime, groups);
+  // Handle new messages in one-to-one conversations
+  await handleNewOneToOneMessages(env, config, lastFetchTime, chats);
 
   // Update the last fetch timestamp to current time for next iteration
   await setLastFetchTime(env, config, DateTime.now().toISO());
-}
-
-async function handleNewMentionsInGroups(
-  env: Env,
-  config: ReturnType<typeof getConfig>,
-  lastFetchTime: number,
-  conversations: DirectCastConversation[]
-) {
-  console.log('[DEBUG] Starting handleNewMentionsInGroups');
-
-  // Process each conversation individually
-  for (const { conversationId } of conversations) {
-    console.log(`[DEBUG] Processing conversation: ${conversationId}`);
-
-    // Get Lil Nouns related messages from this conversation
-    const { messages } = await fetchLilNounsRelatedMessages(
-      config,
-      conversationId
-    );
-
-    // Filter messages to only include those since last retrieval
-    const filteredMessages = pipe(
-      messages,
-      filter(m => (m.serverTimestamp ?? 0) > lastFetchTime)
-    );
-
-    console.log(
-      `[DEBUG] Found ${filteredMessages.length} unprocessed messages in conversation`
-    );
-
-    // Process each relevant message
-    for (const message of filteredMessages) {
-      console.log(
-        `[DEBUG] Processing message: ${message.messageId} from sender: ${message.senderFid}`
-      );
-
-      const contextText = await generateContextText(
-        env,
-        config,
-        message.message
-      );
-
-      const toolsMessage = await handleAiToolCalls(env, config, [
-        {
-          role: message.senderFid === config.agent.fid ? 'assistant' : 'user',
-          content: message.message,
-        },
-      ]);
-
-      // Generate a final AI response incorporating any tool call results
-      const { response } = await env.AI.run(
-        config.agent.aiModels.functionCalling,
-        {
-          max_tokens: config.agent.maxTokens,
-          messages: [
-            {
-              role: 'system',
-              content: !contextText
-                ? agentSystemMessage
-                : `${agentSystemMessage}\nHere is some context from relevant documents:\n${contextText}`,
-            },
-            // The actual message content to respond to
-            { role: 'user', content: message.message },
-            ...toolsMessage,
-          ],
-        },
-        {
-          gateway: {
-            id: config.agent.gatewayId,
-            skipCache: false,
-            cacheTtl: config.agent.cacheTtl,
-          },
-        }
-      );
-
-      console.log(`[DEBUG] AI response: "${response}"`);
-
-      // Prepare plain text message without markdown
-      const messageContent = stripMarkdown(response ?? "I don't know");
-
-      // Send the AI-generated response back to the conversation on Farcaster
-      // Includes the original message ID for proper threading and mentions the original sender
-      const { error, data } = await sendDirectCastMessage({
-        auth: () => config.farcasterAuthToken,
-        body: {
-          conversationId,
-          recipientFids: [message.senderFid],
-          messageId: crypto.randomUUID().replace(/-/g, ''),
-          type: 'text',
-          message: messageContent,
-          inReplyToId: message.messageId,
-        },
-      });
-
-      if (error) {
-        console.log(`[DEBUG] Error sending message:`, error);
-      } else {
-        console.log(
-          `[DEBUG] Message sent successfully, messageId: ${data?.result?.messageId}`
-        );
-      }
-    }
-  }
 }
 
 async function handleNewOneToOneMessages(
@@ -265,4 +162,107 @@ async function handleNewOneToOneMessages(
   }
 
   console.log('[DEBUG] Completed handleNewOneToOneMessages');
+}
+
+async function handleNewMentionsInGroups(
+  env: Env,
+  config: ReturnType<typeof getConfig>,
+  lastFetchTime: number,
+  conversations: DirectCastConversation[]
+) {
+  console.log('[DEBUG] Starting handleNewMentionsInGroups');
+
+  // Process each conversation individually
+  for (const { conversationId } of conversations) {
+    console.log(`[DEBUG] Processing conversation: ${conversationId}`);
+
+    // Get Lil Nouns related messages from this conversation
+    const { messages } = await fetchLilNounsRelatedMessages(
+      config,
+      conversationId
+    );
+
+    // Filter messages to only include those since last retrieval
+    const filteredMessages = pipe(
+      messages,
+      filter(m => (m.serverTimestamp ?? 0) > lastFetchTime)
+    );
+
+    console.log(
+      `[DEBUG] Found ${filteredMessages.length} unprocessed messages in conversation`
+    );
+
+    // Process each relevant message
+    for (const message of filteredMessages) {
+      console.log(
+        `[DEBUG] Processing message: ${message.messageId} from sender: ${message.senderFid}`
+      );
+
+      const contextText = await generateContextText(
+        env,
+        config,
+        message.message
+      );
+
+      const toolsMessage = await handleAiToolCalls(env, config, [
+        {
+          role: message.senderFid === config.agent.fid ? 'assistant' : 'user',
+          content: message.message,
+        },
+      ]);
+
+      // Generate a final AI response incorporating any tool call results
+      const { response } = await env.AI.run(
+        config.agent.aiModels.functionCalling,
+        {
+          max_tokens: config.agent.maxTokens,
+          messages: [
+            {
+              role: 'system',
+              content: !contextText
+                ? agentSystemMessage
+                : `${agentSystemMessage}\nHere is some context from relevant documents:\n${contextText}`,
+            },
+            // The actual message content to respond to
+            { role: 'user', content: message.message },
+            ...toolsMessage,
+          ],
+        },
+        {
+          gateway: {
+            id: config.agent.gatewayId,
+            skipCache: false,
+            cacheTtl: config.agent.cacheTtl,
+          },
+        }
+      );
+
+      console.log(`[DEBUG] AI response: "${response}"`);
+
+      // Prepare plain text message without markdown
+      const messageContent = stripMarkdown(response ?? "I don't know");
+
+      // Send the AI-generated response back to the conversation on Farcaster
+      // Includes the original message ID for proper threading and mentions the original sender
+      const { error, data } = await sendDirectCastMessage({
+        auth: () => config.farcasterAuthToken,
+        body: {
+          conversationId,
+          recipientFids: [message.senderFid],
+          messageId: crypto.randomUUID().replace(/-/g, ''),
+          type: 'text',
+          message: messageContent,
+          inReplyToId: message.messageId,
+        },
+      });
+
+      if (error) {
+        console.log(`[DEBUG] Error sending message:`, error);
+      } else {
+        console.log(
+          `[DEBUG] Message sent successfully, messageId: ${data?.result?.messageId}`
+        );
+      }
+    }
+  }
 }
