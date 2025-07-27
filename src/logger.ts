@@ -34,22 +34,39 @@ export function createLogger(env: Env, options: pino.LoggerOptions = {}) {
     ...(config.env === 'development' && {
       browser: {
         asObject: true,
+        // Custom write function to format logs readably
         write: obj => {
-          console.log(
-            (log => {
-              // @ts-ignore
-              const { level, msg, time, ...rest } = log;
-              const timestamp = new Date(time).toISOString();
-              const levelName = pino.levels.labels[level].toUpperCase();
+          const formattedLog = (log => {
+            // @ts-ignore
+            const { level, msg, time, ...rest } = log;
+            const timestamp = new Date(time).toISOString();
+            const levelName = pino.levels.labels[level].toUpperCase();
 
-              // Format the additional data (if any)
-              const additionalData = Object.keys(rest).length
-                ? ` ${JSON.stringify(rest)}`
-                : '';
+            // Format the additional data (if any)
+            const additionalData = Object.keys(rest).length
+              ? ` ${JSON.stringify(rest)}`
+              : '';
 
-              return `${timestamp} [${levelName}]: ${msg}${additionalData}`;
-            })(obj)
-          );
+            return `${timestamp} [${levelName}]: ${msg}${additionalData}`;
+          })(obj);
+
+          // @ts-ignore
+          switch (obj.level) {
+            case pino.levels.values.error:
+              console.error(formattedLog);
+              break;
+            case pino.levels.values.warn:
+              console.warn(formattedLog);
+              break;
+            case pino.levels.values.info:
+              console.info(formattedLog);
+              break;
+            case pino.levels.values.debug:
+              console.debug(formattedLog);
+              break;
+            default:
+              console.log(formattedLog);
+          }
         },
       },
     }),
