@@ -13,7 +13,7 @@ export async function fetchUnreadMentionsInGroups(
 ) {
   console.log('[DEBUG] Starting fetchUnreadMentionsInGroups');
   // Fetch the DirectCast inbox using Farcaster authentication
-  const { data, error, response } = await getDirectCastInbox({
+  const { data, error } = await getDirectCastInbox({
     auth: () => config.farcasterAuthToken,
   });
 
@@ -44,13 +44,12 @@ export async function fetchLilNounsRelatedMessages(
     `[DEBUG] Retrieving messages for conversation: ${conversationId}`
   );
   // Get recent messages from the specified conversation
-  const { data, response, error } =
-    await getDirectCastConversationRecentMessages({
-      auth: () => config.farcasterAuthToken,
-      query: {
-        conversationId,
-      },
-    });
+  const { data, error } = await getDirectCastConversationRecentMessages({
+    auth: () => config.farcasterAuthToken,
+    query: {
+      conversationId,
+    },
+  });
 
   console.log(
     `[DEBUG] Retrieved ${data?.result?.messages?.length ?? 0} messages from conversation`
