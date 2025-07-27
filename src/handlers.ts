@@ -258,7 +258,7 @@ async function handleNewOneToOneMessages(env: Env) {
     const { error } = await sendDirectCast({
       auth: () => config.farcasterApiKey,
       body: {
-        recipientFid: Number(conversationId.split('-')[1]),
+        recipientFid: Number(conversationId.split('-')[0]),
         idempotencyKey: crypto.randomUUID().replace(/-/g, ''),
         message: messageContent,
       },
