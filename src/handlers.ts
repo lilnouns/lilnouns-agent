@@ -1,15 +1,6 @@
 import { sendDirectCast, sendDirectCastMessage } from '@nekofar/warpcast';
 import { DateTime } from 'luxon';
-import {
-  filter,
-  flatMap,
-  isNot,
-  isTruthy,
-  join,
-  last,
-  map,
-  pipe,
-} from 'remeda';
+import { filter, flatMap, isNot, isTruthy, join, map, pipe } from 'remeda';
 import { generateContextText, handleAiToolCalls } from './ai';
 import { getLastFetchTime, setLastFetchTime } from './cache';
 import { getConfig } from './config';
@@ -124,22 +115,6 @@ async function handleNewMentionsInGroups(env: Env) {
         );
       }
     }
-  }
-
-  const lastConversation = last(filteredConversations);
-
-  if (lastConversation?.lastMessage?.serverTimestamp) {
-    const formattedLastMessageDate = DateTime.fromMillis(
-      Number(lastConversation.lastMessage.serverTimestamp)
-    ).toISO();
-    console.log(
-      `[DEBUG] Updating last retrieval date to: ${formattedLastMessageDate}`
-    );
-    await setLastFetchTime(env, config, formattedLastMessageDate);
-  } else {
-    console.log(
-      `[DEBUG] No last conversation found, keeping last retrieval date: ${lastFetchTime}`
-    );
   }
 }
 
@@ -273,6 +248,10 @@ async function handleNewOneToOneMessages(env: Env) {
 
 // Main function that processes all conversations with unread mentions
 export async function handleGroupConversations(env: Env) {
+  const config = getConfig(env);
+
   // handleNewMentionsInGroups(env),
   await handleNewOneToOneMessages(env);
+
+  await setLastFetchTime(env, config, DateTime.now().toISO());
 }
