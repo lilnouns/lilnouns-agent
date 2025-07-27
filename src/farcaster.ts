@@ -2,6 +2,7 @@
 
 import {
   type DirectCastConversation,
+  type DirectCastMessage,
   getDirectCastConversationRecentMessages,
   getDirectCastInbox,
 } from '@nekofar/warpcast';
@@ -125,6 +126,8 @@ export async function fetchLilNounsConversationMessages(
 ) {
   console.log(`[DEBUG] Fetching messages for conversation: ${conversationId}`);
 
+  let messages: DirectCastMessage[] = [];
+
   // Get recent messages from the specified conversation
   const { data, error } = await getDirectCastConversationRecentMessages({
     auth: () => config.farcasterAuthToken,
@@ -135,10 +138,10 @@ export async function fetchLilNounsConversationMessages(
 
   if (error) {
     console.error(`[DEBUG] Error fetching conversation messages:`, error);
-    return { messages: [] };
+    return { messages };
   }
 
-  const messages = pipe(
+  messages = pipe(
     data?.result?.messages ?? [],
     sortBy(m => m.serverTimestamp)
   );
