@@ -8,20 +8,29 @@ import {
 } from '@nekofar/warpcast';
 import { filter, pipe, sortBy } from 'remeda';
 import type { getConfig } from './config';
+import { createLogger } from './logger';
 
 export async function fetchUnreadMentionsInGroups(
+  env: Env,
   config: ReturnType<typeof getConfig>
 ) {
-  console.log('[DEBUG] Starting fetchUnreadMentionsInGroups');
+  const logger = createLogger(env).child({
+    module: 'farcaster',
+    function: 'fetchUnreadMentionsInGroups',
+  });
+  logger.debug('Starting to fetch unread mentions in groups');
+
   // Fetch the DirectCast inbox using Farcaster authentication
   const { data, error } = await getDirectCastInbox({
     auth: () => config.farcasterAuthToken,
   });
 
-  console.log(
-    `[DEBUG] DirectCast inbox fetched. Found ${data?.result?.conversations?.length ?? 0} conversations`
-  );
-  if (error) console.log(`[DEBUG] DirectCast inbox error:`, error);
+  const conversationCount = data?.result?.conversations?.length ?? 0;
+  logger.debug({ conversationCount }, 'DirectCast inbox fetched');
+
+  if (error) {
+    logger.error({ error }, 'Error fetching DirectCast inbox');
+  }
 
   // Filter conversations to only include groups with unread mentions
   const conversations = pipe(
@@ -30,20 +39,27 @@ export async function fetchUnreadMentionsInGroups(
     sortBy(c => c.lastMessage?.serverTimestamp ?? 0)
   );
 
-  console.log(
-    `[DEBUG] Found ${conversations.length} group conversations with unread mentions`
+  logger.debug(
+    { count: conversations.length },
+    'Found group conversations with unread mentions'
   );
   return { conversations };
 }
 
 // Retrieves messages from a conversation that are related to Lil Nouns
 export async function fetchLilNounsRelatedMessages(
+  env: Env,
   config: ReturnType<typeof getConfig>,
   conversationId: string
 ) {
-  console.log(
-    `[DEBUG] Retrieving messages for conversation: ${conversationId}`
-  );
+  const logger = createLogger(env).child({
+    module: 'farcaster',
+    function: 'fetchLilNounsRelatedMessages',
+    conversationId,
+  });
+
+  logger.debug('Retrieving messages for conversation');
+
   // Get recent messages from the specified conversation
   const { data, error } = await getDirectCastConversationRecentMessages({
     auth: () => config.farcasterAuthToken,
@@ -52,10 +68,12 @@ export async function fetchLilNounsRelatedMessages(
     },
   });
 
-  console.log(
-    `[DEBUG] Retrieved ${data?.result?.messages?.length ?? 0} messages from conversation`
-  );
-  if (error) console.log(`[DEBUG] Error retrieving messages:`, error);
+  const messageCount = data?.result?.messages?.length ?? 0;
+  logger.debug({ messageCount }, 'Retrieved messages from conversation');
+
+  if (error) {
+    logger.error({ error }, 'Error retrieving conversation messages');
+  }
 
   const messages = pipe(
     data?.result?.messages ?? [],
@@ -82,18 +100,27 @@ export async function fetchLilNounsRelatedMessages(
     }),
     sortBy(m => m.serverTimestamp) // Sort messages by timestamp
   );
-  console.log(
-    `[DEBUG] Filtered to ${messages.length} Lil Nouns related messages`
+
+  logger.debug(
+    { filteredCount: messages.length },
+    'Filtered Lil Nouns related messages'
   );
 
   return { messages };
 }
 
 export async function fetchLilNounsConversationMessages(
+  env: Env,
   config: ReturnType<typeof getConfig>,
   conversationId: string
 ) {
-  console.log(`[DEBUG] Fetching messages for conversation: ${conversationId}`);
+  const logger = createLogger(env).child({
+    module: 'farcaster',
+    function: 'fetchLilNounsConversationMessages',
+    conversationId,
+  });
+
+  logger.debug('Fetching messages for conversation');
 
   let messages: DirectCastMessage[] = [];
 
@@ -106,7 +133,7 @@ export async function fetchLilNounsConversationMessages(
   });
 
   if (error) {
-    console.error(`[DEBUG] Error fetching conversation messages:`, error);
+    logger.error({ error }, 'Error fetching conversation messages');
     return { messages };
   }
 
@@ -115,16 +142,23 @@ export async function fetchLilNounsConversationMessages(
     sortBy(m => m.serverTimestamp)
   );
 
-  console.log(
-    `[DEBUG] Retrieved ${messages.length} messages from conversation`
+  logger.debug(
+    { messageCount: messages.length },
+    'Retrieved messages from conversation'
   );
   return { messages };
 }
 
 export async function fetchLilNounsUnreadConversations(
+  env: Env,
   config: ReturnType<typeof getConfig>
 ) {
-  console.log('[DEBUG] Fetching Lil Nouns unread conversations');
+  const logger = createLogger(env).child({
+    module: 'farcaster',
+    function: 'fetchLilNounsUnreadConversations',
+  });
+
+  logger.debug('Fetching Lil Nouns unread conversations');
 
   let conversations: DirectCastConversation[] = [];
 
@@ -139,7 +173,7 @@ export async function fetchLilNounsUnreadConversations(
   });
 
   if (error) {
-    console.error(`[DEBUG] Error fetching unread conversations:`, error);
+    logger.error({ error }, 'Error fetching unread conversations');
     return { conversations };
   }
 
@@ -148,7 +182,10 @@ export async function fetchLilNounsUnreadConversations(
     sortBy(c => c.lastMessage?.serverTimestamp ?? 0)
   );
 
-  console.log(`[DEBUG] Found ${conversations.length} unread conversations`);
+  logger.debug(
+    { conversationCount: conversations.length },
+    'Found unread conversations'
+  );
 
   return { conversations };
 }

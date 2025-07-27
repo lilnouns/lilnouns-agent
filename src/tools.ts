@@ -10,6 +10,7 @@ import { map, pipe } from 'remeda';
 import { formatEther } from 'viem';
 import { getBlockNumber } from 'wagmi/actions';
 import type { getConfig } from './config';
+import { createLogger } from './logger';
 
 import { createWagmiConfig } from './wagmi';
 
@@ -88,9 +89,15 @@ export const aiTools = [
  * @return {Promise<Object>} A promise that resolves to an object containing the current auction details.
  */
 export async function fetchCurrentAuction(
+  env: Env,
   config: ReturnType<typeof getConfig>
 ) {
-  console.log('[DEBUG] Fetching current auction');
+  const logger = createLogger(env).child({
+    module: 'tools',
+    function: 'fetchCurrentAuction',
+  });
+
+  logger.debug('Fetching current auction');
 
   const wagmiConfig = createWagmiConfig(config);
   const [nounId, seed, svg, price, hash, blockNumber] =
@@ -102,10 +109,7 @@ export async function fetchCurrentAuction(
     link: `https://lilnouns.auction`,
   };
 
-  console.log(
-    '[DEBUG] Retrieved current auction: ',
-    JSON.stringify({ auction })
-  );
+  logger.debug({ auction }, 'Retrieved current auction');
 
   return { auction };
 }
@@ -120,12 +124,20 @@ export async function fetchCurrentAuction(
  * @return {Promise<{ proposals: Array<{ id: string, title: string, createdTimestamp: string }> }>} A promise that resolves to an object containing an array of active proposals. Each proposal includes its id, title, and formatted creation timestamp.
  */
 export async function fetchActiveProposals(
+  env: Env,
   config: ReturnType<typeof getConfig>
 ) {
-  console.log('[DEBUG] Fetching active proposals');
+  const logger = createLogger(env).child({
+    module: 'tools',
+    function: 'fetchActiveProposals',
+  });
+
+  logger.debug('Fetching active proposals');
+
   const wagmiConfig = createWagmiConfig(config);
   const blockNumber = await getBlockNumber(wagmiConfig); // Get current Ethereum block number
-  console.log(`[DEBUG] Current Ethereum block number: ${blockNumber}`);
+
+  logger.debug({ blockNumber }, 'Current Ethereum block number');
 
   // Query the Lil Nouns subgraph for active proposals using current block number
   const { proposals } = await request<Query>(
@@ -161,9 +173,11 @@ export async function fetchActiveProposals(
     }))
   );
 
-  console.log(
-    `[DEBUG] Retrieved ${formattedProposals.length} active proposals`
+  logger.debug(
+    { proposalCount: formattedProposals.length },
+    'Retrieved active proposals'
   );
+
   return { proposals: formattedProposals };
 }
 
@@ -174,15 +188,23 @@ export async function fetchActiveProposals(
  * @return {Promise<Object>} An object containing the total supply of tokens as a number.
  */
 export async function fetchLilNounsTokenTotalSupply(
+  env: Env,
   config: ReturnType<typeof getConfig>
 ) {
-  console.log('[DEBUG] Fetching token total supply');
+  const logger = createLogger(env).child({
+    module: 'tools',
+    function: 'fetchLilNounsTokenTotalSupply',
+  });
+
+  logger.debug('Fetching token total supply');
 
   const wagmiConfig = createWagmiConfig(config);
   const totalSupply = await readLilNounsTokenTotalSupply(wagmiConfig, {});
 
-  console.log(
-    `[DEBUG] Retrieved token total supply: ${formatEther(totalSupply)}`
+  const formattedSupply = formatEther(totalSupply);
+  logger.debug(
+    { totalSupply: formattedSupply },
+    'Retrieved token total supply'
   );
 
   return { totalSupply: Number(totalSupply) };
@@ -196,10 +218,17 @@ export async function fetchLilNounsTokenTotalSupply(
  * @return {Promise<object>} A promise that resolves to an object containing the proposal's summary, including id, title, description, status, and a formatted `createdTimestamp`.
  */
 export async function fetchLilNounsProposalSummary(
+  env: Env,
   config: ReturnType<typeof getConfig>,
   proposalId: number
 ) {
-  console.log('[DEBUG] Fetching proposal summary');
+  const logger = createLogger(env).child({
+    module: 'tools',
+    function: 'fetchLilNounsProposalSummary',
+    proposalId,
+  });
+
+  logger.debug('Fetching proposal summary');
 
   const { proposal } = await request<Query>(
     config.lilNounsSubgraphUrl,
@@ -216,15 +245,12 @@ export async function fetchLilNounsProposalSummary(
     { proposalId }
   );
 
-  console.log(
-    `[DEBUG] Retrieved proposal summary: ${JSON.stringify({
-      proposal: {
-        title: proposal?.title,
-      },
-    })}`
+  logger.debug(
+    { proposalTitle: proposal?.title },
+    'Retrieved proposal summary'
   );
 
-  const state = await fetchLilNounsProposalsState(config, proposalId);
+  const state = await fetchLilNounsProposalsState(env, config, proposalId);
 
   return {
     proposal: {
@@ -270,10 +296,17 @@ export enum ProposalState {
  * @return {Promise<Object>} An object containing the proposal state as both numeric value and string representation.
  */
 export async function fetchLilNounsProposalsState(
+  env: Env,
   config: ReturnType<typeof getConfig>,
   proposalId: number
 ) {
-  console.log('[DEBUG] Fetching proposal state for ID:', proposalId);
+  const logger = createLogger(env).child({
+    module: 'tools',
+    function: 'fetchLilNounsProposalsState',
+    proposalId,
+  });
+
+  logger.debug('Fetching proposal state');
 
   const wagmiConfig = createWagmiConfig(config);
   const state = await readLilNounsGovernorState(wagmiConfig, {
@@ -283,7 +316,7 @@ export async function fetchLilNounsProposalsState(
   const stateNumber = Number(state);
   const stateText = ProposalState[stateNumber];
 
-  console.log('[DEBUG] Retrieved proposal state:', stateNumber, stateText);
+  logger.debug({ stateNumber, stateText }, 'Retrieved proposal state');
 
   return {
     state: stateNumber,

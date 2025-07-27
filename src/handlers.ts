@@ -27,14 +27,17 @@ import { agentSystemMessage } from './prompts';
 import { stripMarkdown } from './utils/text';
 
 export async function handleUnreadConversations(env: Env) {
-  const logger = createLogger(env);
-  logger.debug('Starting handleUnreadConversations');
+  const logger = createLogger(env).child({
+    module: 'handlers',
+    function: 'handleUnreadConversations',
+  });
+  logger.debug('Starting to process unread conversations');
 
   const config = getConfig(env);
   const lastFetchTime = await getLastFetchTime(env, config);
 
   // Fetch all conversations with unread messages
-  const { conversations } = await fetchLilNounsUnreadConversations(config);
+  const { conversations } = await fetchLilNounsUnreadConversations(env, config);
 
   // Process each conversation individually
   const [groups, chats] = pipe(
@@ -43,7 +46,8 @@ export async function handleUnreadConversations(env: Env) {
   );
 
   logger.debug(
-    `Processing ${groups.length} group conversations and ${chats.length} one-to-one conversations`
+    { groupCount: groups.length, chatCount: chats.length },
+    'Processing group and one-to-one conversations'
   );
 
   // Handle new mentions in groups conversations
@@ -62,23 +66,30 @@ async function handleNewOneToOneMessages(
   lastFetchTime: number,
   conversations: DirectCastConversation[]
 ) {
-  const logger = createLogger(env);
-  logger.debug('Starting handleNewOneToOneMessages');
+  const logger = createLogger(env).child({
+    module: 'handlers',
+    function: 'handleNewOneToOneMessages',
+    conversationCount: conversations.length,
+  });
+  logger.debug('Starting to process one-to-one messages');
 
   // Process each conversation individually
   for (const { conversationId } of conversations) {
-    logger.debug(`Processing conversation: ${conversationId}`);
+    const conversationLogger = logger.child({ conversationId });
+    conversationLogger.debug('Processing conversation');
 
     // Fetch messages from this conversation
     const { messages } = await fetchLilNounsConversationMessages(
+      env,
       config,
       conversationId
     );
 
     // If no messages found, skip this conversation or if the last message is from the agent
     if (last(messages)?.senderFid === config.agent.fid) {
-      logger.debug(
-        `Skipping conversation: ${conversationId} because it's already handled by the agent`
+      conversationLogger.debug(
+        { agentFid: config.agent.fid },
+        'Skipping conversation already handled by the agent'
       );
       continue;
     }
@@ -147,12 +158,15 @@ async function handleNewOneToOneMessages(
       }
     );
 
-    logger.debug(`AI response: "${response}"`);
+    conversationLogger.debug({ response }, 'AI generated response');
 
     // Prepare a plain text message without markdown
     const messageContent = stripMarkdown(response ?? "I don't know");
 
-    logger.debug(`Sending message: "${messageContent}"`);
+    conversationLogger.debug(
+      { messageContent },
+      'Sending message to conversation'
+    );
 
     // Send the AI-generated response back to the conversation on Farcaster
     const { error } = await sendDirectCast({
@@ -165,13 +179,16 @@ async function handleNewOneToOneMessages(
     });
 
     if (error) {
-      logger.error({ error }, `Error sending message`);
+      conversationLogger.error(
+        { error },
+        'Error sending message to conversation'
+      );
     } else {
-      logger.debug(`Message sent successfully.`);
+      conversationLogger.info('Message sent successfully');
     }
   }
 
-  logger.debug('Completed handleNewOneToOneMessages');
+  logger.info('Completed processing one-to-one messages');
 }
 
 async function handleNewMentionsInGroups(
@@ -180,15 +197,21 @@ async function handleNewMentionsInGroups(
   lastFetchTime: number,
   conversations: DirectCastConversation[]
 ) {
-  const logger = createLogger(env);
-  logger.debug('Starting handleNewMentionsInGroups');
+  const logger = createLogger(env).child({
+    module: 'handlers',
+    function: 'handleNewMentionsInGroups',
+    conversationCount: conversations.length,
+  });
+  logger.debug('Starting to process mentions in groups');
 
   // Process each conversation individually
   for (const { conversationId } of conversations) {
-    logger.debug(`Processing conversation: ${conversationId}`);
+    const conversationLogger = logger.child({ conversationId });
+    conversationLogger.debug('Processing group conversation');
 
     // Get Lil Nouns related messages from this conversation
     const { messages } = await fetchLilNounsRelatedMessages(
+      env,
       config,
       conversationId
     );
@@ -199,15 +222,18 @@ async function handleNewMentionsInGroups(
       filter(m => (m.serverTimestamp ?? 0) > lastFetchTime)
     );
 
-    logger.debug(
-      `Found ${filteredMessages.length} unprocessed messages in conversation`
+    conversationLogger.debug(
+      { messageCount: filteredMessages.length },
+      'Found unprocessed messages in conversation'
     );
 
     // Process each relevant message
     for (const message of filteredMessages) {
-      logger.debug(
-        `Processing message: ${message.messageId} from sender: ${message.senderFid}`
-      );
+      const messageLogger = conversationLogger.child({
+        messageId: message.messageId,
+        senderFid: message.senderFid,
+      });
+      messageLogger.debug('Processing message');
 
       const contextText = await generateContextText(
         env,
@@ -248,7 +274,7 @@ async function handleNewMentionsInGroups(
         }
       );
 
-      logger.debug(`AI response: "${response}"`);
+      messageLogger.debug({ response }, 'AI generated response');
 
       // Prepare plain text message without markdown
       const messageContent = stripMarkdown(response ?? "I don't know");
@@ -268,10 +294,11 @@ async function handleNewMentionsInGroups(
       });
 
       if (error) {
-        logger.error({ error }, `Error sending message`);
+        messageLogger.error({ error }, 'Error sending message to group');
       } else {
-        logger.debug(
-          `Message sent successfully, messageId: ${data?.result?.messageId}`
+        messageLogger.info(
+          { responseMessageId: data?.result?.messageId },
+          'Message sent successfully'
         );
       }
     }

@@ -1,5 +1,6 @@
 import { filter, flatMap, join, map, pipe } from 'remeda';
 import type { getConfig } from './config';
+import { createLogger } from './logger';
 import { agentSystemMessage } from './prompts';
 import {
   aiTools,
@@ -16,6 +17,12 @@ export async function generateContextText(
   config: ReturnType<typeof getConfig>,
   query: string
 ) {
+  const logger = createLogger(env).child({
+    module: 'ai',
+    function: 'generateContextText',
+  });
+
+  logger.debug({ query }, 'Searching for relevant context using AutoRAG');
   // Search for relevant context using AutoRAG based on the user's directCastMessage content
   const answer = await env.AI.autorag(config.agent.autoRagId).search({
     query,
@@ -34,6 +41,11 @@ export async function generateContextText(
     join('\n')
   );
 
+  logger.debug(
+    { contentLength: contextContent.length },
+    'Generated context content'
+  );
+
   return contextContent;
 }
 
@@ -42,6 +54,10 @@ export async function handleAiToolCalls(
   config: ReturnType<typeof getConfig>,
   messages: { role: string; content: string }[]
 ) {
+  const logger = createLogger(env).child({
+    module: 'ai',
+    function: 'handleAiToolCalls',
+  });
   const toolsMessage = [];
 
   // Generate AI response using Cloudflare AI with a specific system prompt
@@ -61,9 +77,9 @@ export async function handleAiToolCalls(
     }
   );
 
-  console.log(
-    `[DEBUG] AI tool_calls:`,
-    tool_calls ? JSON.stringify(tool_calls) : 'none'
+  logger.debug(
+    { tool_calls: tool_calls ? JSON.stringify(tool_calls) : 'none' },
+    'AI tool calls result'
   );
 
   // Handle any tool calls made by the AI (e.g., fetching proposals)
@@ -73,7 +89,7 @@ export async function handleAiToolCalls(
     for (const toolCall of tool_calls) {
       switch (toolCall.name) {
         case 'fetchLilNounsActiveProposals': {
-          const { proposals } = await fetchActiveProposals(config);
+          const { proposals } = await fetchActiveProposals(env, config);
           toolsMessage.push({
             role: 'tool',
             name: toolCall.name,
@@ -82,7 +98,7 @@ export async function handleAiToolCalls(
           break;
         }
         case 'fetchLilNounsCurrentAuction': {
-          const { auction } = await fetchCurrentAuction(config);
+          const { auction } = await fetchCurrentAuction(env, config);
           toolsMessage.push({
             role: 'tool',
             name: toolCall.name,
@@ -91,7 +107,10 @@ export async function handleAiToolCalls(
           break;
         }
         case 'fetchLilNounsTokenTotalSupply': {
-          const { totalSupply } = await fetchLilNounsTokenTotalSupply(config);
+          const { totalSupply } = await fetchLilNounsTokenTotalSupply(
+            env,
+            config
+          );
           toolsMessage.push({
             role: 'tool',
             name: toolCall.name,
@@ -114,12 +133,13 @@ export async function handleAiToolCalls(
           };
 
           if (!proposalId) {
-            console.log(
-              `[DEBUG] fetchLilNounsProposalSummary tool call missing required argument: proposalId`
+            logger.debug(
+              'fetchLilNounsProposalSummary tool call missing required argument: proposalId'
             );
           }
 
           const { proposal } = await fetchLilNounsProposalSummary(
+            env,
             config,
             proposalId ?? 0
           );
@@ -154,12 +174,13 @@ export async function handleAiToolCalls(
           };
 
           if (!proposalId) {
-            console.log(
-              `[DEBUG] fetchProposalsState tool call missing required argument: proposalId`
+            logger.debug(
+              'fetchProposalsState tool call missing required argument: proposalId'
             );
           }
 
           const result = await fetchLilNounsProposalsState(
+            env,
             config,
             proposalId ?? 0
           );
@@ -172,7 +193,7 @@ export async function handleAiToolCalls(
           break;
         }
         default:
-          console.log(`[DEBUG] Unhandled tool call: ${toolCall.name}`);
+          logger.debug({ toolName: toolCall.name }, 'Unhandled tool call');
           break;
       }
     }
