@@ -15,11 +15,11 @@ import {
 export async function generateContextText(
   env: Env,
   config: ReturnType<typeof getConfig>,
-  directCastMessage: DirectCastMessage
+  query: string
 ) {
   // Search for relevant context using AutoRAG based on the user's directCastMessage content
   const answer = await env.AI.autorag(config.agent.autoRagId).search({
-    query: directCastMessage.message,
+    query,
     rewrite_query: false,
     max_num_results: 2,
     ranking_options: {

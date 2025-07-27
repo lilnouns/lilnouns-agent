@@ -49,7 +49,11 @@ async function handleNewMentionsInGroups(env: Env) {
       console.log(
         `[DEBUG] Processing message: ${message.messageId} from sender: ${message.senderFid}`
       );
-      const contextText = await generateContextText(env, config, message);
+      const contextText = await generateContextText(
+        env,
+        config,
+        message.message
+      );
 
       const toolsMessage = await handleAiToolCalls(env, config, message);
 
