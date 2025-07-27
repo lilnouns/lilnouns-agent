@@ -85,39 +85,8 @@ export async function fetchLilNounsRelatedMessages(
   console.log(
     `[DEBUG] Filtered to ${messages.length} Lil Nouns related messages`
   );
-  return messages;
-}
 
-export async function fetchLilNounsOneToOneConversations(
-  config: ReturnType<typeof getConfig>
-) {
-  console.log('[DEBUG] Fetching Lil Nouns one-by-one conversations');
-
-  // Fetch the inbox
-  const { data, error } = await getDirectCastInbox({
-    auth: () => config.farcasterAuthToken,
-    query: {
-      limit: 10, // Fetch up to 100 conversations
-      category: 'default',
-      filter: '1-1',
-    },
-  });
-
-  if (error) {
-    console.error(`[DEBUG] Error fetching one-by-one conversations:`, error);
-    return { conversations: [] };
-  }
-
-  const conversations = pipe(
-    data?.result?.conversations ?? [],
-    sortBy(c => c.lastMessage?.serverTimestamp ?? 0)
-  );
-
-  console.log(
-    `[DEBUG] Found ${conversations.length} one-by-one conversations with unread mentions`
-  );
-
-  return { conversations };
+  return { messages };
 }
 
 export async function fetchLilNounsConversationMessages(

@@ -12,7 +12,6 @@ import {
   fetchLilNounsConversationMessages,
   fetchLilNounsRelatedMessages,
   fetchLilNounsUnreadConversations,
-  fetchUnreadMentionsInGroups,
 } from './farcaster';
 import { agentSystemMessage } from './prompts';
 import { stripMarkdown } from './utils/text';
@@ -47,37 +46,37 @@ export async function handleUnreadConversations(env: Env) {
   // Handle group conversations first
   await handleNewOneToOneMessages(env, config, lastFetchTime, chats);
 
+  // Handle new mentions in groups
+  await handleNewMentionsInGroups(env, config, lastFetchTime, groups);
+
   // Update the last fetch timestamp to current time for next iteration
   await setLastFetchTime(env, config, DateTime.now().toISO());
 }
 
-async function handleNewMentionsInGroups(env: Env) {
+async function handleNewMentionsInGroups(
+  env: Env,
+  config: ReturnType<typeof getConfig>,
+  lastFetchTime: number,
+  conversations: DirectCastConversation[]
+) {
   console.log('[DEBUG] Starting handleNewMentionsInGroups');
 
-  const config = getConfig(env);
-  const lastFetchTime = await getLastFetchTime(env, config);
-
-  const { conversations } = await fetchUnreadMentionsInGroups(config); // Get conversations to process
-  console.log(
-    `[DEBUG] Last retrieval time: ${new Date(lastFetchTime).toISOString()}`
-  );
-  const filteredConversations = pipe(
-    conversations,
-    filter(c => (c.lastMessage?.serverTimestamp ?? 0) > lastFetchTime)
-  );
-  console.log(
-    `[DEBUG] Filtered to ${filteredConversations.length} new conversations since last check`
-  );
-
   // Process each conversation individually
-  for (const { conversationId } of filteredConversations) {
+  for (const { conversationId } of conversations) {
     console.log(`[DEBUG] Processing conversation: ${conversationId}`);
+
     // Get Lil Nouns related messages from this conversation
-    const messages = await fetchLilNounsRelatedMessages(config, conversationId);
+    const { messages } = await fetchLilNounsRelatedMessages(
+      config,
+      conversationId
+    );
+
+    // Filter messages to only include those since last retrieval
     const filteredMessages = pipe(
       messages,
       filter(m => (m.serverTimestamp ?? 0) > lastFetchTime)
     );
+
     console.log(
       `[DEBUG] Found ${filteredMessages.length} unprocessed messages in conversation`
     );
@@ -87,6 +86,7 @@ async function handleNewMentionsInGroups(env: Env) {
       console.log(
         `[DEBUG] Processing message: ${message.messageId} from sender: ${message.senderFid}`
       );
+
       const contextText = await generateContextText(
         env,
         config,
