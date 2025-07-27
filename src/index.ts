@@ -195,9 +195,8 @@ async function processToolCalls(
   return toolsMessage;
 }
 
-// Main function that processes all conversations with unread mentions
-async function processConversations(env: Env) {
-  console.log('[DEBUG] Starting processConversations');
+async function processGroupConversations(env: Env) {
+  console.log('[DEBUG] Starting processGroupConversations');
 
   const config = getConfig(env);
 
@@ -317,6 +316,11 @@ async function processConversations(env: Env) {
       `[DEBUG] No last conversation found, keeping last retrieval date: ${lastRetrievalDate}`
     );
   }
+}
+
+// Main function that processes all conversations with unread mentions
+async function processConversations(env: Env) {
+  return Promise.all([processGroupConversations(env)]);
 }
 
 export default {
