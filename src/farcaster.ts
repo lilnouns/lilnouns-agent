@@ -86,3 +86,35 @@ export async function fetchLilNounsRelatedMessages(
   );
   return messages;
 }
+
+export async function fetchLilNounsOneToOneConversations(
+  config: ReturnType<typeof getConfig>
+) {
+  console.log('[DEBUG] Fetching Lil Nouns one-by-one conversations');
+
+  // Fetch the inbox
+  const { data, response, error } = await getDirectCastInbox({
+    auth: () => config.farcasterAuthToken,
+    query: {
+      limit: 50, // Fetch up to 100 conversations
+      category: 'default',
+      filter: '1-1',
+    },
+  });
+
+  const conversations = pipe(
+    data?.result?.conversations ?? [],
+    filter(c => !c.isGroup && (c.viewerContext?.unreadMentionsCount ?? 0) > 0),
+    sortBy(c => c.lastMessage?.serverTimestamp ?? 0)
+  );
+
+  console.log(
+    `[DEBUG] Found ${conversations.length} one-by-one conversations with unread mentions`
+  );
+
+  if (error) {
+    console.log(`[DEBUG] Error fetching one-by-one conversations:`, error);
+  }
+
+  return { conversations };
+}
