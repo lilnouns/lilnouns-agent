@@ -22,11 +22,13 @@ import {
   fetchLilNounsRelatedMessages,
   fetchLilNounsUnreadConversations,
 } from './farcaster';
+import { createLogger } from './logger';
 import { agentSystemMessage } from './prompts';
 import { stripMarkdown } from './utils/text';
 
 export async function handleUnreadConversations(env: Env) {
-  console.log('[DEBUG] Starting handleUnreadConversations');
+  const logger = createLogger(env);
+  logger.debug('Starting handleUnreadConversations');
 
   const config = getConfig(env);
   const lastFetchTime = await getLastFetchTime(env, config);
@@ -40,8 +42,8 @@ export async function handleUnreadConversations(env: Env) {
     partition(c => c.isGroup)
   );
 
-  console.log(
-    `[DEBUG] Processing ${groups.length} group conversations and ${chats.length} one-to-one conversations`
+  logger.debug(
+    `Processing ${groups.length} group conversations and ${chats.length} one-to-one conversations`
   );
 
   // Handle new mentions in groups conversations
@@ -60,11 +62,12 @@ async function handleNewOneToOneMessages(
   lastFetchTime: number,
   conversations: DirectCastConversation[]
 ) {
-  console.log('[DEBUG] Starting handleNewOneToOneMessages');
+  const logger = createLogger(env);
+  logger.debug('Starting handleNewOneToOneMessages');
 
   // Process each conversation individually
   for (const { conversationId } of conversations) {
-    console.log(`[DEBUG] Processing conversation: ${conversationId}`);
+    logger.debug(`Processing conversation: ${conversationId}`);
 
     // Fetch messages from this conversation
     const { messages } = await fetchLilNounsConversationMessages(
@@ -74,8 +77,8 @@ async function handleNewOneToOneMessages(
 
     // If no messages found, skip this conversation or if the last message is from the agent
     if (last(messages)?.senderFid === config.agent.fid) {
-      console.log(
-        `[DEBUG] Skipping conversation: ${conversationId} because it's already handled by the agent`
+      logger.debug(
+        `Skipping conversation: ${conversationId} because it's already handled by the agent`
       );
       continue;
     }
@@ -144,12 +147,12 @@ async function handleNewOneToOneMessages(
       }
     );
 
-    console.log(`[DEBUG] AI response: "${response}"`);
+    logger.debug(`AI response: "${response}"`);
 
     // Prepare a plain text message without markdown
     const messageContent = stripMarkdown(response ?? "I don't know");
 
-    console.log(`[DEBUG] Sending message: "${messageContent}"`);
+    logger.debug(`Sending message: "${messageContent}"`);
 
     // Send the AI-generated response back to the conversation on Farcaster
     const { error } = await sendDirectCast({
@@ -162,13 +165,13 @@ async function handleNewOneToOneMessages(
     });
 
     if (error) {
-      console.log(`[DEBUG] Error sending message:`, error);
+      logger.error({ error }, `Error sending message`);
     } else {
-      console.log(`[DEBUG] Message sent successfully.`);
+      logger.debug(`Message sent successfully.`);
     }
   }
 
-  console.log('[DEBUG] Completed handleNewOneToOneMessages');
+  logger.debug('Completed handleNewOneToOneMessages');
 }
 
 async function handleNewMentionsInGroups(
@@ -177,11 +180,12 @@ async function handleNewMentionsInGroups(
   lastFetchTime: number,
   conversations: DirectCastConversation[]
 ) {
-  console.log('[DEBUG] Starting handleNewMentionsInGroups');
+  const logger = createLogger(env);
+  logger.debug('Starting handleNewMentionsInGroups');
 
   // Process each conversation individually
   for (const { conversationId } of conversations) {
-    console.log(`[DEBUG] Processing conversation: ${conversationId}`);
+    logger.debug(`Processing conversation: ${conversationId}`);
 
     // Get Lil Nouns related messages from this conversation
     const { messages } = await fetchLilNounsRelatedMessages(
@@ -195,14 +199,14 @@ async function handleNewMentionsInGroups(
       filter(m => (m.serverTimestamp ?? 0) > lastFetchTime)
     );
 
-    console.log(
-      `[DEBUG] Found ${filteredMessages.length} unprocessed messages in conversation`
+    logger.debug(
+      `Found ${filteredMessages.length} unprocessed messages in conversation`
     );
 
     // Process each relevant message
     for (const message of filteredMessages) {
-      console.log(
-        `[DEBUG] Processing message: ${message.messageId} from sender: ${message.senderFid}`
+      logger.debug(
+        `Processing message: ${message.messageId} from sender: ${message.senderFid}`
       );
 
       const contextText = await generateContextText(
@@ -244,7 +248,7 @@ async function handleNewMentionsInGroups(
         }
       );
 
-      console.log(`[DEBUG] AI response: "${response}"`);
+      logger.debug(`AI response: "${response}"`);
 
       // Prepare plain text message without markdown
       const messageContent = stripMarkdown(response ?? "I don't know");
@@ -264,10 +268,10 @@ async function handleNewMentionsInGroups(
       });
 
       if (error) {
-        console.log(`[DEBUG] Error sending message:`, error);
+        logger.error({ error }, `Error sending message`);
       } else {
-        console.log(
-          `[DEBUG] Message sent successfully, messageId: ${data?.result?.messageId}`
+        logger.debug(
+          `Message sent successfully, messageId: ${data?.result?.messageId}`
         );
       }
     }
