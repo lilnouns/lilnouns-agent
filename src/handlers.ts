@@ -1,13 +1,13 @@
 import { sendDirectCastMessage } from '@nekofar/warpcast';
 import { DateTime } from 'luxon';
-import { filter, last, pipe } from 'remeda';
+import { filter, isNot, isTruthy, last, pipe, take } from 'remeda';
 import { generateContextText, handleAiToolCalls } from './ai';
 import { getLastFetchTime, setLastFetchTime } from './cache';
 import { getConfig } from './config';
 import {
   fetchLilNounsConversationMessages,
-  fetchLilNounsOneToOneConversations,
   fetchLilNounsRelatedMessages,
+  fetchLilNounsUnreadConversations,
   fetchUnreadMentionsInGroups,
 } from './farcaster';
 import { agentSystemMessage } from './prompts';
@@ -136,7 +136,11 @@ async function handleNewOneToOneMessages(env: Env) {
   );
 
   // Fetch all conversations with unread messages
-  const { conversations } = await fetchLilNounsOneToOneConversations(config);
+  const { conversations } = await fetchLilNounsUnreadConversations(config);
+
+  console.log(
+    `[DEBUG] Found ${conversations.length} conversations with unread messages`
+  );
 
   // Filter conversations to only include those with new messages since last retrieval
   const filteredConversations = pipe(
