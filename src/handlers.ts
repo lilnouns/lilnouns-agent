@@ -11,6 +11,7 @@ import {
   first,
   flatMap,
   groupByProp,
+  isEmpty,
   join,
   last,
   map,
@@ -157,7 +158,7 @@ async function handleNewOneToOneMessages(
         messages: [
           {
             role: 'system',
-            content: !contextText
+            content: isEmpty(contextText)
               ? agentSystemMessage
               : `${agentSystemMessage}\nRELEVANT CONTEXT:\n${contextText}`,
           },
@@ -321,7 +322,7 @@ async function handleNewMentionsInGroups(
             messages: [
               {
                 role: 'system',
-                content: !contextText
+                content: isEmpty(contextText)
                   ? agentSystemMessage
                   : `${agentSystemMessage}\nHere is some context from relevant documents:\n${contextText}`,
               },
