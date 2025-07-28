@@ -15,8 +15,8 @@ importers:
         specifier: 1.0.0-alpha.13
         version: 1.0.0-alpha.13(@tanstack/react-query@5.83.0(react@19.1.0))(@wagmi/core@2.18.0(@tanstack/query-core@5.83.0)(react@19.1.0)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.33.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.0.10)))(graphql-request@7.2.0(graphql@16.11.0))(graphql-tag@2.12.6(graphql@16.11.0))(graphql@16.11.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)(viem@2.33.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.0.10))(wagmi@2.16.0(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.33.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.0.10))(zod@4.0.10))
       '@nekofar/warpcast':
-        specifier: 2.0.0-alpha.39
-        version: 2.0.0-alpha.39(zod@4.0.10)
+        specifier: 2.0.0-alpha.40
+        version: 2.0.0-alpha.40(zod@4.0.10)
       agents:
         specifier: 0.0.109
         version: 0.0.109(@cloudflare/workers-types@4.20250726.0)(react@19.1.0)
@@ -841,8 +841,8 @@ packages:
       viem: ^2.27.2
       wagmi: ^2.14.16
 
-  '@nekofar/warpcast@2.0.0-alpha.39':
-    resolution: {integrity: sha512-vdhz/K9Vc8rZq49lPpobqBSaQFQFJCth6yuGO70DfkOtO1eltAStlKjxdNtslGTc5+xZyIEamsFYBRPUVlqzRA==}
+  '@nekofar/warpcast@2.0.0-alpha.40':
+    resolution: {integrity: sha512-3WkvIdvnNAIQK1NtDXZfCtgxRgjaRMcEEqwmt+3lxhaENETW3pF5bZAbrkHcHG/5SieFG2Oasi52A7oi97XsjA==}
     peerDependencies:
       zod: ^4.0.10
 
@@ -3849,7 +3849,7 @@ snapshots:
       viem: 2.33.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.0.10)
       wagmi: 2.16.0(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.33.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.0.10))(zod@4.0.10)
 
-  '@nekofar/warpcast@2.0.0-alpha.39(zod@4.0.10)':
+  '@nekofar/warpcast@2.0.0-alpha.40(zod@4.0.10)':
     dependencies:
       zod: 4.0.10
 
