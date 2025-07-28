@@ -147,12 +147,10 @@ async function handleNewOneToOneMessages(
           ...pipe(
             messages,
             takeLast(10),
-            map(m => {
-              return {
-                role: m.senderFid === config.agent.fid ? 'assistant' : 'user',
-                content: m.message,
-              };
-            })
+            map(m => ({
+              role: m.senderFid === config.agent.fid ? 'assistant' : 'user',
+              content: m.message,
+            }))
           ),
           ...toolsMessage,
         ],
