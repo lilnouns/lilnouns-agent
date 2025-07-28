@@ -188,7 +188,7 @@ async function handleNewOneToOneMessages(
             first<Participant[]>
           )?.fid ?? 0
         ),
-        idempotencyKey: crypto.randomUUID().replace(/-/g, ''),
+        idempotencyKey: crypto.randomUUID(),
         message: messageContent,
       },
     });
