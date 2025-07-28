@@ -230,19 +230,13 @@ async function handleNewMentionsInGroups(
       conversationId
     );
 
-    // Filter messages to only include those since last retrieval
-    const filteredMessages = pipe(
-      messages,
-      filter(m => (m.serverTimestamp ?? 0) > lastFetchTime)
-    );
-
     conversationLogger.debug(
-      { messageCount: filteredMessages.length },
+      { messageCount: messages.length },
       'Found unprocessed messages in conversation'
     );
 
     // Process each relevant message
-    for (const message of filteredMessages) {
+    for (const message of messages) {
       const messageLogger = conversationLogger.child({
         messageId: message.messageId,
         senderFid: message.senderFid,
