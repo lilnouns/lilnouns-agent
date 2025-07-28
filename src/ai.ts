@@ -22,6 +22,12 @@ export async function generateContextText(
     function: 'generateContextText',
   });
 
+  // If a query is empty, return empty context immediately
+  if (!query || query.trim() === '') {
+    logger.debug('Empty query provided, skipping context generation');
+    return '';
+  }
+
   logger.debug({ query }, 'Searching for relevant context using AutoRAG');
   // Search for relevant context using AutoRAG based on the user's directCastMessage content
   const answer = await env.AI.autorag(config.agent.autoRagId).search({
