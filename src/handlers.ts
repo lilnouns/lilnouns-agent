@@ -1,11 +1,13 @@
 import {
   type DirectCastConversation,
+  type User as Participant,
   sendDirectCast,
   sendDirectCastMessage,
 } from '@nekofar/warpcast';
 import { DateTime } from 'luxon';
 import {
   filter,
+  first,
   flatMap,
   join,
   last,
@@ -19,6 +21,7 @@ import { getLastFetchTime, setLastFetchTime } from './cache';
 import { getConfig } from './config';
 import {
   fetchLilNounsConversationMessages,
+  fetchLilNounsConversationParticipants,
   fetchLilNounsRelatedMessages,
   fetchLilNounsUnreadConversations,
 } from './farcaster';
@@ -80,6 +83,12 @@ async function handleNewOneToOneMessages(
 
     // Fetch messages from this conversation
     const { messages } = await fetchLilNounsConversationMessages(
+      env,
+      config,
+      conversationId
+    );
+
+    const { participants } = await fetchLilNounsConversationParticipants(
       env,
       config,
       conversationId
@@ -172,7 +181,13 @@ async function handleNewOneToOneMessages(
     const { error } = await sendDirectCast({
       auth: () => config.farcasterApiKey,
       body: {
-        recipientFid: Number(conversationId.split('-')[0]),
+        recipientFid: Number(
+          pipe(
+            participants,
+            filter(p => p.fid !== config.agent.fid),
+            first<Participant[]>
+          )?.fid ?? 0
+        ),
         idempotencyKey: crypto.randomUUID().replace(/-/g, ''),
         message: messageContent,
       },
