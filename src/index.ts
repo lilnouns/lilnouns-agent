@@ -1,5 +1,5 @@
-import { handleUnreadConversations } from './handlers';
-import { createLogger } from './logger';
+import { handleUnreadConversations } from '@/handlers/scheduled';
+import { createLogger } from '@/lib/logger';
 
 export default {
   // The scheduled handler runs at intervals defined in wrangler.jsonc triggers

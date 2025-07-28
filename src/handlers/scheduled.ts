@@ -19,17 +19,17 @@ import {
   pipe,
   takeLast,
 } from 'remeda';
-import { generateContextText, handleAiToolCalls } from './ai';
-import { getLastFetchTime, setLastFetchTime } from './cache';
-import { getConfig } from './config';
+import { generateContextText, handleAiToolCalls } from '@/lib/ai';
+import { getLastFetchTime, setLastFetchTime } from '@/lib/cache';
+import { getConfig } from '@/lib/config';
+import { createLogger } from '@/lib/logger';
+import { agentSystemMessage } from '@/lib/prompts';
 import {
   fetchLilNounsConversationMessages,
   fetchLilNounsConversationParticipants,
   fetchLilNounsUnreadConversations,
-} from './farcaster';
-import { createLogger } from './logger';
-import { agentSystemMessage } from './prompts';
-import { stripMarkdown } from './utils/text';
+} from '@/services/farcaster';
+import { stripMarkdown } from '@/utils/text';
 
 /**
  * Handles processing of unread conversations, segregating them into group and one-to-one chats,

@@ -1,14 +1,3 @@
-/**
- * @file Farcaster Integration Module
- *
- * This module provides functionality to interact with the Farcaster social network
- * through the Warpcast API. It specifically focuses on retrieving and managing
- * conversations related to the Lil Nouns bot.
- *
- * The module handles fetching unread conversations, retrieving conversation messages,
- * and getting conversation participants.
- */
-
 import {
   type DirectCastConversation,
   type DirectCastMessage,
@@ -17,8 +6,8 @@ import {
   getDirectCastInbox,
 } from '@nekofar/warpcast';
 import { filter, pipe, sortBy } from 'remeda';
-import type { getConfig } from './config';
-import { createLogger } from './logger';
+import type { getConfig } from '@/lib/config';
+import { createLogger } from '@/lib/logger';
 
 /**
  * Fetches unread conversations for the Lil Nouns bot from Farcaster.
