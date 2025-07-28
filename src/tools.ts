@@ -144,24 +144,25 @@ export async function fetchActiveProposals(
   logger.debug({ blockNumber }, 'Current Ethereum block number');
 
   // Query the Lil Nouns subgraph for active proposals using the current block number
+  const getProposalsQuery = gql`
+    query GetProposals($blockNumber: BigInt!) {
+      proposals(
+        orderBy: createdBlock,
+        orderDirection: desc,
+        where: {
+          status_not_in: [CANCELLED],
+          endBlock_gte: $blockNumber
+        }
+      ) {
+        id
+        title
+        createdTimestamp
+      }
+    }
+  `;
   const { proposals } = await request<Query>(
     config.lilNounsSubgraphUrl,
-    gql`
-      query GetProposals($blockNumber: BigInt!) {
-        proposals(
-          orderBy: createdBlock,
-          orderDirection: desc,
-          where: {
-            status_not_in: [CANCELLED],
-            endBlock_gte: $blockNumber
-          }
-        ) {
-          id
-          title
-          createdTimestamp
-        }
-      }
-    `,
+    getProposalsQuery,
     { blockNumber: blockNumber.toString() }
   );
 
