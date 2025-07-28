@@ -14,7 +14,7 @@ function formatLogForConsole(log: any): string {
 
   // Format the additional data (if any)
   const additionalData = Object.keys(rest).length
-    ? ` ${JSON.stringify(rest)}`
+    ? ` ${JSON.stringify(rest, null, 2)}`
     : '';
 
   return `${timestamp} [${levelName}]: ${msg}${additionalData}`;
