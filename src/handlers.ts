@@ -322,83 +322,74 @@ async function handleNewMentionsInGroups(
         )
       );
 
-      // Process each relevant message
-      for (const message of senderMessages) {
-        const messageLogger = conversationLogger.child({
-          messageId: message.messageId,
-          senderFid: message.senderFid,
-        });
-        messageLogger.debug('Processing message');
-
-        // Generate a final AI response incorporating any tool call results
-        const { response } = await env.AI.run(
-          config.agent.aiModels.functionCalling,
-          {
-            max_tokens: config.agent.maxTokens,
-            messages: [
-              {
-                role: 'system',
-                content: isEmpty(contextText)
-                  ? agentSystemMessage
-                  : `${agentSystemMessage}\nHere is some context from relevant documents:\n${contextText}`,
-              },
-              // The actual message content to respond to
-              ...pipe(
-                senderMessages,
-                filter(m => m.senderFid === Number(senderFid)),
-                filter(
-                  m =>
-                    (m.mentions?.some(
-                      mention => mention.user.fid === config.agent.fid
-                    ) ??
-                      false) ||
-                    m.inReplyTo?.senderFid === config.agent.fid
-                ),
-                takeLast(10),
-                map(m => ({
-                  role: 'user',
-                  content: m.message,
-                }))
-              ),
-              ...toolsMessage,
-            ],
-          },
-          {
-            gateway: {
-              id: config.agent.gatewayId,
-              skipCache: false,
-              cacheTtl: config.agent.cacheTtl,
+      // Generate a final AI response incorporating any tool call results
+      const { response } = await env.AI.run(
+        config.agent.aiModels.functionCalling,
+        {
+          max_tokens: config.agent.maxTokens,
+          messages: [
+            {
+              role: 'system',
+              content: isEmpty(contextText)
+                ? agentSystemMessage
+                : `${agentSystemMessage}\nHere is some context from relevant documents:\n${contextText}`,
             },
-          }
-        );
-
-        messageLogger.debug({ response }, 'AI generated response');
-
-        // Prepare a plain text message without Markdown
-        const messageContent = stripMarkdown(response ?? "I don't know");
-
-        // Send the AI-generated response back to the conversation on Farcaster
-        // Includes the original message ID for proper threading and mentions the original sender
-        const { error, data } = await sendDirectCastMessage({
-          auth: () => config.farcasterAuthToken,
-          body: {
-            conversationId,
-            recipientFids: [Number(senderFid)],
-            messageId: crypto.randomUUID().replace(/-/g, ''),
-            type: 'text',
-            message: messageContent,
-            inReplyToId: message.messageId,
+            // The actual message content to respond to
+            ...pipe(
+              senderMessages,
+              filter(m => m.senderFid === Number(senderFid)),
+              filter(
+                m =>
+                  (m.mentions?.some(
+                    mention => mention.user.fid === config.agent.fid
+                  ) ??
+                    false) ||
+                  m.inReplyTo?.senderFid === config.agent.fid
+              ),
+              takeLast(10),
+              map(m => ({
+                role: 'user',
+                content: m.message,
+              }))
+            ),
+            ...toolsMessage,
+          ],
+        },
+        {
+          gateway: {
+            id: config.agent.gatewayId,
+            skipCache: false,
+            cacheTtl: config.agent.cacheTtl,
           },
-        });
-
-        if (error) {
-          messageLogger.error({ error }, 'Error sending message to group');
-        } else {
-          messageLogger.info(
-            { responseMessageId: data?.result?.messageId },
-            'Message sent successfully'
-          );
         }
+      );
+
+      messageLogger.debug({ response }, 'AI generated response');
+
+      // Prepare a plain text message without Markdown
+      const messageContent = stripMarkdown(response ?? "I don't know");
+
+      // Send the AI-generated response back to the conversation on Farcaster
+      // Includes the original message ID for proper threading and mentions the original sender
+      const { error, data } = await sendDirectCastMessage({
+        auth: () => config.farcasterAuthToken,
+        body: {
+          conversationId,
+          recipientFids: [Number(senderFid)],
+          messageId: crypto.randomUUID().replace(/-/g, ''),
+          type: 'text',
+          message: messageContent,
+          inReplyToId: last(senderMessages).messageId,
+        },
+      });
+
+      if (error) {
+        messageLogger.error({ error }, 'Error sending message to group');
+      } else {
+        messageLogger.info(
+          { responseMessageId: data?.result?.messageId },
+          'Message sent successfully'
+        );
       }
     }
   }
