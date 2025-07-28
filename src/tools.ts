@@ -11,8 +11,21 @@ import { formatEther } from 'viem';
 import { getBlockNumber } from 'wagmi/actions';
 import type { getConfig } from './config';
 import { createLogger } from './logger';
-
 import { createWagmiConfig } from './wagmi';
+
+// Add BigInt serialization support to JSON.stringify
+declare global {
+  interface BigInt {
+    toJSON(): string;
+  }
+}
+
+// Only add the method if it doesn't exist yet
+if (typeof BigInt.prototype.toJSON !== 'function') {
+  BigInt.prototype.toJSON = function () {
+    return this.toString();
+  };
+}
 
 /**
  * AI tools configuration for function calling
