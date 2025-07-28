@@ -140,6 +140,7 @@ export async function fetchLilNounsConversationMessages(
 
   messages = pipe(
     data?.result?.messages ?? [],
+    filter(m => m.type === 'text'),
     sortBy(m => m.serverTimestamp)
   );
 
