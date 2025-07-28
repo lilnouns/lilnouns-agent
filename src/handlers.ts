@@ -168,7 +168,7 @@ async function handleNewOneToOneMessages(
 
     conversationLogger.debug({ response }, 'AI generated response');
 
-    // Prepare a plain text message without markdown
+    // Prepare a plain text message without Markdown
     const messageContent = stripMarkdown(response ?? "I don't know");
 
     conversationLogger.debug(
@@ -324,7 +324,7 @@ async function handleNewMentionsInGroups(
 
         messageLogger.debug({ response }, 'AI generated response');
 
-        // Prepare plain text message without markdown
+        // Prepare a plain text message without Markdown
         const messageContent = stripMarkdown(response ?? "I don't know");
 
         // Send the AI-generated response back to the conversation on Farcaster
