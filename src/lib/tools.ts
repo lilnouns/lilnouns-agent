@@ -98,8 +98,8 @@ export const aiTools = [
 /**
  * Fetches the current auction data for Lil Nouns.
  *
- * @param env
- * @param {Object} config - The configuration object returned by the `getConfig` function.
+ * @param {Env} env - The environment object containing configuration and dependencies.
+ * @param {ReturnType<typeof getConfig>} config - The configuration object returned by the `getConfig` function.
  * @return {Promise<Object>} A promise that resolves to an object containing the current auction details.
  */
 export async function fetchCurrentAuction(
@@ -136,7 +136,7 @@ export async function fetchCurrentAuction(
  * Active proposals are those that have not been canceled and have an ending block greater than or equal to the current block.
  * The retrieved proposals include their id, title, and creation timestamp, with timestamps formatted to ISO format.
  *
- * @param env
+ * @param {Env} env - The environment object containing configuration and dependencies.
  * @param {ReturnType<typeof getConfig>} config - The configuration object used to initialize the Wagmi settings and subgraph query.
  * @return {Promise<{ proposals: Array<{ id: string, title: string, createdTimestamp: string }> }>} A promise that resolves to an object containing an array of active proposals. Each proposal includes its id, title, and formatted creation timestamp.
  */
@@ -202,8 +202,8 @@ export async function fetchActiveProposals(
 /**
  * Fetches the total supply of Lil Nouns tokens.
  *
- * @param env
- * @param {Object} config - The configuration object obtained from the getConfig function.
+ * @param {Env} env - The environment object containing configuration and dependencies.
+ * @param {ReturnType<typeof getConfig>} config - The configuration object obtained from the getConfig function.
  * @return {Promise<Object>} An object containing the total supply of tokens as a number.
  */
 export async function fetchLilNounsTokenTotalSupply(

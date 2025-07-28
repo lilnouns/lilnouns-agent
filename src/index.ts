@@ -2,7 +2,7 @@ import { handleUnreadConversations } from '@/handlers/scheduled';
 import { createLogger } from '@/lib/logger';
 
 export default {
-  // The scheduled handler runs at intervals defined in wrangler.jsonc triggers
+  // The scheduled handler runs at intervals defined in wrangler.toml triggers
   async scheduled(_event, env, _ctx): Promise<void> {
     const logger = createLogger(env).child({
       module: 'index',

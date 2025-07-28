@@ -12,6 +12,17 @@ import {
   getCurrentIsoDateTimeUtc,
 } from './tools';
 
+/**
+ * Generates contextual text using AutoRAG based on a user query.
+ *
+ * Searches for relevant context using Cloudflare's AutoRAG service and returns
+ * formatted text content that can be used to enhance AI responses.
+ *
+ * @param {Env} env - The environment object containing configuration and dependencies.
+ * @param {ReturnType<typeof getConfig>} config - The configuration object with AutoRAG settings.
+ * @param {string} query - The user query to search for relevant context.
+ * @return {Promise<string>} A promise that resolves to the generated context text.
+ */
 export async function generateContextText(
   env: Env,
   config: ReturnType<typeof getConfig>,
@@ -55,6 +66,18 @@ export async function generateContextText(
   return contextContent;
 }
 
+/**
+ * Handles AI tool calls by processing messages and executing requested functions.
+ *
+ * Sends messages to the AI model with available tools, processes any tool calls
+ * made by the AI (such as fetching proposals, auctions, or token data), and
+ * returns the results formatted for further AI processing.
+ *
+ * @param {Env} env - The environment object containing configuration and dependencies.
+ * @param {ReturnType<typeof getConfig>} config - The configuration object with AI model settings.
+ * @param {Array<{role: string, content: string}>} messages - Array of conversation messages to process.
+ * @return {Promise<Array<{role: string, name?: string, content: string}>>} A promise that resolves to an array of tool response messages.
+ */
 export async function handleAiToolCalls(
   env: Env,
   config: ReturnType<typeof getConfig>,
