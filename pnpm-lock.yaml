@@ -39,8 +39,8 @@ importers:
         specifier: 13.0.0
         version: 13.0.0
       remeda:
-        specifier: 2.26.1
-        version: 2.26.1
+        specifier: 2.27.0
+        version: 2.27.0
       type-fest:
         specifier: 4.41.0
         version: 4.41.0
@@ -2340,8 +2340,8 @@ packages:
   preact@10.24.2:
     resolution: {integrity: sha512-1cSoF0aCC8uaARATfrlz4VCBqE8LwZwRfLgkxJOQwAlQt6ayTmi0D9OF7nXid1POI5SZidFuG9CnlXbDfLqY/Q==}
 
-  preact@10.26.9:
-    resolution: {integrity: sha512-SSjF9vcnF27mJK1XyFMNJzFd5u3pQiATFqoaDy03XuN00u4ziveVVEGt5RKJrDR8MHE/wJo9Nnad56RLzS2RMA==}
+  preact@10.27.0:
+    resolution: {integrity: sha512-/DTYoB6mwwgPytiqQTh/7SFRL98ZdiD8Sk8zIUVOxtwq4oWcwrcd1uno9fE/zZmUaUrFNYzbH14CPebOz9tZQw==}
 
   printable-characters@1.0.42:
     resolution: {integrity: sha512-dKp+C4iXWK4vVYZmYSd0KBH5F/h1HoZRsbJ82AVKRO3PEo8L4lBS/vLwhVtpwwuYcoIsVY+1JYKR268yn480uQ==}
@@ -2424,8 +2424,8 @@ packages:
     resolution: {integrity: sha512-57frrGM/OCTLqLOAh0mhVA9VBMHd+9U7Zb2THMGdBUoZVOtGbJzjxsYGDJ3A9AYYCP4hn6y1TVbaOfzWtm5GFg==}
     engines: {node: '>= 12.13.0'}
 
-  remeda@2.26.1:
-    resolution: {integrity: sha512-hpiLfhUwkJhiMS3Z7dRrygcRdkMRZASw5qUdNdi33x1/Y9y/J5q5TyLyf8btDoVLIcsg/4fzPdaGXDTbnl+ixw==}
+  remeda@2.27.0:
+    resolution: {integrity: sha512-KWG2qPzprmCGUoWSUSEJPLhczFRXlxh5YJTvQWZoN4hw5EG+nVase5lCVwEsidA7jDV2K5nibr9jpK4eNaOMdw==}
 
   require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
@@ -3356,7 +3356,7 @@ snapshots:
       eth-json-rpc-filters: 6.0.1
       eventemitter3: 5.0.1
       keccak: 3.0.4
-      preact: 10.26.9
+      preact: 10.27.0
       sha.js: 2.4.12
     transitivePeerDependencies:
       - supports-color
@@ -6102,7 +6102,7 @@ snapshots:
 
   preact@10.24.2: {}
 
-  preact@10.26.9: {}
+  preact@10.27.0: {}
 
   printable-characters@1.0.42: {}
 
@@ -6186,7 +6186,7 @@ snapshots:
 
   real-require@0.2.0: {}
 
-  remeda@2.26.1:
+  remeda@2.27.0:
     dependencies:
       type-fest: 4.41.0
 
