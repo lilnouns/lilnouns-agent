@@ -15,8 +15,8 @@ importers:
         specifier: 1.0.0-alpha.13
         version: 1.0.0-alpha.13(@tanstack/react-query@5.83.0(react@19.1.0))(@wagmi/core@2.18.0(@tanstack/query-core@5.83.0)(react@19.1.0)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.33.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.0.10)))(graphql-request@7.2.0(graphql@16.11.0))(graphql-tag@2.12.6(graphql@16.11.0))(graphql@16.11.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)(viem@2.33.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.0.10))(wagmi@2.16.0(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.33.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.0.10))(zod@4.0.10))
       '@nekofar/warpcast':
-        specifier: 2.0.0-alpha.38
-        version: 2.0.0-alpha.38
+        specifier: 2.0.0-alpha.39
+        version: 2.0.0-alpha.39(zod@4.0.10)
       agents:
         specifier: 0.0.109
         version: 0.0.109(@cloudflare/workers-types@4.20250726.0)(react@19.1.0)
@@ -841,8 +841,10 @@ packages:
       viem: ^2.27.2
       wagmi: ^2.14.16
 
-  '@nekofar/warpcast@2.0.0-alpha.38':
-    resolution: {integrity: sha512-hPaMb7GIIfTnhcjgqHDHbDgjzW7q0l6RunzsZv+3liMzBleNAThpiOS4+zsmA0wt21u+QopPXwMbRF+QirtY6Q==}
+  '@nekofar/warpcast@2.0.0-alpha.39':
+    resolution: {integrity: sha512-vdhz/K9Vc8rZq49lPpobqBSaQFQFJCth6yuGO70DfkOtO1eltAStlKjxdNtslGTc5+xZyIEamsFYBRPUVlqzRA==}
+    peerDependencies:
+      zod: ^4.0.10
 
   '@noble/ciphers@1.2.1':
     resolution: {integrity: sha512-rONPWMC7PeExE077uLE4oqWrZ1IvAfz3oH9LibVAcVCopJiA9R62uavnbEzdkVmJYI6M6Zgkbeb07+tWjlq2XA==}
@@ -3847,7 +3849,9 @@ snapshots:
       viem: 2.33.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.0.10)
       wagmi: 2.16.0(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.33.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.0.10))(zod@4.0.10)
 
-  '@nekofar/warpcast@2.0.0-alpha.38': {}
+  '@nekofar/warpcast@2.0.0-alpha.39(zod@4.0.10)':
+    dependencies:
+      zod: 4.0.10
 
   '@noble/ciphers@1.2.1': {}
 
@@ -5925,7 +5929,7 @@ snapshots:
   ox@0.6.7(typescript@5.8.3)(zod@4.0.10):
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.8.1
+      '@noble/curves': 1.9.4
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
       '@scure/bip39': 1.6.0
