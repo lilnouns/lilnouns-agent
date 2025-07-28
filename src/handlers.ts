@@ -287,6 +287,15 @@ async function handleNewMentionsInGroups(
           messages,
           filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
           filter(m => m.senderFid === Number(senderFid)),
+          filter(
+            m =>
+              ((m.hasMention &&
+                m.mentions?.some(
+                  mention => mention.user.fid === config.agent.fid
+                )) ??
+                false) ||
+              m.inReplyTo?.senderFid === config.agent.fid
+          ),
           flatMap(m => m.message),
           join('\n')
         )
@@ -299,6 +308,15 @@ async function handleNewMentionsInGroups(
           messages,
           filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
           filter(m => m.senderFid === Number(senderFid)),
+          filter(
+            m =>
+              ((m.hasMention &&
+                m.mentions?.some(
+                  mention => mention.user.fid === config.agent.fid
+                )) ??
+                false) ||
+              m.inReplyTo?.senderFid === config.agent.fid
+          ),
           map(m => ({
             role: 'user',
             content: m.message,
@@ -330,6 +348,15 @@ async function handleNewMentionsInGroups(
               ...pipe(
                 messages,
                 filter(m => m.senderFid === Number(senderFid)),
+                filter(
+                  m =>
+                    ((m.hasMention &&
+                      m.mentions?.some(
+                        mention => mention.user.fid === config.agent.fid
+                      )) ??
+                      false) ||
+                    m.inReplyTo?.senderFid === config.agent.fid
+                ),
                 takeLast(10),
                 map(m => ({
                   role: 'user',
