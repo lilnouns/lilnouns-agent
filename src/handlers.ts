@@ -30,6 +30,13 @@ import { createLogger } from './logger';
 import { agentSystemMessage } from './prompts';
 import { stripMarkdown } from './utils/text';
 
+/**
+ * Handles processing of unread conversations, segregating them into group and one-to-one chats,
+ * and processing messages accordingly. Updates the last fetch timestamp after successful processing.
+ *
+ * @param {Env} env - The environment object containing configuration and dependencies.
+ * @return {Promise<void>} Resolves when all unread conversations have been processed successfully.
+ */
 export async function handleUnreadConversations(env: Env) {
   const logger = createLogger(env).child({
     module: 'handlers',
@@ -64,6 +71,15 @@ export async function handleUnreadConversations(env: Env) {
   await setLastFetchTime(env, config, DateTime.now().toISO());
 }
 
+/**
+ * Processes new one-to-one messages from a list of conversations, generating AI responses and sending them back.
+ *
+ * @param {Env} env - The environment configuration required to process the messages.
+ * @param {Object} config - The result of the `getConfig` function providing configuration for the agent and services.
+ * @param {number} lastFetchTime - The timestamp of the last message fetch, used to filter new messages.
+ * @param {DirectCastConversation[]} conversations - An array of one-to-one conversations containing messages to process.
+ * @return {Promise<void>} A Promise that resolves when all conversations are processed, or rejects on errors.
+ */
 async function handleNewOneToOneMessages(
   env: Env,
   config: ReturnType<typeof getConfig>,
@@ -205,6 +221,15 @@ async function handleNewOneToOneMessages(
   logger.info('Completed processing one-to-one messages');
 }
 
+/**
+ * Handles mentions in group conversations by processing messages from users and generating appropriate AI responses.
+ *
+ * @param {Env} env - The environment object containing application-specific utilities and configurations.
+ * @param {object} config - The application configuration object, derived from the `getConfig` function, including agent credentials and settings.
+ * @param {number} lastFetchTime - The timestamp representing the last time messages were fetched and processed.
+ * @param {DirectCastConversation[]} conversations - A list of conversations to process, including message and sender details.
+ * @return {Promise<void>} A promise indicating the completion of mentions processing in group conversations.
+ */
 async function handleNewMentionsInGroups(
   env: Env,
   config: ReturnType<typeof getConfig>,
