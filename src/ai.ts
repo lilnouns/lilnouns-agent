@@ -66,143 +66,168 @@ export async function handleAiToolCalls(
   });
   const toolsMessage = [];
 
-  // Generate AI response using Cloudflare AI with a specific system prompt
-  const { tool_calls } = await env.AI.run(
-    config.agent.aiModels.functionCalling,
-    {
-      max_tokens: config.agent.maxTokens,
-      messages: [{ role: 'system', content: agentSystemMessage }, ...messages],
-      tools: aiTools,
-    },
-    {
-      gateway: {
-        id: config.agent.gatewayId,
-        skipCache: false,
-        cacheTtl: config.agent.cacheTtl,
+  try {
+    // Generate AI response using Cloudflare AI with a specific system prompt
+    const { tool_calls } = await env.AI.run(
+      config.agent.aiModels.functionCalling,
+      {
+        max_tokens: config.agent.maxTokens,
+        messages: [
+          { role: 'system', content: agentSystemMessage },
+          ...messages,
+        ],
+        tools: aiTools,
       },
-    }
-  );
+      {
+        gateway: {
+          id: config.agent.gatewayId,
+          skipCache: false,
+          cacheTtl: config.agent.cacheTtl,
+        },
+      }
+    );
 
-  logger.debug(
-    { tool_calls: tool_calls ? JSON.stringify(tool_calls) : 'none' },
-    'AI tool calls result'
-  );
+    logger.debug(
+      { tool_calls: tool_calls ? JSON.stringify(tool_calls) : 'none' },
+      'AI tool calls result'
+    );
 
-  // Handle any tool calls made by the AI (e.g., fetching proposals)
-  // Process any tool calls requested by the AI, such as fetching current proposal information
-  // This allows the AI to access real-time data about Lil Nouns governance when needed
-  if (tool_calls !== undefined) {
-    for (const toolCall of tool_calls) {
-      switch (toolCall.name) {
-        case 'fetchLilNounsActiveProposals': {
-          const { proposals } = await fetchActiveProposals(env, config);
-          toolsMessage.push({
-            role: 'tool',
-            name: toolCall.name,
-            content: JSON.stringify({ proposals }),
-          });
-          break;
-        }
-        case 'fetchLilNounsCurrentAuction': {
-          const { auction } = await fetchCurrentAuction(env, config);
-          toolsMessage.push({
-            role: 'tool',
-            name: toolCall.name,
-            content: JSON.stringify({ auction }),
-          });
-          break;
-        }
-        case 'fetchLilNounsTokenTotalSupply': {
-          const { totalSupply } = await fetchLilNounsTokenTotalSupply(
-            env,
-            config
-          );
-          toolsMessage.push({
-            role: 'tool',
-            name: toolCall.name,
-            content: JSON.stringify({ totalSupply }),
-          });
-          break;
-        }
-        case 'getCurrentIsoDateTimeUtc': {
-          const currentDateTime = getCurrentIsoDateTimeUtc();
-          toolsMessage.push({
-            role: 'tool',
-            name: toolCall.name,
-            content: JSON.stringify({ currentDateTime }),
-          });
-          break;
-        }
-        case 'fetchLilNounsProposalSummary': {
-          const { proposalId } = toolCall?.arguments as {
-            proposalId: number;
-          };
-
-          if (!proposalId) {
-            logger.debug(
-              'fetchLilNounsProposalSummary tool call missing required argument: proposalId'
-            );
-          }
-
-          const { proposal } = await fetchLilNounsProposalSummary(
-            env,
-            config,
-            proposalId ?? 0
-          );
-
-          const response = await env.AI.run(
-            config.agent.aiModels.summarization,
-            {
-              input_text: `# ${proposal?.title}${proposal?.description}`,
-              max_length: 200,
-            },
-            {
-              gateway: {
-                id: config.agent.gatewayId,
-                skipCache: false,
-                cacheTtl: config.agent.cacheTtl,
-              },
+    // Handle any tool calls made by the AI (e.g., fetching proposals)
+    // Process any tool calls requested by the AI, such as fetching current proposal information
+    // This allows the AI to access real-time data about Lil Nouns governance when needed
+    if (tool_calls !== undefined) {
+      for (const toolCall of tool_calls) {
+        try {
+          switch (toolCall.name) {
+            case 'fetchLilNounsActiveProposals': {
+              const { proposals } = await fetchActiveProposals(env, config);
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify({ proposals }),
+              });
+              break;
             }
-          );
+            case 'fetchLilNounsCurrentAuction': {
+              const { auction } = await fetchCurrentAuction(env, config);
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify({ auction }),
+              });
+              break;
+            }
+            case 'fetchLilNounsTokenTotalSupply': {
+              const { totalSupply } = await fetchLilNounsTokenTotalSupply(
+                env,
+                config
+              );
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify({ totalSupply }),
+              });
+              break;
+            }
+            case 'getCurrentIsoDateTimeUtc': {
+              const currentDateTime = getCurrentIsoDateTimeUtc();
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify({ currentDateTime }),
+              });
+              break;
+            }
+            case 'fetchLilNounsProposalSummary': {
+              const { proposalId } = toolCall?.arguments as {
+                proposalId: number;
+              };
 
-          toolsMessage.push({
-            role: 'tool',
-            name: toolCall.name,
-            content: JSON.stringify({
-              proposal: { ...proposal, description: response.summary },
-            }),
-          });
-          break;
-        }
-        case 'fetchLilNounsProposalsState': {
-          const { proposalId } = toolCall?.arguments as {
-            proposalId: number;
-          };
+              if (!proposalId) {
+                logger.debug(
+                  'fetchLilNounsProposalSummary tool call missing required argument: proposalId'
+                );
+                break; // Skip this tool call
+              }
 
-          if (!proposalId) {
-            logger.debug(
-              'fetchProposalsState tool call missing required argument: proposalId'
-            );
+              const { proposal } = await fetchLilNounsProposalSummary(
+                env,
+                config,
+                proposalId
+              );
+
+              const response = await env.AI.run(
+                config.agent.aiModels.summarization,
+                {
+                  input_text: `# ${proposal?.title}${proposal?.description}`,
+                  max_length: 200,
+                },
+                {
+                  gateway: {
+                    id: config.agent.gatewayId,
+                    skipCache: false,
+                    cacheTtl: config.agent.cacheTtl,
+                  },
+                }
+              );
+
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify({
+                  proposal: { ...proposal, description: response.summary },
+                }),
+              });
+              break;
+            }
+            case 'fetchLilNounsProposalsState': {
+              const { proposalId } = toolCall?.arguments as {
+                proposalId: number;
+              };
+
+              if (!proposalId) {
+                logger.debug(
+                  'fetchProposalsState tool call missing required argument: proposalId'
+                );
+                break; // Skip this tool call
+              }
+
+              const result = await fetchLilNounsProposalsState(
+                env,
+                config,
+                proposalId
+              );
+
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify(result),
+              });
+              break;
+            }
+            default:
+              logger.debug({ toolName: toolCall.name }, 'Unhandled tool call');
+              break;
           }
-
-          const result = await fetchLilNounsProposalsState(
-            env,
-            config,
-            proposalId ?? 0
+        } catch (error) {
+          logger.error(
+            {
+              error: error instanceof Error ? error.message : String(error),
+              toolName: toolCall.name,
+              toolArguments: toolCall.arguments,
+            },
+            'Tool call failed, skipping'
           );
-
-          toolsMessage.push({
-            role: 'tool',
-            name: toolCall.name,
-            content: JSON.stringify(result),
-          });
-          break;
         }
-        default:
-          logger.debug({ toolName: toolCall.name }, 'Unhandled tool call');
-          break;
       }
     }
+  } catch (error) {
+    logger.error(
+      { error: error instanceof Error ? error.message : String(error) },
+      'Failed to generate AI tool calls'
+    );
+    // Return empty array if the initial AI call fails
+    return [];
   }
 
   return toolsMessage;
