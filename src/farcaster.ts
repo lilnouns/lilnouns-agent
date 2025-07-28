@@ -3,6 +3,7 @@
 import {
   type DirectCastConversation,
   type DirectCastMessage,
+  getDirectCastConversation,
   getDirectCastConversationRecentMessages,
   getDirectCastInbox,
 } from '@nekofar/warpcast';
@@ -188,4 +189,40 @@ export async function fetchLilNounsUnreadConversations(
   );
 
   return { conversations };
+}
+
+export async function fetchLilNounsConversationParticipants(
+  env: Env,
+  config: ReturnType<typeof getConfig>,
+  conversationId: string
+) {
+  const logger = createLogger(env).child({
+    module: 'farcaster',
+    function: 'fetchLilNounsConversationParticipants',
+    conversationId,
+  });
+
+  logger.debug('Fetching participants for conversation');
+
+  // Get the conversation details
+  const { data, error } = await getDirectCastConversation({
+    auth: () => config.farcasterAuthToken,
+    query: {
+      conversationId,
+    },
+  });
+
+  if (error) {
+    logger.error({ error }, 'Error fetching conversation participants');
+    return { participants: [] };
+  }
+
+  const participants = data?.result?.conversation?.participants ?? [];
+
+  logger.debug(
+    { participantCount: participants.length },
+    'Retrieved conversation participants'
+  );
+
+  return { participants };
 }
