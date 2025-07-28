@@ -22,7 +22,6 @@ import { getConfig } from './config';
 import {
   fetchLilNounsConversationMessages,
   fetchLilNounsConversationParticipants,
-  fetchLilNounsRelatedMessages,
   fetchLilNounsUnreadConversations,
 } from './farcaster';
 import { createLogger } from './logger';
@@ -54,7 +53,7 @@ export async function handleUnreadConversations(env: Env) {
   );
 
   // Handle new mentions in groups conversations
-  // await handleNewMentionsInGroups(env, config, lastFetchTime, groups);
+  await handleNewMentionsInGroups(env, config, lastFetchTime, groups);
 
   // Handle new messages in one-to-one conversations
   await handleNewOneToOneMessages(env, config, lastFetchTime, chats);
@@ -224,8 +223,8 @@ async function handleNewMentionsInGroups(
     const conversationLogger = logger.child({ conversationId });
     conversationLogger.debug('Processing group conversation');
 
-    // Get Lil Nouns related messages from this conversation
-    const { messages } = await fetchLilNounsRelatedMessages(
+    // Fetch messages from this conversation
+    const { messages } = await fetchLilNounsConversationMessages(
       env,
       config,
       conversationId
