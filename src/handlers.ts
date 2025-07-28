@@ -6,9 +6,11 @@ import {
 } from '@nekofar/warpcast';
 import { DateTime } from 'luxon';
 import {
+  entries,
   filter,
   first,
   flatMap,
+  groupByProp,
   join,
   last,
   map,
@@ -233,79 +235,120 @@ async function handleNewMentionsInGroups(
       'Found unprocessed messages in conversation'
     );
 
-    // Process each relevant message
-    for (const message of messages) {
+    // Group messages by participants, excluding the agent's own messages
+    const messageGroups = pipe(
+      messages,
+      filter(m => m.senderFid !== config.agent.fid),
+      groupByProp('senderFid')
+    );
+
+    conversationLogger.debug(
+      { groupCount: Object.keys(messageGroups).length },
+      'Grouped messages by sender'
+    );
+
+    for (const [senderFid, senderMessages] of entries(messageGroups)) {
       const messageLogger = conversationLogger.child({
-        messageId: message.messageId,
-        senderFid: message.senderFid,
+        senderFid,
+        messageCount: senderMessages.length,
       });
-      messageLogger.debug('Processing message');
+      messageLogger.debug('Processing messages for sender');
 
       const contextText = await generateContextText(
         env,
         config,
-        message.message
+        pipe(
+          messages,
+          filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
+          filter(m => m.senderFid === Number(senderFid)),
+          flatMap(m => m.message),
+          join('\n')
+        )
       );
 
-      const toolsMessage = await handleAiToolCalls(env, config, [
-        {
-          role: message.senderFid === config.agent.fid ? 'assistant' : 'user',
-          content: message.message,
-        },
-      ]);
+      const toolsMessage = await handleAiToolCalls(
+        env,
+        config,
+        pipe(
+          messages,
+          filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
+          filter(m => m.senderFid === Number(senderFid)),
+          map(m => ({
+            role: 'user',
+            content: m.message,
+          }))
+        )
+      );
 
-      // Generate a final AI response incorporating any tool call results
-      const { response } = await env.AI.run(
-        config.agent.aiModels.functionCalling,
-        {
-          max_tokens: config.agent.maxTokens,
-          messages: [
-            {
-              role: 'system',
-              content: !contextText
-                ? agentSystemMessage
-                : `${agentSystemMessage}\nHere is some context from relevant documents:\n${contextText}`,
-            },
-            // The actual message content to respond to
-            { role: 'user', content: message.message },
-            ...toolsMessage,
-          ],
-        },
-        {
-          gateway: {
-            id: config.agent.gatewayId,
-            skipCache: false,
-            cacheTtl: config.agent.cacheTtl,
+      // Process each relevant message
+      for (const message of senderMessages) {
+        const messageLogger = conversationLogger.child({
+          messageId: message.messageId,
+          senderFid: message.senderFid,
+        });
+        messageLogger.debug('Processing message');
+
+        // Generate a final AI response incorporating any tool call results
+        const { response } = await env.AI.run(
+          config.agent.aiModels.functionCalling,
+          {
+            max_tokens: config.agent.maxTokens,
+            messages: [
+              {
+                role: 'system',
+                content: !contextText
+                  ? agentSystemMessage
+                  : `${agentSystemMessage}\nHere is some context from relevant documents:\n${contextText}`,
+              },
+              // The actual message content to respond to
+              ...pipe(
+                messages,
+                filter(m => m.senderFid === Number(senderFid)),
+                takeLast(10),
+                map(m => ({
+                  role: 'user',
+                  content: m.message,
+                }))
+              ),
+              ...toolsMessage,
+            ],
           },
-        }
-      );
-
-      messageLogger.debug({ response }, 'AI generated response');
-
-      // Prepare plain text message without markdown
-      const messageContent = stripMarkdown(response ?? "I don't know");
-
-      // Send the AI-generated response back to the conversation on Farcaster
-      // Includes the original message ID for proper threading and mentions the original sender
-      const { error, data } = await sendDirectCastMessage({
-        auth: () => config.farcasterAuthToken,
-        body: {
-          conversationId,
-          recipientFids: [message.senderFid],
-          messageId: crypto.randomUUID().replace(/-/g, ''),
-          type: 'text',
-          message: messageContent,
-          inReplyToId: message.messageId,
-        },
-      });
-
-      if (error) {
-        messageLogger.error({ error }, 'Error sending message to group');
-      } else {
-        messageLogger.info(
-          { responseMessageId: data?.result?.messageId },
-          'Message sent successfully'
+          {
+            gateway: {
+              id: config.agent.gatewayId,
+              skipCache: false,
+              cacheTtl: config.agent.cacheTtl,
+            },
+          }
         );
+
+        messageLogger.debug({ response }, 'AI generated response');
+
+        // Prepare plain text message without markdown
+        const messageContent = stripMarkdown(response ?? "I don't know");
+
+        // Send the AI-generated response back to the conversation on Farcaster
+        // Includes the original message ID for proper threading and mentions the original sender
+        const { error, data } = await sendDirectCastMessage({
+          auth: () => config.farcasterAuthToken,
+          body: {
+            conversationId,
+            recipientFids: [Number(senderFid)],
+            messageId: crypto.randomUUID().replace(/-/g, ''),
+            type: 'text',
+            message: messageContent,
+            inReplyToId: message.messageId,
+          },
+        });
+
+        if (error) {
+          messageLogger.error({ error }, 'Error sending message to group');
+        } else {
+          messageLogger.info(
+            { responseMessageId: data?.result?.messageId },
+            'Message sent successfully'
+          );
+        }
       }
     }
   }
