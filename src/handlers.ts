@@ -284,15 +284,14 @@ async function handleNewMentionsInGroups(
         env,
         config,
         pipe(
-          messages,
+          senderMessages,
           filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
           filter(m => m.senderFid === Number(senderFid)),
           filter(
             m =>
-              ((m.hasMention &&
-                m.mentions?.some(
-                  mention => mention.user.fid === config.agent.fid
-                )) ??
+              (m.mentions?.some(
+                mention => mention.user.fid === config.agent.fid
+              ) ??
                 false) ||
               m.inReplyTo?.senderFid === config.agent.fid
           ),
@@ -305,15 +304,14 @@ async function handleNewMentionsInGroups(
         env,
         config,
         pipe(
-          messages,
+          senderMessages,
           filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
           filter(m => m.senderFid === Number(senderFid)),
           filter(
             m =>
-              ((m.hasMention &&
-                m.mentions?.some(
-                  mention => mention.user.fid === config.agent.fid
-                )) ??
+              (m.mentions?.some(
+                mention => mention.user.fid === config.agent.fid
+              ) ??
                 false) ||
               m.inReplyTo?.senderFid === config.agent.fid
           ),
@@ -346,14 +344,13 @@ async function handleNewMentionsInGroups(
               },
               // The actual message content to respond to
               ...pipe(
-                messages,
+                senderMessages,
                 filter(m => m.senderFid === Number(senderFid)),
                 filter(
                   m =>
-                    ((m.hasMention &&
-                      m.mentions?.some(
-                        mention => mention.user.fid === config.agent.fid
-                      )) ??
+                    (m.mentions?.some(
+                      mention => mention.user.fid === config.agent.fid
+                    ) ??
                       false) ||
                     m.inReplyTo?.senderFid === config.agent.fid
                 ),
