@@ -38,6 +38,8 @@ const agentConfigSchema = z.object({
   features: z.object({
     handleGroupConversations: z.boolean().default(true),
     handleOneToOneConversations: z.boolean().default(true),
+    sendDirectMessagesToGroupConversations: z.boolean().default(false),
+    sendDirectMessagesToOneToOneConversations: z.boolean().default(false),
   }),
   defaults: z.object({
     fallbackDate: z
@@ -119,6 +121,8 @@ export function getConfig(env: Env): Config {
       features: {
         handleGroupConversations: true,
         handleOneToOneConversations: true,
+        sendDirectMessagesToGroupConversations: false,
+        sendDirectMessagesToOneToOneConversations: true,
       },
       defaults: {
         fallbackDate: '1970-01-01T00:00:00.000Z',
