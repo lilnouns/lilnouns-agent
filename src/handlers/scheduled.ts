@@ -61,8 +61,6 @@ export async function handleUnreadConversations(context: ConversationContext) {
   });
   logger.debug('Starting to process unread conversations');
 
-  const lastFetchTime = await getLastFetchTime(env, config);
-
   // Fetch all conversations with unread messages
   const { conversations } = await fetchLilNounsUnreadConversations(context);
 
@@ -91,7 +89,7 @@ export async function handleUnreadConversations(context: ConversationContext) {
       'Handling new mentions in group conversations'
     );
 
-    await handleNewMentionsInGroups(context, lastFetchTime, groups);
+    await handleNewMentionsInGroups(context, groups);
   } else {
     logger.debug(
       { groupCount: groups.length },
@@ -106,7 +104,7 @@ export async function handleUnreadConversations(context: ConversationContext) {
       'Handling new messages in one-to-one conversations'
     );
 
-    await handleNewOneToOneMessages(context, lastFetchTime, chats);
+    await handleNewOneToOneMessages(context, chats);
   } else {
     logger.debug(
       { chatCount: chats.length },
@@ -122,13 +120,11 @@ export async function handleUnreadConversations(context: ConversationContext) {
  * Processes new one-to-one messages from a list of conversations, generating AI responses and sending them back.
  *
  * @param {ConversationContext} context - Environment and configuration context required for message processing
- * @param {number} lastFetchTime - The timestamp of the last message fetch, used to filter new messages.
  * @param {DirectCastConversation[]} conversations - An array of one-to-one conversations containing messages to process.
  * @return {Promise<void>} A Promise that resolves when all conversations are processed, or rejects on errors.
  */
 async function handleNewOneToOneMessages(
   context: ConversationContext,
-  lastFetchTime: number,
   conversations: DirectCastConversation[]
 ) {
   const { env } = context;
@@ -146,7 +142,7 @@ async function handleNewOneToOneMessages(
     conversationLogger.debug('Processing conversation');
 
     // Perform the actual processing of the conversation
-    await processOneToOneConversation(context, lastFetchTime, conversationId);
+    await processOneToOneConversation(context, conversationId);
 
     // Mark the conversation as read after processing all messages
     await markLilNounsConversationAsRead(context, conversationId);
@@ -161,16 +157,14 @@ async function handleNewOneToOneMessages(
  * Handles mentions in group conversations by processing messages from users and generating appropriate AI responses.
  *
  * @param {ConversationContext} context - Environment and configuration context required for group message processing
- * @param {number} lastFetchTime - The timestamp representing the last time messages were fetched and processed.
  * @param {DirectCastConversation[]} conversations - A list of conversations to process, including message and sender details.
  * @return {Promise<void>} A promise indicating the completion of mentions processing in group conversations.
  */
 async function handleNewMentionsInGroups(
   context: ConversationContext,
-  lastFetchTime: number,
   conversations: DirectCastConversation[]
 ) {
-  const { env, config } = context;
+  const { env } = context;
 
   // Create a logger for this handler
   const logger = createLogger(env).child({
@@ -185,7 +179,7 @@ async function handleNewMentionsInGroups(
     const conversationLogger = logger.child({ conversationId });
     conversationLogger.debug('Processing group conversation');
 
-    await processGroupConversation(context, lastFetchTime, conversationId);
+    await processGroupConversation(context, conversationId);
 
     // Mark the conversation as read after processing all messages
     await markLilNounsConversationAsRead(context, conversationId);
@@ -198,13 +192,11 @@ async function handleNewMentionsInGroups(
  * Processes a single one-to-one conversation by fetching messages, generating AI responses, and sending replies.
  *
  * @param {ConversationContext} context - Environment and configuration context required for conversation processing
- * @param {number} lastFetchTime - The timestamp of the last message fetch, used to filter new messages
  * @param {string} conversationId - The unique identifier of the conversation to process
  * @return {Promise<void>} A promise that resolves when the conversation has been processed
  */
-async function processOneToOneConversation(
+export async function processOneToOneConversation(
   context: ConversationContext,
-  lastFetchTime: number,
   conversationId: string
 ): Promise<void> {
   const { env, config } = context;
@@ -215,6 +207,8 @@ async function processOneToOneConversation(
     function: 'processOneToOneConversation',
     conversationId,
   });
+
+  const lastFetchTime = await getLastFetchTime(env, config);
 
   // Fetch messages from this conversation
   const { messages } = await fetchLilNounsConversationMessages(
@@ -355,14 +349,12 @@ async function processOneToOneConversation(
  * Processes a group conversation by fetching recent messages, grouping them by participants,
  * and generating AI responses based on the conversation context.
  *
- * @param context - Object containing environment and configuration context
- * @param lastFetchTime - The timestamp of the last fetch point for filtering new messages
+ * @param context - Object contains environment and configuration context
  * @param conversationId - The unique identifier of the group conversation being processed
  * @returns A promise that resolves when the group conversation processing is complete
  */
 export async function processGroupConversation(
   context: ConversationContext,
-  lastFetchTime: number,
   conversationId: string
 ): Promise<void> {
   const { env, config } = context;
@@ -372,6 +364,8 @@ export async function processGroupConversation(
     function: 'processGroupConversation',
     conversationId,
   });
+
+  const lastFetchTime = await getLastFetchTime(env, config);
 
   // Fetch messages from this conversation
   const { messages } = await fetchLilNounsConversationMessages(
