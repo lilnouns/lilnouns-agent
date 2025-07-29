@@ -195,7 +195,6 @@ export async function markLilNounsConversationAsRead(
       // Main WebSocket operation
       new Promise<boolean>((resolve, reject) => {
         const ws = new WebSocket('wss://ws.farcaster.xyz/stream');
-
         let isResolved = false;
         let isAuthenticated = false;
         let connectionEstablished = false;
@@ -216,6 +215,32 @@ export async function markLilNounsConversationAsRead(
           }
         };
 
+        const sendReadMessage = () => {
+          try {
+            ws.send(
+              JSON.stringify({
+                messageType: 'direct-cast-read',
+                payload: { conversationId },
+                data: conversationId,
+              })
+            );
+            logger.debug('Read message sent');
+
+            setTimeout(() => {
+              if (!isResolved) {
+                logger.debug('Assuming read operation successful after delay');
+                resolveOnce(true);
+              }
+            }, 3000);
+          } catch (err) {
+            rejectOnce(
+              new Error(
+                `Failed to send read message: ${err instanceof Error ? err.message : 'Unknown error'}`
+              )
+            );
+          }
+        };
+
         ws.addEventListener('open', () => {
           connectionEstablished = true;
           logger.debug('WebSocket connection opened');
@@ -230,7 +255,7 @@ export async function markLilNounsConversationAsRead(
             );
             logger.debug('Authentication message sent');
 
-            // Since auth doesn't respond on success, send a read message immediately
+            // Since auth doesn't respond on success, send a read message after delay
             setTimeout(() => {
               if (!isResolved) {
                 isAuthenticated = true;
@@ -249,120 +274,17 @@ export async function markLilNounsConversationAsRead(
           }
         });
 
-        ws.addEventListener('message', event => {
-          const rawData = event.data;
-          logger.debug({ rawData }, 'WebSocket message received');
-
-          // Try to parse as JSON
-          let msg: {
-            messageType?: string;
-            data?: string;
-            status?: string;
-          } | null = null;
-
-          try {
-            msg = JSON.parse(rawData);
-            logger.debug({ message: msg }, 'Parsed JSON message');
-          } catch (err) {
-            // Handle non-JSON messages
-            if (typeof rawData === 'string') {
-              logger.debug(
-                { textMessage: rawData },
-                'Non-JSON message received'
-              );
-
-              // Handle authentication confirmation
-              if (rawData.toLowerCase().includes('authenticated')) {
-                isAuthenticated = true;
-                logger.debug('Authentication confirmed');
-                sendReadMessage();
-                return;
-              }
-
-              // Handle success indicators
-              if (
-                rawData.toLowerCase().includes('success') ||
-                rawData.toLowerCase().includes('read')
-              ) {
-                logger.debug('Read operation appeared successful');
-                resolveOnce(true);
-                return;
-              }
-            }
-
-            logger.debug('Ignoring unparseable message');
-            return;
-          }
-
-          // Handle JSON messages
-          if (msg) {
-            if (
-              msg.messageType === 'authenticated' ||
-              msg.status === 'authenticated'
-            ) {
-              isAuthenticated = true;
-              logger.debug('Authentication successful');
-              sendReadMessage();
-            } else if (
-              msg.messageType === 'unseen' ||
-              msg.messageType === 'direct-cast-read-success'
-            ) {
-              logger.debug('Read operation successful');
-              resolveOnce(true);
-            } else if (msg.messageType === 'error') {
-              rejectOnce(
-                new Error(`WebSocket error: ${msg.data || 'Unknown error'}`)
-              );
-            } else if (
-              msg.messageType === 'unauthenticated' ||
-              msg.messageType === 'unauthorized'
-            ) {
-              rejectOnce(new Error('Authentication failed'));
-            }
-          }
-        });
-
-        const sendReadMessage = () => {
-          try {
-            ws.send(
-              JSON.stringify({
-                messageType: 'direct-cast-read',
-                payload: { conversationId },
-                data: conversationId,
-              })
-            );
-            logger.debug('Read message sent');
-
-            // If no explicit response comes back, assume success after a short delay
-            setTimeout(() => {
-              if (!isResolved) {
-                logger.debug('Assuming read operation successful after delay');
-                resolveOnce(true);
-              }
-            }, 3000); // Increase to 3 seconds for response
-          } catch (err) {
-            rejectOnce(
-              new Error(
-                `Failed to send read message: ${err instanceof Error ? err.message : 'Unknown error'}`
-              )
-            );
-          }
-        };
-
         ws.addEventListener('error', event => {
           logger.warn('WebSocket error occurred');
           if (!connectionEstablished) {
             rejectOnce(new Error('Failed to establish WebSocket connection'));
+          } else if (isAuthenticated && !isResolved) {
+            logger.debug(
+              'WebSocket error but authentication succeeded, assuming success'
+            );
+            resolveOnce(true);
           } else {
-            // If we're authenticated, consider it a success despite the error
-            if (isAuthenticated && !isResolved) {
-              logger.debug(
-                'WebSocket error but authentication succeeded, assuming success'
-              );
-              resolveOnce(true);
-            } else {
-              rejectOnce(new Error('WebSocket connection error'));
-            }
+            rejectOnce(new Error('WebSocket connection error'));
           }
         });
 
