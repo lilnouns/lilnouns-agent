@@ -22,6 +22,71 @@ interface FarcasterContext {
 }
 
 /**
+ * Fetches detailed information for a specific unread conversation by its ID.
+ * Retrieves conversation data including participants and metadata from the Farcaster API.
+ *
+ * @param context - Environment and configuration context required for Farcaster API operations
+ * @param conversationId - The unique identifier of the conversation to fetch
+ * @returns Promise resolving to an object containing the conversation data or null if not found
+ *
+ * @example
+ * ```typescript
+ * const { conversation } = await fetchLilNounsUnreadConversation(
+ *   { env, config },
+ *   'conversation-123'
+ * );
+ * if (conversation) {
+ *   console.log(`Found conversation with ${conversation.activeParticipantsCount} participants`);
+ * }
+ * ```
+ */
+export async function fetchLilNounsUnreadConversation(
+  context: FarcasterContext,
+  conversationId: string
+) {
+  const { env, config } = context;
+
+  const logger = createLogger(env).child({
+    module: 'farcaster',
+    function: 'fetchLilNounsUnreadConversation',
+    conversationId,
+  });
+
+  logger.debug('Fetching unread conversation by ID');
+
+  // Fetch the conversation details from Farcaster API
+  const { data, error } = await getDirectCastConversation({
+    auth: () => config.farcasterAuthToken,
+    query: {
+      conversationId,
+    },
+  });
+
+  if (error) {
+    logger.error({ error }, 'Error fetching conversation by ID');
+    return { conversation: null };
+  }
+
+  const conversation = data?.result?.conversation ?? null;
+
+  if (!conversation) {
+    logger.warn('No conversation found with the provided ID');
+    return { conversation: null };
+  }
+
+  logger.debug(
+    {
+      conversationId,
+      participantsCount: conversation.activeParticipantsCount,
+      isGroup: conversation.isGroup,
+    },
+    'Successfully fetched conversation details'
+  );
+
+  return { conversation };
+}
+
+/**
  * Fetches unread conversations for the Lil Nouns bot from Farcaster.
  *
  * @param context - Object containing environment and configuration context
