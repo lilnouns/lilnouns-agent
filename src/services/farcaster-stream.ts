@@ -42,6 +42,25 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
     });
   }
 
+  // HTTP entrypoint to trigger connection
+  async fetch(_request: Request): Promise<Response> {
+    const logger = this.logger.child({
+      method: 'fetch',
+      timestamp: new Date().toISOString(),
+    });
+
+    logger.info('WebSocket fetch request started');
+
+    try {
+      await this.connect();
+      logger.info('WebSocket connection initiated successfully');
+      return new Response('WebSocket connection initiated');
+    } catch (error) {
+      logger.error({ error }, 'Failed to initiate WebSocket connection');
+      throw error; // Re-throw to ensure proper error reporting
+    }
+  }
+
   // Alarm handler: sends heartbeat or triggers reconnect
   async alarm(): Promise<void> {
     try {
