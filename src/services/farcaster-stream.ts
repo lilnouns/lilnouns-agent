@@ -1,4 +1,3 @@
-// Type definitions for WebSocket messages
 import { DurableObject } from 'cloudflare:workers';
 import type { Logger } from 'pino';
 import { createLogger } from '@/lib/logger';
@@ -8,20 +7,47 @@ interface FarcasterMessage {
     | 'authenticate'
     | 'heartbeat'
     | 'unseen'
-    | 'refresh-direct-cast-conversation';
+    | 'refresh-direct-cast-conversation'
+    | 'direct-cast-read';
   data?: string;
-  payload?: any;
+  payload?: Record<string, any>;
 }
 
-interface UnseenPayload {
-  count: number;
-  // Add other unseen payload properties as needed
-}
+// Possible unseen payload types based on AsyncAPI schema
+type UnseenPayload =
+  | { inboxCount: number }
+  | { unreadNotificationsCount: number }
+  | {
+      channelFeedsUnseenStatus: Array<{
+        channelKey: string;
+        feedType: string;
+        hasNewItems: boolean;
+      }>;
+    };
 
 interface RefreshPayload {
+  conversationId: string;
   message: {
+    conversationId: string;
+    message: string;
     messageId: string;
-    // Add other message properties as needed
+    senderFid: number;
+    serverTimestamp: number;
+    type: string;
+    isDeleted: boolean;
+    senderContext: {
+      displayName: string;
+      fid: number;
+      pfp: {
+        url: string;
+        verified: boolean;
+      };
+      username: string;
+    };
+    reactions: Array<Record<string, any>>;
+    hasMention: boolean;
+    isPinned: boolean;
+    mentions: Array<Record<string, any>>;
   };
 }
 
@@ -220,21 +246,58 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
   private async handleUnseen(payload: UnseenPayload): Promise<void> {
     this.logger.info({ payload }, 'Processing unseen messages');
 
-    // Add your unseen message handling logic here,
-    // For example, updating counters in storage or triggering notifications
+    // Handle different types of unseen payloads
+    if ('inboxCount' in payload) {
+      this.logger.info(
+        { inboxCount: payload.inboxCount },
+        'Received inbox count update'
+      );
+      // Handle inbox count
+    } else if ('unreadNotificationsCount' in payload) {
+      this.logger.info(
+        { unreadCount: payload.unreadNotificationsCount },
+        'Received notification count update'
+      );
+      // Handle unread notifications count
+    } else if ('channelFeedsUnseenStatus' in payload) {
+      this.logger.info(
+        { channels: payload.channelFeedsUnseenStatus.length },
+        'Received channel feeds status update'
+      );
+      // Handle channel feeds status
+    }
   }
 
-  // Persist last message ID for a conversation
+  // Handle refresh of direct cast conversation
   private async handleRefresh(payload: RefreshPayload): Promise<void> {
     try {
-      const messageId = payload.message?.messageId;
-      if (!messageId) {
-        this.logger.warn({ payload }, 'Refresh payload missing message ID');
+      const { conversationId, message } = payload;
+      if (!message || !message.messageId) {
+        this.logger.warn(
+          { payload },
+          'Refresh payload missing required message data'
+        );
         return;
       }
 
-      await this.ctx.storage.put('lastMessageId', messageId);
-      this.logger.info({ messageId }, 'Persisted last message ID');
+      // Store relevant conversation data
+      await this.ctx.storage.put(
+        `conversation:${conversationId}:lastMessageId`,
+        message.messageId
+      );
+      await this.ctx.storage.put(
+        `conversation:${conversationId}:timestamp`,
+        message.serverTimestamp.toString()
+      );
+
+      this.logger.info(
+        {
+          conversationId,
+          messageId: message.messageId,
+          sender: message.senderContext.username,
+        },
+        'Processed conversation update'
+      );
     } catch (error) {
       this.logger.error({ error, payload }, 'Failed to handle refresh message');
       throw error;
