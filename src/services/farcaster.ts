@@ -229,6 +229,17 @@ export async function markLilNounsConversationAsRead(
               })
             );
             logger.debug('Authentication message sent');
+
+            // Since auth doesn't respond on success, send a read message immediately
+            setTimeout(() => {
+              if (!isResolved) {
+                isAuthenticated = true;
+                logger.debug(
+                  'Assuming authentication successful, sending read message'
+                );
+                sendReadMessage();
+              }
+            }, 1000); // Small delay to allow auth to process
           } catch (err) {
             rejectOnce(
               new Error(

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.16] - 2025-07-29
+
+### 🐛 Bug Fixes
+
+- *(wrangler)* Update cron trigger frequency to every 5 mins
+- *(farcaster)* Handle delayed authentication response
+
 ## [1.0.0-alpha.15] - 2025-07-29
 
 ### 🚀 Features
