@@ -56,7 +56,7 @@ export function createLogger(env: Env, options: pino.LoggerOptions = {}) {
 
   // Base options with sensible defaults
   const baseOptions: pino.LoggerOptions = {
-    level: config.env === 'production' ? 'info' : 'debug',
+    level: config.logger.level,
     // Add timestamp and service name to all logs
     base: {
       pid: false,
@@ -68,7 +68,7 @@ export function createLogger(env: Env, options: pino.LoggerOptions = {}) {
       err: pino.stdSerializers.err,
       error: pino.stdSerializers.err,
     },
-    ...(config.env === 'development' && {
+    ...(config.logger.prettyPrint && {
       browser: {
         asObject: true,
         // Custom write function to format logs readably

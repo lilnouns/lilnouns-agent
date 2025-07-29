@@ -55,6 +55,13 @@ export async function handleUnreadConversations(env: Env) {
   // Process each conversation individually
   const [groups, chats] = pipe(
     conversations,
+    // Filter conversations that have not been updated in the last week
+    // This helps in avoiding processing stale conversations
+    filter(
+      c =>
+        Number(c.lastMessage?.serverTimestamp ?? 0) >
+        DateTime.now().minus({ weeks: 1 }).startOf('week').toMillis()
+    ),
     partition(c => c.isGroup)
   );
 
@@ -64,10 +71,34 @@ export async function handleUnreadConversations(env: Env) {
   );
 
   // Handle new mentions in groups conversations
-  await handleNewMentionsInGroups(env, config, lastFetchTime, groups);
+  if (config.agent.features.handleGroupConversations && groups.length > 0) {
+    logger.debug(
+      { groupCount: groups.length },
+      'Handling new mentions in group conversations'
+    );
+
+    await handleNewMentionsInGroups(env, config, lastFetchTime, groups);
+  } else {
+    logger.debug(
+      { groupCount: groups.length },
+      'Skipping group conversations handling as feature is disabled or no groups found'
+    );
+  }
 
   // Handle new messages in one-to-one conversations
-  await handleNewOneToOneMessages(env, config, lastFetchTime, chats);
+  if (config.agent.features.handleOneToOneConversations && chats.length > 0) {
+    logger.debug(
+      { chatCount: chats.length },
+      'Handling new messages in one-to-one conversations'
+    );
+
+    await handleNewOneToOneMessages(env, config, lastFetchTime, chats);
+  } else {
+    logger.debug(
+      { chatCount: chats.length },
+      'Skipping one-to-one conversations handling as feature is disabled or no chats found'
+    );
+  }
 
   // Update the last fetch timestamp to current time for next iteration
   await setLastFetchTime(env, config, DateTime.now().toISO());
@@ -195,22 +226,7 @@ async function handleNewOneToOneMessages(
     );
 
     // Send the AI-generated response back to the conversation on Farcaster
-    if (config.env === 'development') {
-      conversationLogger.info(
-        {
-          messageContent,
-          recipientFid: Number(
-            pipe(
-              participants,
-              filter(p => p.fid !== config.agent.fid),
-              first<Participant[]>
-            )?.fid ?? 0
-          ),
-          idempotencyKey: crypto.randomUUID(),
-        },
-        'Would send direct cast message (dev mode - not actually sent)'
-      );
-    } else {
+    if (config.agent.features.sendDirectMessagesToOneToOneConversations) {
       const { error } = await sendDirectCast({
         auth: () => config.farcasterApiKey,
         body: {
@@ -234,6 +250,21 @@ async function handleNewOneToOneMessages(
       } else {
         conversationLogger.info('Message sent successfully');
       }
+    } else {
+      conversationLogger.info(
+        {
+          messageContent,
+          recipientFid: Number(
+            pipe(
+              participants,
+              filter(p => p.fid !== config.agent.fid),
+              first<Participant[]>
+            )?.fid ?? 0
+          ),
+          idempotencyKey: crypto.randomUUID(),
+        },
+        'Would send direct cast message to one-to-one conversation (not actually sent)'
+      );
     }
 
     await markLilNounsConversationAsRead(env, config, conversationId);
@@ -391,18 +422,7 @@ async function handleNewMentionsInGroups(
 
       // Send the AI-generated response back to the conversation on Farcaster
       // Includes the original message ID for proper threading and mentions the original sender
-      if (config.env === 'development') {
-        messageLogger.info(
-          {
-            messageContent,
-            conversationId,
-            recipientFids: [Number(senderFid)],
-            messageId: crypto.randomUUID().replace(/-/g, ''),
-            inReplyToId: last(senderMessages).messageId,
-          },
-          'Would send direct cast message to group (dev mode - not actually sent)'
-        );
-      } else {
+      if (config.agent.features.sendDirectMessagesToGroupConversations) {
         const { error, data } = await sendDirectCastMessage({
           auth: () => config.farcasterAuthToken,
           body: {
@@ -423,7 +443,23 @@ async function handleNewMentionsInGroups(
             'Message sent successfully'
           );
         }
+      } else {
+        messageLogger.info(
+          {
+            messageContent,
+            conversationId,
+            recipientFids: [Number(senderFid)],
+            messageId: crypto.randomUUID().replace(/-/g, ''),
+            inReplyToId: last(senderMessages).messageId,
+          },
+          'Would send direct cast message to group conversation (not actually sent)'
+        );
       }
     }
+
+    // Mark the conversation as read after processing all messages
+    await markLilNounsConversationAsRead(env, config, conversationId);
   }
+
+  logger.info('Completed processing mentions in group conversations');
 }

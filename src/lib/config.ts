@@ -19,6 +19,13 @@ const envSchema = z.object({
   ETHEREUM_RPC_URL: z.string().url('ETHEREUM_RPC_URL must be a valid URL'),
 });
 
+const loggerConfigSchema = z.object({
+  level: z.enum(['debug', 'info', 'warn', 'error'], {
+    message: 'Logger level must be one of: debug, info, warn, error',
+  }),
+  prettyPrint: z.boolean().default(false),
+});
+
 // Add validation for agent configuration
 const agentConfigSchema = z.object({
   fid: z.number().positive('Agent FID must be a positive number'),
@@ -34,6 +41,12 @@ const agentConfigSchema = z.object({
   maxTokens: z.number().positive('Max tokens must be positive'),
   cacheKeys: z.object({
     lastFetch: z.string().min(1),
+  }),
+  features: z.object({
+    handleGroupConversations: z.boolean().default(true),
+    handleOneToOneConversations: z.boolean().default(true),
+    sendDirectMessagesToGroupConversations: z.boolean().default(false),
+    sendDirectMessagesToOneToOneConversations: z.boolean().default(false),
   }),
   defaults: z.object({
     fallbackDate: z
@@ -58,6 +71,7 @@ export type Config = Simplify<{
   lilNounsSubgraphUrl: RawEnv['LILNOUNS_SUBGRAPH_URL'];
   ethereumRpcUrl: RawEnv['ETHEREUM_RPC_URL'];
   agent: z.infer<typeof agentConfigSchema>;
+  logger: z.infer<typeof loggerConfigSchema>;
 }>;
 
 /**
@@ -97,6 +111,11 @@ export function getConfig(env: Env): Config {
       throw new Error(`Environment validation failed:\n  ${errorMessages}`);
     }
 
+    const loggerConfig = {
+      level: 'debug' as const,
+      prettyPrint: envResult.data.NODE_ENV !== 'production',
+    };
+
     const agentConfig = {
       fid: 20146,
       autoRagId: 'lilnouns-agent',
@@ -112,10 +131,27 @@ export function getConfig(env: Env): Config {
       cacheKeys: {
         lastFetch: 'conversations:last-fetch',
       },
+      features: {
+        handleGroupConversations: true,
+        handleOneToOneConversations: true,
+        sendDirectMessagesToGroupConversations: false,
+        sendDirectMessagesToOneToOneConversations: true,
+      },
       defaults: {
         fallbackDate: '1970-01-01T00:00:00.000Z',
       },
     };
+
+    // Validate logger configuration
+    const loggerResult = loggerConfigSchema.safeParse(loggerConfig);
+    if (!loggerResult.success) {
+      const errorMessages = loggerResult.error.issues
+        .map(issue => `logger.${issue.path.join('.')}: ${issue.message}`)
+        .join('\n  ');
+      throw new Error(
+        `Logger configuration validation failed:\n  ${errorMessages}`
+      );
+    }
 
     // Validate agent configuration
     const agentResult = agentConfigSchema.safeParse(agentConfig);
@@ -135,6 +171,7 @@ export function getConfig(env: Env): Config {
       lilNounsSubgraphUrl: envResult.data.LILNOUNS_SUBGRAPH_URL,
       ethereumRpcUrl: envResult.data.ETHEREUM_RPC_URL,
       agent: agentResult.data,
+      logger: loggerResult.data,
     };
   }
 
