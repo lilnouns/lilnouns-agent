@@ -73,7 +73,7 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
         );
         this.logger.debug('Heartbeat sent');
       } else {
-        // Attempt reconnect with backoff
+        // Attempt to reconnect with backoff
         await this.connect();
       }
       // Reschedule next alarm
