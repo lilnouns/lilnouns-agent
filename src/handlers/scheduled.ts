@@ -71,10 +71,34 @@ export async function handleUnreadConversations(env: Env) {
   );
 
   // Handle new mentions in groups conversations
-  await handleNewMentionsInGroups(env, config, lastFetchTime, groups);
+  if (config.agent.features.handleGroupConversations && groups.length > 0) {
+    logger.debug(
+      { groupCount: groups.length },
+      'Handling new mentions in group conversations'
+    );
+
+    await handleNewMentionsInGroups(env, config, lastFetchTime, groups);
+  } else {
+    logger.debug(
+      { groupCount: groups.length },
+      'Skipping group conversations handling as feature is disabled or no groups found'
+    );
+  }
 
   // Handle new messages in one-to-one conversations
-  await handleNewOneToOneMessages(env, config, lastFetchTime, chats);
+  if (config.agent.features.handleOneToOneConversations && chats.length > 0) {
+    logger.debug(
+      { chatCount: chats.length },
+      'Handling new messages in one-to-one conversations'
+    );
+
+    await handleNewOneToOneMessages(env, config, lastFetchTime, chats);
+  } else {
+    logger.debug(
+      { chatCount: chats.length },
+      'Skipping one-to-one conversations handling as feature is disabled or no chats found'
+    );
+  }
 
   // Update the last fetch timestamp to current time for next iteration
   await setLastFetchTime(env, config, DateTime.now().toISO());
