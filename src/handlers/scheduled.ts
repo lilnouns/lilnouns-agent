@@ -148,7 +148,10 @@ async function handleNewOneToOneMessages(
     // Perform the actual processing of the conversation
     await processOneToOneConversation(context, lastFetchTime, conversationId);
 
+    // Mark the conversation as read after processing all messages
     await markLilNounsConversationAsRead(env, config, conversationId);
+
+    conversationLogger.debug('Marked conversation as read');
   }
 
   logger.info('Completed processing one-to-one messages');
