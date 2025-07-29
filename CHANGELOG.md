@@ -2,6 +2,103 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.15] - 2025-07-29
+
+### 🚀 Features
+
+- *(farcaster)* Add `fetchLilNounsOneToOneConversations` function
+- *(handlers)* Add handler for processing one-to-one messages
+- *(farcaster)* Add fetch for unread Lil Nouns conversations
+- *(worker-configuration)* Add `FARCASTER_API_KEY` to `Env`
+- *(config)* Add `FARCASTER_API_KEY` to configuration
+- *(logger)* Add `createLogger` with environment-based config
+- *(farcaster)* Add function to fetch conversation participants
+- *(handlers)* Update recipient handling in conversation
+- *(farcaster)* Add filter to text message processing
+- *(farcaster)* Add `markLilNounsConversationAsRead`
+
+### 🐛 Bug Fixes
+
+- *(handlers)* Correct `recipientFid` extraction logic
+- *(handlers)* Add filter to remove agent messages
+- *(handlers)* Skip conversations already handled by agent
+- *(handlers)* Simplify idempotency key generation
+- *(wrangler)* Update cron trigger frequency to every minute
+
+### 🚜 Refactor
+
+- *(wagmi)* Extract `createWagmiConfig` function
+- *(farcaster)* Extract fetch functions to new module
+- *(index)* Extract and reorder conversation functions
+- *(handlers)* Move conversation processing to new module
+- *(handlers)* Rename conversation processing functions
+- *(handlers)* Extract AI functions to `ai` module
+- *(ai)* Rename `processToolCalls` to `handleAiToolCalls`
+- *(handlers)* Extract and reuse cache management functions
+- *(farcaster)* Simplify error handling in fetch logic
+- *(farcaster)* Adjust query `limit` for inbox fetch
+- *(cache)* Rename variables for clarity
+- *(farcaster)* Remove redundant response destructuring
+- *(farcaster)* Simplify message initialization logic
+- *(handlers)* Replace unread conversation fetch logic
+- *(handlers)* Update conversation filtering logic
+- *(handlers)* Apply additional filtering to messages
+- *(handlers)* Update `generateContextText` args
+- *(handlers)* Update `handleAiToolCalls` args
+- *(handlers)* Streamline message processing logic
+- *(handlers)* Replace `sendDirectCastMessage` usage
+- *(handlers)* Remove redundant comment in `sendDirectCast`
+- *(tools)* Improve function descriptions for clarity
+- *(handlers)* Simplify filtering pipeline
+- *(handlers)* Simplify filtering pipeline
+- *(handlers)* Streamline message processing logic
+- *(handlers)* Restructure conversation handling logic
+- *(handlers)* Simplify `handleNewMentionsInGroups` logic
+- *(handlers)* Reorder conversation handling logic
+- *(handlers)* Clarify message filtering logic
+- *(handlers)* Filter and process only new messages
+- *(handlers)* Remove debug logging statements
+- *(handlers)* Replace `console.log` with `logger`
+- *(logging)* Replace `console.log` with `logger`
+- *(logger)* Enhance log formatting and handling
+- *(logger)* Extract log formatting into helper functions
+- *(farcaster)* Rename and improve conversation methods
+- *(handlers)* Streamline message fetching logic
+- *(handlers)* Remove redundant message filtering logic
+- *(handlers)* Streamline message mapping logic
+- *(handlers)* Group and process messages by senders
+- *(handlers)* Correct casing in comments for consistency
+- *(tools)* Standardize doc comments and simplify logic
+- *(wagmi)* Add detailed doc comments for `createWagmiConfig`
+- *(handlers)* Add detailed doc comments for processing
+- *(tools)* Extract gql query into a separate variable
+- *(ai)* Handle empty query in `generateContextText`
+- *(handlers)* Replace negation with `isEmpty` utility
+- *(handlers)* Add mention and reply filtering logic
+- *(ai)* Add error handling for tool calls
+- *(tools)* Add `toJSON` method for `BigInt` serialization
+- *(handlers)* Replace `messages` with `senderMessages`
+- *(handlers)* Simplify message processing loop
+- *(prompts)* Update guidelines for Farcaster context
+- *(handlers)* Add environment-based message sending logic
+- *(tsconfig)* Add path mapping for module resolution
+- Rename and reorganize module files for improved structure
+- *(logger)* Improve JSON formatting for additional data
+
+### 📚 Documentation
+
+- Add README with project overview and guidelines
+- Improve JSDoc annotations across modules
+
+### ⚙️ Miscellaneous Tasks
+
+- *(templates)* Add bug report and feature request templates
+- *(github-actions)* Add stale issue management workflow
+- *(funding)* Add funding configuration file
+- *(dependabot)* Add dependabot configuration
+- *(config)* Update `NODE_ENV` to `development`
+- *(license)* Add Apache 2.0 license
+
 ## [1.0.0-alpha.14] - 2025-07-26
 
 ### 🚀 Features
