@@ -76,6 +76,9 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
 
     // Initialize configuration
     this.config = getConfig(env);
+
+    // Schedule the first heartbeat
+    this.ctx.storage.setAlarm(Date.now() + this.heartbeatInterval);
   }
 
   // HTTP entrypoint to trigger connection
