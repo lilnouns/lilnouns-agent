@@ -35,6 +35,10 @@ const agentConfigSchema = z.object({
   cacheKeys: z.object({
     lastFetch: z.string().min(1),
   }),
+  features: z.object({
+    handleGroupConversations: z.boolean().default(true),
+    handleOneToOneConversations: z.boolean().default(true),
+  }),
   defaults: z.object({
     fallbackDate: z
       .string()
@@ -111,6 +115,10 @@ export function getConfig(env: Env): Config {
       maxTokens: 100,
       cacheKeys: {
         lastFetch: 'conversations:last-fetch',
+      },
+      features: {
+        handleGroupConversations: true,
+        handleOneToOneConversations: true,
       },
       defaults: {
         fallbackDate: '1970-01-01T00:00:00.000Z',
