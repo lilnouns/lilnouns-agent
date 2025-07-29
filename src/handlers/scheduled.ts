@@ -28,6 +28,7 @@ import {
   fetchLilNounsConversationMessages,
   fetchLilNounsConversationParticipants,
   fetchLilNounsUnreadConversations,
+  markLilNounsConversationAsRead,
 } from '@/services/farcaster';
 import { stripMarkdown } from '@/utils/text';
 
@@ -234,6 +235,8 @@ async function handleNewOneToOneMessages(
         conversationLogger.info('Message sent successfully');
       }
     }
+
+    await markLilNounsConversationAsRead(env, config, conversationId);
   }
 
   logger.info('Completed processing one-to-one messages');
