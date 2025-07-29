@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.21] - 2025-07-29
+
+### 🚀 Features
+
+- *(stream)* Add HTTP entrypoint for WebSocket connection
+- *(handlers)* Mark conversations as read after processing
+- *(services)* Add `fetchLilNounsUnreadConversation` method
+- *(services)* Handle one-to-one conversations in stream
+- *(services)* Add group conversation processing in stream
+- *(config)* Enable direct messages in group conversations
+
+### 🐛 Bug Fixes
+
+- *(stream)* Ensure safe WebSocket method invocation
+
+### 🚜 Refactor
+
+- *(handlers)* Extract one-to-one conversation logic
+- *(handlers)* Introduce `ConversationContext` interface
+- *(services)* Use `FarcasterContext` in API methods
+- *(handlers)* Extract group conversation logic
+- *(services)* Enhance unseen and refresh payload handling
+- *(handlers)* Remove `lastFetchTime` parameter usage
+
+### 🎨 Styling
+
+- *(stream)* Fix comment style in reconnection logic
+
 ## [1.0.0-alpha.20] - 2025-07-29
 
 ### 🚀 Features
