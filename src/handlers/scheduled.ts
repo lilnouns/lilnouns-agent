@@ -21,7 +21,7 @@ import {
 } from 'remeda';
 import { generateContextText, handleAiToolCalls } from '@/lib/ai';
 import { getLastFetchTime, setLastFetchTime } from '@/lib/cache';
-import { getConfig } from '@/lib/config';
+import type { getConfig } from '@/lib/config';
 import { createLogger } from '@/lib/logger';
 import { agentSystemMessage } from '@/lib/prompts';
 import {
@@ -33,20 +33,34 @@ import {
 import { stripMarkdown } from '@/utils/text';
 
 /**
+ * Provides essential environment and configuration context for conversation handling operations.
+ * This interface encapsulates the necessary dependencies for processing messages,
+ * interacting with Farcaster API, and managing AI-powered responses.
+ *
+ * @property {Env} env - The environment object containing runtime configurations and service connections
+ * @property {ReturnType<typeof getConfig>} config - Application configuration with agent settings and feature flags
+ */
+interface ConversationContext {
+  env: Env;
+  config: ReturnType<typeof getConfig>;
+}
+
+/**
  * Handles processing of unread conversations, segregating them into group and one-to-one chats,
  * and processing messages accordingly. Updates the last fetch timestamp after successful processing.
  *
- * @param {Env} env - The environment object containing configuration and dependencies.
+ * @param {ConversationContext} context - Environment and configuration context required for conversation processing
  * @return {Promise<void>} Resolves when all unread conversations have been processed successfully.
  */
-export async function handleUnreadConversations(env: Env) {
+export async function handleUnreadConversations(context: ConversationContext) {
+  const { env, config } = context;
+
   const logger = createLogger(env).child({
     module: 'handlers',
     function: 'handleUnreadConversations',
   });
   logger.debug('Starting to process unread conversations');
 
-  const config = getConfig(env);
   const lastFetchTime = await getLastFetchTime(env, config);
 
   // Fetch all conversations with unread messages
@@ -77,7 +91,7 @@ export async function handleUnreadConversations(env: Env) {
       'Handling new mentions in group conversations'
     );
 
-    await handleNewMentionsInGroups(env, config, lastFetchTime, groups);
+    await handleNewMentionsInGroups(context, lastFetchTime, groups);
   } else {
     logger.debug(
       { groupCount: groups.length },
@@ -92,7 +106,7 @@ export async function handleUnreadConversations(env: Env) {
       'Handling new messages in one-to-one conversations'
     );
 
-    await handleNewOneToOneMessages(env, config, lastFetchTime, chats);
+    await handleNewOneToOneMessages(context, lastFetchTime, chats);
   } else {
     logger.debug(
       { chatCount: chats.length },
@@ -107,18 +121,18 @@ export async function handleUnreadConversations(env: Env) {
 /**
  * Processes new one-to-one messages from a list of conversations, generating AI responses and sending them back.
  *
- * @param {Env} env - The environment configuration required to process the messages.
- * @param {Object} config - The result of the `getConfig` function providing configuration for the agent and services.
+ * @param {ConversationContext} context - Environment and configuration context required for message processing
  * @param {number} lastFetchTime - The timestamp of the last message fetch, used to filter new messages.
  * @param {DirectCastConversation[]} conversations - An array of one-to-one conversations containing messages to process.
  * @return {Promise<void>} A Promise that resolves when all conversations are processed, or rejects on errors.
  */
 async function handleNewOneToOneMessages(
-  env: Env,
-  config: ReturnType<typeof getConfig>,
+  context: ConversationContext,
   lastFetchTime: number,
   conversations: DirectCastConversation[]
 ) {
+  const { env, config } = context;
+
   const logger = createLogger(env).child({
     module: 'handlers',
     function: 'handleNewOneToOneMessages',
@@ -132,12 +146,7 @@ async function handleNewOneToOneMessages(
     conversationLogger.debug('Processing conversation');
 
     // Perform the actual processing of the conversation
-    await processOneToOneConversation(
-      env,
-      config,
-      lastFetchTime,
-      conversationId
-    );
+    await processOneToOneConversation(context, lastFetchTime, conversationId);
 
     await markLilNounsConversationAsRead(env, config, conversationId);
   }
@@ -148,18 +157,19 @@ async function handleNewOneToOneMessages(
 /**
  * Handles mentions in group conversations by processing messages from users and generating appropriate AI responses.
  *
- * @param {Env} env - The environment object containing application-specific utilities and configurations.
- * @param {object} config - The application configuration object, derived from the `getConfig` function, including agent credentials and settings.
+ * @param {ConversationContext} context - Environment and configuration context required for group message processing
  * @param {number} lastFetchTime - The timestamp representing the last time messages were fetched and processed.
  * @param {DirectCastConversation[]} conversations - A list of conversations to process, including message and sender details.
  * @return {Promise<void>} A promise indicating the completion of mentions processing in group conversations.
  */
 async function handleNewMentionsInGroups(
-  env: Env,
-  config: ReturnType<typeof getConfig>,
+  context: ConversationContext,
   lastFetchTime: number,
   conversations: DirectCastConversation[]
 ) {
+  const { env, config } = context;
+
+  // Create a logger for this handler
   const logger = createLogger(env).child({
     module: 'handlers',
     function: 'handleNewMentionsInGroups',
@@ -336,17 +346,28 @@ async function handleNewMentionsInGroups(
   logger.info('Completed processing mentions in group conversations');
 }
 
+/**
+ * Processes a single one-to-one conversation by fetching messages, generating AI responses, and sending replies.
+ *
+ * @param {ConversationContext} context - Environment and configuration context required for conversation processing
+ * @param {number} lastFetchTime - The timestamp of the last message fetch, used to filter new messages
+ * @param {string} conversationId - The unique identifier of the conversation to process
+ * @return {Promise<void>} A promise that resolves when the conversation has been processed
+ */
 async function processOneToOneConversation(
-  env: Env,
-  config: ReturnType<typeof getConfig>,
+  context: ConversationContext,
   lastFetchTime: number,
   conversationId: string
 ): Promise<void> {
+  const { env, config } = context;
+
+  // Create a logger for this conversation handler
   const conversationLogger = createLogger(env).child({
     module: 'handlers',
     function: 'processOneToOneConversation',
     conversationId,
   });
+
   // Fetch messages from this conversation
   const { messages } = await fetchLilNounsConversationMessages(
     env,
