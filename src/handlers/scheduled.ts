@@ -64,7 +64,7 @@ export async function handleUnreadConversations(context: ConversationContext) {
   const lastFetchTime = await getLastFetchTime(env, config);
 
   // Fetch all conversations with unread messages
-  const { conversations } = await fetchLilNounsUnreadConversations(env, config);
+  const { conversations } = await fetchLilNounsUnreadConversations(context);
 
   // Process each conversation individually
   const [groups, chats] = pipe(
@@ -131,7 +131,7 @@ async function handleNewOneToOneMessages(
   lastFetchTime: number,
   conversations: DirectCastConversation[]
 ) {
-  const { env, config } = context;
+  const { env } = context;
 
   const logger = createLogger(env).child({
     module: 'handlers',
@@ -149,7 +149,7 @@ async function handleNewOneToOneMessages(
     await processOneToOneConversation(context, lastFetchTime, conversationId);
 
     // Mark the conversation as read after processing all messages
-    await markLilNounsConversationAsRead(env, config, conversationId);
+    await markLilNounsConversationAsRead(context, conversationId);
 
     conversationLogger.debug('Marked conversation as read');
   }
@@ -187,8 +187,7 @@ async function handleNewMentionsInGroups(
 
     // Fetch messages from this conversation
     const { messages } = await fetchLilNounsConversationMessages(
-      env,
-      config,
+      context,
       conversationId
     );
 
@@ -343,7 +342,7 @@ async function handleNewMentionsInGroups(
     }
 
     // Mark the conversation as read after processing all messages
-    await markLilNounsConversationAsRead(env, config, conversationId);
+    await markLilNounsConversationAsRead(context, conversationId);
   }
 
   logger.info('Completed processing mentions in group conversations');
@@ -373,14 +372,12 @@ async function processOneToOneConversation(
 
   // Fetch messages from this conversation
   const { messages } = await fetchLilNounsConversationMessages(
-    env,
-    config,
+    context,
     conversationId
   );
 
   const { participants } = await fetchLilNounsConversationParticipants(
-    env,
-    config,
+    context,
     conversationId
   );
 
