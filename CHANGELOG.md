@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.17] - 2025-07-29
+
+### 🐛 Bug Fixes
+
+- *(farcaster)* Refactor WebSocket read message handling
+
 ## [1.0.0-alpha.16] - 2025-07-29
 
 ### 🐛 Bug Fixes
