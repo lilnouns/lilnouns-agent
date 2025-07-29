@@ -1,6 +1,9 @@
 import { DurableObject } from 'cloudflare:workers';
 import type { Logger } from 'pino';
-import { processOneToOneConversation } from '@/handlers/scheduled';
+import {
+  processGroupConversation,
+  processOneToOneConversation,
+} from '@/handlers/scheduled';
 import { getConfig } from '@/lib/config';
 import { createLogger } from '@/lib/logger';
 import { fetchLilNounsUnreadConversation } from '@/services/farcaster';
@@ -307,6 +310,10 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
           'Processing group conversation update'
         );
         // Handle group conversation updates if needed
+        await processGroupConversation(
+          { env: this.env, config: this.config },
+          conversationId
+        );
       } else {
         this.logger.info(
           { conversationId, messageId: message.messageId },
