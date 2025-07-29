@@ -263,7 +263,7 @@ async function handleNewOneToOneMessages(
           ),
           idempotencyKey: crypto.randomUUID(),
         },
-        'Would send direct cast message (dev mode - not actually sent)'
+        'Would send direct cast message to one-to-one conversation (not actually sent)'
       );
     }
 
@@ -452,7 +452,7 @@ async function handleNewMentionsInGroups(
             messageId: crypto.randomUUID().replace(/-/g, ''),
             inReplyToId: last(senderMessages).messageId,
           },
-          'Would send direct cast message to group (dev mode - not actually sent)'
+          'Would send direct cast message to group conversation (not actually sent)'
         );
       }
     }
