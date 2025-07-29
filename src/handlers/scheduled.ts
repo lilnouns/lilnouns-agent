@@ -226,45 +226,28 @@ async function handleNewOneToOneMessages(
     );
 
     // Send the AI-generated response back to the conversation on Farcaster
-    if (config.env === 'development') {
-      conversationLogger.info(
-        {
-          messageContent,
-          recipientFid: Number(
-            pipe(
-              participants,
-              filter(p => p.fid !== config.agent.fid),
-              first<Participant[]>
-            )?.fid ?? 0
-          ),
-          idempotencyKey: crypto.randomUUID(),
-        },
-        'Would send direct cast message (dev mode - not actually sent)'
+    const { error } = await sendDirectCast({
+      auth: () => config.farcasterApiKey,
+      body: {
+        recipientFid: Number(
+          pipe(
+            participants,
+            filter(p => p.fid !== config.agent.fid),
+            first<Participant[]>
+          )?.fid ?? 0
+        ),
+        idempotencyKey: crypto.randomUUID(),
+        message: messageContent,
+      },
+    });
+
+    if (error) {
+      conversationLogger.error(
+        { error },
+        'Error sending message to conversation'
       );
     } else {
-      const { error } = await sendDirectCast({
-        auth: () => config.farcasterApiKey,
-        body: {
-          recipientFid: Number(
-            pipe(
-              participants,
-              filter(p => p.fid !== config.agent.fid),
-              first<Participant[]>
-            )?.fid ?? 0
-          ),
-          idempotencyKey: crypto.randomUUID(),
-          message: messageContent,
-        },
-      });
-
-      if (error) {
-        conversationLogger.error(
-          { error },
-          'Error sending message to conversation'
-        );
-      } else {
-        conversationLogger.info('Message sent successfully');
-      }
+      conversationLogger.info('Message sent successfully');
     }
 
     await markLilNounsConversationAsRead(env, config, conversationId);
@@ -422,38 +405,25 @@ async function handleNewMentionsInGroups(
 
       // Send the AI-generated response back to the conversation on Farcaster
       // Includes the original message ID for proper threading and mentions the original sender
-      if (config.env === 'development') {
-        messageLogger.info(
-          {
-            messageContent,
-            conversationId,
-            recipientFids: [Number(senderFid)],
-            messageId: crypto.randomUUID().replace(/-/g, ''),
-            inReplyToId: last(senderMessages).messageId,
-          },
-          'Would send direct cast message to group (dev mode - not actually sent)'
-        );
-      } else {
-        const { error, data } = await sendDirectCastMessage({
-          auth: () => config.farcasterAuthToken,
-          body: {
-            conversationId,
-            recipientFids: [Number(senderFid)],
-            messageId: crypto.randomUUID().replace(/-/g, ''),
-            type: 'text',
-            message: messageContent,
-            inReplyToId: last(senderMessages).messageId,
-          },
-        });
+      const { error, data } = await sendDirectCastMessage({
+        auth: () => config.farcasterAuthToken,
+        body: {
+          conversationId,
+          recipientFids: [Number(senderFid)],
+          messageId: crypto.randomUUID().replace(/-/g, ''),
+          type: 'text',
+          message: messageContent,
+          inReplyToId: last(senderMessages).messageId,
+        },
+      });
 
-        if (error) {
-          messageLogger.error({ error }, 'Error sending message to group');
-        } else {
-          messageLogger.info(
-            { responseMessageId: data?.result?.messageId },
-            'Message sent successfully'
-          );
-        }
+      if (error) {
+        messageLogger.error({ error }, 'Error sending message to group');
+      } else {
+        messageLogger.info(
+          { responseMessageId: data?.result?.messageId },
+          'Message sent successfully'
+        );
       }
     }
   }
