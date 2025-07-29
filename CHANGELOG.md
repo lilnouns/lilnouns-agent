@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.24] - 2025-07-29
+
+### ⚙️ Miscellaneous Tasks
+
+- *(config)* Enable `workers_dev` mode in wrangler configuration
+
 ## [1.0.0-alpha.23] - 2025-07-29
 
 ### 🚀 Features
