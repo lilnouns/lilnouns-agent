@@ -227,21 +227,6 @@ async function handleNewOneToOneMessages(
 
     // Send the AI-generated response back to the conversation on Farcaster
     if (config.agent.features.sendDirectMessagesToOneToOneConversations) {
-      conversationLogger.info(
-        {
-          messageContent,
-          recipientFid: Number(
-            pipe(
-              participants,
-              filter(p => p.fid !== config.agent.fid),
-              first<Participant[]>
-            )?.fid ?? 0
-          ),
-          idempotencyKey: crypto.randomUUID(),
-        },
-        'Would send direct cast message (dev mode - not actually sent)'
-      );
-    } else {
       const { error } = await sendDirectCast({
         auth: () => config.farcasterApiKey,
         body: {
@@ -265,6 +250,21 @@ async function handleNewOneToOneMessages(
       } else {
         conversationLogger.info('Message sent successfully');
       }
+    } else {
+      conversationLogger.info(
+        {
+          messageContent,
+          recipientFid: Number(
+            pipe(
+              participants,
+              filter(p => p.fid !== config.agent.fid),
+              first<Participant[]>
+            )?.fid ?? 0
+          ),
+          idempotencyKey: crypto.randomUUID(),
+        },
+        'Would send direct cast message (dev mode - not actually sent)'
+      );
     }
 
     await markLilNounsConversationAsRead(env, config, conversationId);
@@ -423,17 +423,6 @@ async function handleNewMentionsInGroups(
       // Send the AI-generated response back to the conversation on Farcaster
       // Includes the original message ID for proper threading and mentions the original sender
       if (config.agent.features.sendDirectMessagesToGroupConversations) {
-        messageLogger.info(
-          {
-            messageContent,
-            conversationId,
-            recipientFids: [Number(senderFid)],
-            messageId: crypto.randomUUID().replace(/-/g, ''),
-            inReplyToId: last(senderMessages).messageId,
-          },
-          'Would send direct cast message to group (dev mode - not actually sent)'
-        );
-      } else {
         const { error, data } = await sendDirectCastMessage({
           auth: () => config.farcasterAuthToken,
           body: {
@@ -454,6 +443,17 @@ async function handleNewMentionsInGroups(
             'Message sent successfully'
           );
         }
+      } else {
+        messageLogger.info(
+          {
+            messageContent,
+            conversationId,
+            recipientFids: [Number(senderFid)],
+            messageId: crypto.randomUUID().replace(/-/g, ''),
+            inReplyToId: last(senderMessages).messageId,
+          },
+          'Would send direct cast message to group (dev mode - not actually sent)'
+        );
       }
     }
   }
