@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.19] - 2025-07-29
+
+### 🚀 Features
+
+- *(stream)* Add durable object for WebSocket connection
+- *(config)* Add durable object binding for WebSocket
+- *(config)* Update `Env` type with durable object binding
+- *(stream)* Move `FarcasterStreamWebsocket` to services
+
 ## [1.0.0-alpha.18] - 2025-07-29
 
 ### 🚀 Features
