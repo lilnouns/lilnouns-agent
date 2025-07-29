@@ -456,5 +456,10 @@ async function handleNewMentionsInGroups(
         );
       }
     }
+
+    // Mark the conversation as read after processing all messages
+    await markLilNounsConversationAsRead(env, config, conversationId);
   }
+
+  logger.info('Completed processing mentions in group conversations');
 }
