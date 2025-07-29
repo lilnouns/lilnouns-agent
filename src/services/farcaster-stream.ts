@@ -107,7 +107,7 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
       this.ws.addEventListener('open', () => {
         this.logger.info('WebSocket connection opened');
         // Authenticate upon open
-        this.ws!.send(
+        this.ws?.send(
           JSON.stringify({
             messageType: 'authenticate',
             data: `Bearer ${token}`,
@@ -220,7 +220,7 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
   private async handleUnseen(payload: UnseenPayload): Promise<void> {
     this.logger.info({ payload }, 'Processing unseen messages');
 
-    // Add your unseen message handling logic here
+    // Add your unseen message handling logic here,
     // For example, updating counters in storage or triggering notifications
   }
 
