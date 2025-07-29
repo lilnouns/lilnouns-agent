@@ -112,7 +112,7 @@ export function getConfig(env: Env): Config {
     }
 
     const loggerConfig = {
-      level: 'info' as const,
+      level: 'debug' as const,
       prettyPrint: envResult.data.NODE_ENV !== 'production',
     };
 
