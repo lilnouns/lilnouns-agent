@@ -131,141 +131,13 @@ async function handleNewOneToOneMessages(
     const conversationLogger = logger.child({ conversationId });
     conversationLogger.debug('Processing conversation');
 
-    // Fetch messages from this conversation
-    const { messages } = await fetchLilNounsConversationMessages(
+    // Perform the actual processing of the conversation
+    await processOneToOneConversation(
       env,
       config,
+      lastFetchTime,
       conversationId
     );
-
-    const { participants } = await fetchLilNounsConversationParticipants(
-      env,
-      config,
-      conversationId
-    );
-
-    // If no messages found, skip this conversation or if the last message is from the agent
-    if (last(messages)?.senderFid === config.agent.fid) {
-      conversationLogger.debug(
-        { agentFid: config.agent.fid },
-        'Skipping conversation already handled by the agent'
-      );
-      continue;
-    }
-
-    // Filter messages to only include those since last retrieval for this conversation
-    // This ensures we only process new messages for generating context
-    const contextText = await generateContextText(
-      env,
-      config,
-      pipe(
-        messages,
-        filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
-        filter(m => m.senderFid !== config.agent.fid),
-        flatMap(m => m.message),
-        join('\n')
-      )
-    );
-
-    // Filter messages to only include those since last and handle tool calls for the messages
-    // This ensures we only process new messages for generating AI response
-    const toolsMessage = await handleAiToolCalls(
-      env,
-      config,
-      pipe(
-        messages,
-        filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
-        map(m => ({
-          role: m.senderFid === config.agent.fid ? 'assistant' : 'user',
-          content: m.message,
-        }))
-      )
-    );
-
-    // Generate a final AI response incorporating any tool call results
-    const { response } = await env.AI.run(
-      config.agent.aiModels.functionCalling,
-      {
-        max_tokens: config.agent.maxTokens,
-        messages: [
-          {
-            role: 'system',
-            content: isEmpty(contextText)
-              ? agentSystemMessage
-              : `${agentSystemMessage}\nRELEVANT CONTEXT:\n${contextText}`,
-          },
-          // The actual message content to respond to
-          ...pipe(
-            messages,
-            takeLast(10),
-            map(m => ({
-              role: m.senderFid === config.agent.fid ? 'assistant' : 'user',
-              content: m.message,
-            }))
-          ),
-          ...toolsMessage,
-        ],
-      },
-      {
-        gateway: {
-          id: config.agent.gatewayId,
-          skipCache: false,
-          cacheTtl: config.agent.cacheTtl,
-        },
-      }
-    );
-
-    conversationLogger.debug({ response }, 'AI generated response');
-
-    // Prepare a plain text message without Markdown
-    const messageContent = stripMarkdown(response ?? "I don't know");
-
-    conversationLogger.debug(
-      { messageContent },
-      'Sending message to conversation'
-    );
-
-    // Send the AI-generated response back to the conversation on Farcaster
-    if (config.agent.features.sendDirectMessagesToOneToOneConversations) {
-      const { error } = await sendDirectCast({
-        auth: () => config.farcasterApiKey,
-        body: {
-          recipientFid: Number(
-            pipe(
-              participants,
-              filter(p => p.fid !== config.agent.fid),
-              first<Participant[]>
-            )?.fid ?? 0
-          ),
-          idempotencyKey: crypto.randomUUID(),
-          message: messageContent,
-        },
-      });
-
-      if (error) {
-        conversationLogger.error(
-          { error },
-          'Error sending message to conversation'
-        );
-      } else {
-        conversationLogger.info('Message sent successfully');
-      }
-    } else {
-      conversationLogger.info(
-        {
-          messageContent,
-          recipientFid: Number(
-            pipe(
-              participants,
-              filter(p => p.fid !== config.agent.fid),
-              first<Participant[]>
-            )?.fid ?? 0
-          ),
-          idempotencyKey: crypto.randomUUID(),
-        },
-        'Would send direct cast message to one-to-one conversation (not actually sent)'
-      );
-    }
 
     await markLilNounsConversationAsRead(env, config, conversationId);
   }
@@ -462,4 +334,152 @@ async function handleNewMentionsInGroups(
   }
 
   logger.info('Completed processing mentions in group conversations');
+}
+
+async function processOneToOneConversation(
+  env: Env,
+  config: ReturnType<typeof getConfig>,
+  lastFetchTime: number,
+  conversationId: string
+): Promise<void> {
+  const conversationLogger = createLogger(env).child({
+    module: 'handlers',
+    function: 'processOneToOneConversation',
+    conversationId,
+  });
+  // Fetch messages from this conversation
+  const { messages } = await fetchLilNounsConversationMessages(
+    env,
+    config,
+    conversationId
+  );
+
+  const { participants } = await fetchLilNounsConversationParticipants(
+    env,
+    config,
+    conversationId
+  );
+
+  // If no messages found, skip this conversation or if the last message is from the agent
+  if (last(messages)?.senderFid === config.agent.fid) {
+    conversationLogger.debug(
+      { agentFid: config.agent.fid },
+      'Skipping conversation already handled by the agent'
+    );
+    return;
+  }
+
+  // Filter messages to only include those since last retrieval for this conversation
+  // This ensures we only process new messages for generating context
+  const contextText = await generateContextText(
+    env,
+    config,
+    pipe(
+      messages,
+      filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
+      filter(m => m.senderFid !== config.agent.fid),
+      flatMap(m => m.message),
+      join('\n')
+    )
+  );
+
+  // Filter messages to only include those since last and handle tool calls for the messages
+  // This ensures we only process new messages for generating AI response
+  const toolsMessage = await handleAiToolCalls(
+    env,
+    config,
+    pipe(
+      messages,
+      filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
+      map(m => ({
+        role: m.senderFid === config.agent.fid ? 'assistant' : 'user',
+        content: m.message,
+      }))
+    )
+  );
+
+  // Generate a final AI response incorporating any tool call results
+  const { response } = await env.AI.run(
+    config.agent.aiModels.functionCalling,
+    {
+      max_tokens: config.agent.maxTokens,
+      messages: [
+        {
+          role: 'system',
+          content: isEmpty(contextText)
+            ? agentSystemMessage
+            : `${agentSystemMessage}\nRELEVANT CONTEXT:\n${contextText}`,
+        },
+        // The actual message content to respond to
+        ...pipe(
+          messages,
+          takeLast(10),
+          map(m => ({
+            role: m.senderFid === config.agent.fid ? 'assistant' : 'user',
+            content: m.message,
+          }))
+        ),
+        ...toolsMessage,
+      ],
+    },
+    {
+      gateway: {
+        id: config.agent.gatewayId,
+        skipCache: false,
+        cacheTtl: config.agent.cacheTtl,
+      },
+    }
+  );
+
+  conversationLogger.debug({ response }, 'AI generated response');
+
+  // Prepare a plain text message without Markdown
+  const messageContent = stripMarkdown(response ?? "I don't know");
+
+  conversationLogger.debug(
+    { messageContent },
+    'Sending message to conversation'
+  );
+
+  // Send the AI-generated response back to the conversation on Farcaster
+  if (config.agent.features.sendDirectMessagesToOneToOneConversations) {
+    const { error } = await sendDirectCast({
+      auth: () => config.farcasterApiKey,
+      body: {
+        recipientFid: Number(
+          pipe(
+            participants,
+            filter(p => p.fid !== config.agent.fid),
+            first<Participant[]>
+          )?.fid ?? 0
+        ),
+        idempotencyKey: crypto.randomUUID(),
+        message: messageContent,
+      },
+    });
+
+    if (error) {
+      conversationLogger.error(
+        { error },
+        'Error sending message to conversation'
+      );
+    } else {
+      conversationLogger.info('Message sent successfully');
+    }
+  } else {
+    conversationLogger.info(
+      {
+        messageContent,
+        recipientFid: Number(
+          pipe(
+            participants,
+            filter(p => p.fid !== config.agent.fid),
+            first<Participant[]>
+          )?.fid ?? 0
+        ),
+        idempotencyKey: crypto.randomUUID(),
+      },
+      'Would send direct cast message to one-to-one conversation (not actually sent)'
+    );
+  }
 }
