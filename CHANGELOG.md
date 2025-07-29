@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.18] - 2025-07-29
+
+### 🚀 Features
+
+- *(config)* Add feature flags for conversations
+- *(scheduled)* Add feature flag checks for conversation handling
+- *(config)* Add feature flags for direct messaging
+- *(scheduled)* Add feature flag checks for message routing
+- *(config)* Add logger configuration validation
+
+### 🐛 Bug Fixes
+
+- *(scheduled)* Filter stale conversations older than a week
+
+### 🚜 Refactor
+
+- *(scheduled)* Remove redundant dev mode checks
+- *(logger)* Use `config.logger` for log level and formatting
+- *(config)* Update logger level to `debug`
+- *(scheduled)* Reorder dev mode logging logic
+- *(scheduled)* Update dev mode log messages for clarity
+- *(scheduled)* Mark conversations as read post-processing
+- *(scheduled)* Fix timestamp comparison logic
+
+### ⚙️ Miscellaneous Tasks
+
+- *(config)* Update `NODE_ENV` to production
+
+### ◀️ Revert
+
+- *(scheduled)* Remove redundant dev mode checks
+
 ## [1.0.0-alpha.17] - 2025-07-29
 
 ### 🐛 Bug Fixes
