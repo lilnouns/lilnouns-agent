@@ -1,3 +1,13 @@
+/**
+ * Strips Markdown formatting from text, leaving only plain text content.
+ *
+ * Removes various Markdown elements including images, links, code blocks,
+ * emphasis, blockquotes, headings, and other formatting characters while
+ * preserving the readable text content.
+ *
+ * @param {string} text - The Markdown-formatted text to process.
+ * @return {string} The plain text with Markdown formatting removed.
+ */
 export function stripMarkdown(text: string): string {
   return text
     .replace(/!\[[^\]]*\]\([^)]*\)\n?/g, '') // remove images and trailing newline

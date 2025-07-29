@@ -10,7 +10,22 @@ import { map, pipe } from 'remeda';
 import { formatEther } from 'viem';
 import { getBlockNumber } from 'wagmi/actions';
 import type { getConfig } from './config';
-import { createWagmiConfig } from './index';
+import { createLogger } from './logger';
+import { createWagmiConfig } from './wagmi';
+
+// Add BigInt serialization support to JSON.stringify
+declare global {
+  interface BigInt {
+    toJSON(): string;
+  }
+}
+
+// Only add the method if it doesn't exist yet
+if (typeof BigInt.prototype.toJSON !== 'function') {
+  BigInt.prototype.toJSON = function () {
+    return this.toString();
+  };
+}
 
 /**
  * AI tools configuration for function calling
@@ -19,19 +34,21 @@ export const aiTools = [
   {
     type: 'function',
     name: 'fetchLilNounsActiveProposals',
-    description: 'Fetch Lil Nouns active proposals',
+    description:
+      'Fetch Lil Nouns active proposals that are currently open for voting, ordered by creation time',
     parameters: {},
   },
   {
     type: 'function',
     name: 'fetchLilNounsProposalsState',
-    description: 'Fetch Lil Nouns proposal state from chain',
+    description:
+      'Fetch the current on-chain state of a Lil Nouns governance proposal by its ID, returning both the numeric state value and text representation (Pending, Active, Canceled, etc.)',
     parameters: {
       type: 'object',
       properties: {
         proposalId: {
           type: 'number',
-          description: 'Proposal ID',
+          description: 'Unique identifier of the proposal to check state for',
         },
       },
       required: ['proposalId'],
@@ -41,25 +58,28 @@ export const aiTools = [
   {
     type: 'function',
     name: 'fetchLilNounsCurrentAuction',
-    description: 'Fetch Lil Nouns current auction',
+    description:
+      'Fetch details about the currently active Lil Nouns auction, including the Noun ID, current price in ETH, and auction link',
     parameters: {},
   },
   {
     type: 'function',
     name: 'fetchLilNounsTokenTotalSupply',
-    description: 'Fetch Lil Nouns token total supply',
+    description:
+      'Fetch the total supply of Lil Nouns tokens that have been minted to date',
     parameters: {},
   },
   {
     type: 'function',
     name: 'fetchLilNounsProposalSummary',
-    description: 'Fetch Lil Nouns proposal summary',
+    description:
+      'Fetch comprehensive details about a specific Lil Nouns governance proposal by its ID, including title, description (AI-summarized), status, creation timestamp, and link to the proposal page',
     parameters: {
       type: 'object',
       properties: {
         proposalId: {
           type: 'number',
-          description: 'Proposal ID',
+          description: 'Unique identifier of the proposal to fetch details for',
         },
       },
       required: ['proposalId'],
@@ -69,7 +89,8 @@ export const aiTools = [
   {
     type: 'function',
     name: 'getCurrentIsoDateTimeUtc',
-    description: 'Get current date and time in ISO format in UTC timezone',
+    description:
+      'Get the current date and time in ISO 8601 format in UTC timezone, useful for timestamping operations and determining time-based conditions',
     parameters: {},
   },
 ] as const;
@@ -77,17 +98,26 @@ export const aiTools = [
 /**
  * Fetches the current auction data for Lil Nouns.
  *
- * @param {Object} config - The configuration object returned by the `getConfig` function.
+ * @param {Env} env - The environment object containing configuration and dependencies.
+ * @param {ReturnType<typeof getConfig>} config - The configuration object returned by the `getConfig` function.
  * @return {Promise<Object>} A promise that resolves to an object containing the current auction details.
  */
 export async function fetchCurrentAuction(
+  env: Env,
   config: ReturnType<typeof getConfig>
 ) {
-  console.log('[DEBUG] Fetching current auction');
+  const logger = createLogger(env).child({
+    module: 'tools',
+    function: 'fetchCurrentAuction',
+  });
+
+  logger.debug('Fetching current auction');
 
   const wagmiConfig = createWagmiConfig(config);
-  const [nounId, seed, svg, price, hash, blockNumber] =
-    await readLilNounsAuctionFetchNextNoun(wagmiConfig, {});
+  const [nounId, , , price] = await readLilNounsAuctionFetchNextNoun(
+    wagmiConfig,
+    {}
+  );
 
   const auction = {
     nounId: Number(nounId),
@@ -95,10 +125,7 @@ export async function fetchCurrentAuction(
     link: `https://lilnouns.auction`,
   };
 
-  console.log(
-    '[DEBUG] Retrieved current auction: ',
-    JSON.stringify({ auction })
-  );
+  logger.debug({ auction }, 'Retrieved current auction');
 
   return { auction };
 }
@@ -106,39 +133,49 @@ export async function fetchCurrentAuction(
 /**
  * Fetches active proposals from the Lil Nouns subgraph based on the current Ethereum block number.
  *
- * Active proposals are those which have not been cancelled and have an ending block greater than or equal to the current block.
+ * Active proposals are those that have not been canceled and have an ending block greater than or equal to the current block.
  * The retrieved proposals include their id, title, and creation timestamp, with timestamps formatted to ISO format.
  *
+ * @param {Env} env - The environment object containing configuration and dependencies.
  * @param {ReturnType<typeof getConfig>} config - The configuration object used to initialize the Wagmi settings and subgraph query.
  * @return {Promise<{ proposals: Array<{ id: string, title: string, createdTimestamp: string }> }>} A promise that resolves to an object containing an array of active proposals. Each proposal includes its id, title, and formatted creation timestamp.
  */
 export async function fetchActiveProposals(
+  env: Env,
   config: ReturnType<typeof getConfig>
 ) {
-  console.log('[DEBUG] Fetching active proposals');
-  const wagmiConfig = createWagmiConfig(config);
-  const blockNumber = await getBlockNumber(wagmiConfig); // Get current Ethereum block number
-  console.log(`[DEBUG] Current Ethereum block number: ${blockNumber}`);
+  const logger = createLogger(env).child({
+    module: 'tools',
+    function: 'fetchActiveProposals',
+  });
 
-  // Query the Lil Nouns subgraph for active proposals using current block number
+  logger.debug('Fetching active proposals');
+
+  const wagmiConfig = createWagmiConfig(config);
+  const blockNumber = await getBlockNumber(wagmiConfig); // Get the current Ethereum block number
+
+  logger.debug({ blockNumber }, 'Current Ethereum block number');
+
+  // Query the Lil Nouns subgraph for active proposals using the current block number
+  const getProposalsQuery = gql`
+    query GetProposals($blockNumber: BigInt!) {
+      proposals(
+        orderBy: createdBlock,
+        orderDirection: desc,
+        where: {
+          status_not_in: [CANCELLED],
+          endBlock_gte: $blockNumber
+        }
+      ) {
+        id
+        title
+        createdTimestamp
+      }
+    }
+  `;
   const { proposals } = await request<Query>(
     config.lilNounsSubgraphUrl,
-    gql`
-      query GetProposals($blockNumber: BigInt!) {
-        proposals(
-          orderBy: createdBlock,
-          orderDirection: desc,
-          where: {
-            status_not_in: [CANCELLED],
-            endBlock_gte: $blockNumber
-          }
-        ) {
-          id
-          title
-          createdTimestamp
-        }
-      }
-    `,
+    getProposalsQuery,
     { blockNumber: blockNumber.toString() }
   );
 
@@ -154,28 +191,39 @@ export async function fetchActiveProposals(
     }))
   );
 
-  console.log(
-    `[DEBUG] Retrieved ${formattedProposals.length} active proposals`
+  logger.debug(
+    { proposalCount: formattedProposals.length },
+    'Retrieved active proposals'
   );
+
   return { proposals: formattedProposals };
 }
 
 /**
  * Fetches the total supply of Lil Nouns tokens.
  *
- * @param {Object} config - The configuration object obtained from the getConfig function.
+ * @param {Env} env - The environment object containing configuration and dependencies.
+ * @param {ReturnType<typeof getConfig>} config - The configuration object obtained from the getConfig function.
  * @return {Promise<Object>} An object containing the total supply of tokens as a number.
  */
 export async function fetchLilNounsTokenTotalSupply(
+  env: Env,
   config: ReturnType<typeof getConfig>
 ) {
-  console.log('[DEBUG] Fetching token total supply');
+  const logger = createLogger(env).child({
+    module: 'tools',
+    function: 'fetchLilNounsTokenTotalSupply',
+  });
+
+  logger.debug('Fetching token total supply');
 
   const wagmiConfig = createWagmiConfig(config);
   const totalSupply = await readLilNounsTokenTotalSupply(wagmiConfig, {});
 
-  console.log(
-    `[DEBUG] Retrieved token total supply: ${formatEther(totalSupply)}`
+  const formattedSupply = formatEther(totalSupply);
+  logger.debug(
+    { totalSupply: formattedSupply },
+    'Retrieved token total supply'
   );
 
   return { totalSupply: Number(totalSupply) };
@@ -184,15 +232,23 @@ export async function fetchLilNounsTokenTotalSupply(
 /**
  * Fetches the summary of a specific "Lil Nouns" proposal by its ID.
  *
+ * @param env
  * @param {object} config - The configuration object for the subgraph, obtained by calling the `getConfig` function. It contains the `lilNounsSubgraphUrl` for querying data.
  * @param {number} proposalId - The unique identifier of the proposal whose summary is to be fetched.
  * @return {Promise<object>} A promise that resolves to an object containing the proposal's summary, including id, title, description, status, and a formatted `createdTimestamp`.
  */
 export async function fetchLilNounsProposalSummary(
+  env: Env,
   config: ReturnType<typeof getConfig>,
   proposalId: number
 ) {
-  console.log('[DEBUG] Fetching proposal summary');
+  const logger = createLogger(env).child({
+    module: 'tools',
+    function: 'fetchLilNounsProposalSummary',
+    proposalId,
+  });
+
+  logger.debug('Fetching proposal summary');
 
   const { proposal } = await request<Query>(
     config.lilNounsSubgraphUrl,
@@ -209,15 +265,12 @@ export async function fetchLilNounsProposalSummary(
     { proposalId }
   );
 
-  console.log(
-    `[DEBUG] Retrieved proposal summary: ${JSON.stringify({
-      proposal: {
-        title: proposal?.title,
-      },
-    })}`
+  logger.debug(
+    { proposalTitle: proposal?.title },
+    'Retrieved proposal summary'
   );
 
-  const state = await fetchLilNounsProposalsState(config, proposalId);
+  const state = await fetchLilNounsProposalsState(env, config, proposalId);
 
   return {
     proposal: {
@@ -258,15 +311,23 @@ export enum ProposalState {
 /**
  * Fetches the on-chain state of a specific Lil Nouns proposal.
  *
+ * @param env
  * @param {Object} config - The configuration object obtained from the getConfig function.
  * @param {number} proposalId - The ID of the proposal to fetch the state for.
  * @return {Promise<Object>} An object containing the proposal state as both numeric value and string representation.
  */
 export async function fetchLilNounsProposalsState(
+  env: Env,
   config: ReturnType<typeof getConfig>,
   proposalId: number
 ) {
-  console.log('[DEBUG] Fetching proposal state for ID:', proposalId);
+  const logger = createLogger(env).child({
+    module: 'tools',
+    function: 'fetchLilNounsProposalsState',
+    proposalId,
+  });
+
+  logger.debug('Fetching proposal state');
 
   const wagmiConfig = createWagmiConfig(config);
   const state = await readLilNounsGovernorState(wagmiConfig, {
@@ -276,7 +337,7 @@ export async function fetchLilNounsProposalsState(
   const stateNumber = Number(state);
   const stateText = ProposalState[stateNumber];
 
-  console.log('[DEBUG] Retrieved proposal state:', stateNumber, stateText);
+  logger.debug({ stateNumber, stateText }, 'Retrieved proposal state');
 
   return {
     state: stateNumber,
