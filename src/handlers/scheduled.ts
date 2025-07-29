@@ -226,7 +226,7 @@ async function handleNewOneToOneMessages(
     );
 
     // Send the AI-generated response back to the conversation on Farcaster
-    if (config.env === 'development') {
+    if (config.agent.features.sendDirectMessagesToOneToOneConversations) {
       conversationLogger.info(
         {
           messageContent,
@@ -422,7 +422,7 @@ async function handleNewMentionsInGroups(
 
       // Send the AI-generated response back to the conversation on Farcaster
       // Includes the original message ID for proper threading and mentions the original sender
-      if (config.env === 'development') {
+      if (config.agent.features.sendDirectMessagesToGroupConversations) {
         messageLogger.info(
           {
             messageContent,
