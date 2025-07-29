@@ -55,6 +55,13 @@ export async function handleUnreadConversations(env: Env) {
   // Process each conversation individually
   const [groups, chats] = pipe(
     conversations,
+    // Filter conversations that have not been updated in the last week
+    // This helps in avoiding processing stale conversations
+    filter(
+      c =>
+        Number(c.lastMessage?.serverTimestamp ?? 0) <
+        DateTime.now().minus({ weeks: 1 }).startOf('week').toMillis()
+    ),
     partition(c => c.isGroup)
   );
 
