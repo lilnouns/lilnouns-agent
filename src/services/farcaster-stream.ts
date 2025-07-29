@@ -69,16 +69,33 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
+
+    // Initialize logger with consistent child configuration pattern
     this.logger = createLogger(env).child({
       module: 'FarcasterStreamWebsocket',
       durableObjectId: ctx.id.toString(),
     });
 
-    // Initialize configuration
+    // Initialize configuration from environment variables
     this.config = getConfig(env);
 
-    // Schedule the first heartbeat
-    this.ctx.storage.setAlarm(Date.now() + this.heartbeatInterval);
+    // Schedule initial heartbeat alarm if none exists
+    // Using proper promise handling with explicit logging for both success and error cases
+    this.ctx.storage
+      .getAlarm()
+      .then(existingAlarm => {
+        if (existingAlarm === null) {
+          this.ctx.storage.setAlarm(Date.now() + this.heartbeatInterval);
+          this.logger.debug('Initial heartbeat alarm scheduled');
+        } else {
+          this.logger.debug(
+            'Existing alarm found, skipping initial alarm setup'
+          );
+        }
+      })
+      .catch(error => {
+        this.logger.error({ error }, 'Failed to check existing alarm');
+      });
   }
 
   // HTTP entrypoint to trigger connection
