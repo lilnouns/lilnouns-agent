@@ -10,21 +10,97 @@ import type { getConfig } from '@/lib/config';
 import { createLogger } from '@/lib/logger';
 
 /**
+ * Represents the context required for Farcaster API operations.
+ * Contains environment variables and application configuration.
+ *
+ * @property {Env} env - Environment variables and runtime connections
+ * @property {ReturnType<typeof getConfig>} config - Application configuration settings
+ */
+interface FarcasterContext {
+  env: Env;
+  config: ReturnType<typeof getConfig>;
+}
+
+/**
+ * Fetches detailed information for a specific unread conversation by its ID.
+ * Retrieves conversation data including participants and metadata from the Farcaster API.
+ *
+ * @param context - Environment and configuration context required for Farcaster API operations
+ * @param conversationId - The unique identifier of the conversation to fetch
+ * @returns Promise resolving to an object containing the conversation data or null if not found
+ *
+ * @example
+ * ```typescript
+ * const { conversation } = await fetchLilNounsUnreadConversation(
+ *   { env, config },
+ *   'conversation-123'
+ * );
+ * if (conversation) {
+ *   console.log(`Found conversation with ${conversation.activeParticipantsCount} participants`);
+ * }
+ * ```
+ */
+export async function fetchLilNounsUnreadConversation(
+  context: FarcasterContext,
+  conversationId: string
+) {
+  const { env, config } = context;
+
+  const logger = createLogger(env).child({
+    module: 'farcaster',
+    function: 'fetchLilNounsUnreadConversation',
+    conversationId,
+  });
+
+  logger.debug('Fetching unread conversation by ID');
+
+  // Fetch the conversation details from Farcaster API
+  const { data, error } = await getDirectCastConversation({
+    auth: () => config.farcasterAuthToken,
+    query: {
+      conversationId,
+    },
+  });
+
+  if (error) {
+    logger.error({ error }, 'Error fetching conversation by ID');
+    return { conversation: null };
+  }
+
+  const conversation = data?.result?.conversation ?? null;
+
+  if (!conversation) {
+    logger.warn('No conversation found with the provided ID');
+    return { conversation: null };
+  }
+
+  logger.debug(
+    {
+      conversationId,
+      participantsCount: conversation.activeParticipantsCount,
+      isGroup: conversation.isGroup,
+    },
+    'Successfully fetched conversation details'
+  );
+
+  return { conversation };
+}
+
+/**
  * Fetches unread conversations for the Lil Nouns bot from Farcaster.
  *
- * @param env - The environment variables containing configuration settings
- * @param config - Configuration object with Farcaster auth token
+ * @param context - Object containing environment and configuration context
  * @returns An object containing an array of unread DirectCastConversations
  */
 export async function fetchLilNounsUnreadConversations(
-  env: Env,
-  config: ReturnType<typeof getConfig>
+  context: FarcasterContext
 ) {
+  const { env, config } = context;
+
   const logger = createLogger(env).child({
     module: 'farcaster',
     function: 'fetchLilNounsUnreadConversations',
   });
-
   logger.debug('Fetching Lil Nouns unread conversations');
 
   let conversations: DirectCastConversation[] = [];
@@ -61,22 +137,21 @@ export async function fetchLilNounsUnreadConversations(
 /**
  * Retrieves recent messages from a specific Farcaster conversation.
  *
- * @param env - The environment variables containing configuration settings
- * @param config - Configuration object with Farcaster auth token
+ * @param context - Object containing environment and configuration context
  * @param conversationId - The unique identifier of the conversation to fetch messages from
  * @returns An object containing an array of text messages from the conversation
  */
 export async function fetchLilNounsConversationMessages(
-  env: Env,
-  config: ReturnType<typeof getConfig>,
+  context: FarcasterContext,
   conversationId: string
 ) {
+  const { env, config } = context;
+
   const logger = createLogger(env).child({
     module: 'farcaster',
     function: 'fetchLilNounsConversationMessages',
     conversationId,
   });
-
   logger.debug('Fetching messages for conversation');
 
   let messages: DirectCastMessage[] = [];
@@ -112,22 +187,21 @@ export async function fetchLilNounsConversationMessages(
 /**
  * Retrieves the list of participants in a specific Farcaster conversation.
  *
- * @param env - The environment variables containing configuration settings
- * @param config - Configuration object with Farcaster auth token
+ * @param context - Object containing environment and configuration context
  * @param conversationId - The unique identifier of the conversation
  * @returns An object containing an array of participants in the conversation
  */
 export async function fetchLilNounsConversationParticipants(
-  env: Env,
-  config: ReturnType<typeof getConfig>,
+  context: FarcasterContext,
   conversationId: string
 ) {
+  const { env, config } = context;
+
   const logger = createLogger(env).child({
     module: 'farcaster',
     function: 'fetchLilNounsConversationParticipants',
     conversationId,
   });
-
   logger.debug('Fetching participants for conversation');
 
   // Get the conversation details
@@ -158,25 +232,24 @@ export async function fetchLilNounsConversationParticipants(
  * Marks a specific Farcaster conversation as read using WebSocket connection.
  * Falls back gracefully if WebSocket operations fail or timeout.
  *
- * @param env - The environment variables containing configuration settings
- * @param config - Configuration object with Farcaster auth token
+ * @param context - Object containing environment and configuration context
  * @param conversationId - The unique identifier of the conversation to mark as read
- * @param retryAttempt - Current retry attempt (used internally)
+ * @param retryAttempt - Current retry attempt (used internally for exponential backoff)
  * @returns An object containing success status and optional error information
  */
 export async function markLilNounsConversationAsRead(
-  env: Env,
-  config: ReturnType<typeof getConfig>,
+  context: FarcasterContext,
   conversationId: string,
   retryAttempt = 0
 ) {
+  const { env, config } = context;
+
   const logger = createLogger(env).child({
     module: 'farcaster',
     function: 'markLilNounsConversationAsRead',
     conversationId,
     retryAttempt,
   });
-
   logger.debug('Attempting to mark conversation as read');
 
   // Validate the Farcaster auth token before attempting WebSocket connection
@@ -343,8 +416,7 @@ export async function markLilNounsConversationAsRead(
 
       await new Promise(resolve => setTimeout(resolve, delay));
       return markLilNounsConversationAsRead(
-        env,
-        config,
+        context,
         conversationId,
         retryAttempt + 1
       );
