@@ -134,7 +134,7 @@ export function getConfig(env: Env): Config {
       features: {
         handleGroupConversations: true,
         handleOneToOneConversations: true,
-        sendDirectMessagesToGroupConversations: false,
+        sendDirectMessagesToGroupConversations: true,
         sendDirectMessagesToOneToOneConversations: true,
       },
       defaults: {
