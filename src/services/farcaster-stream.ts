@@ -1,6 +1,9 @@
 import { DurableObject } from 'cloudflare:workers';
 import type { Logger } from 'pino';
+import { processOneToOneConversation } from '@/handlers/scheduled';
+import { getConfig } from '@/lib/config';
 import { createLogger } from '@/lib/logger';
+import { fetchLilNounsUnreadConversation } from '@/services/farcaster';
 
 interface FarcasterMessage {
   messageType:
@@ -52,6 +55,7 @@ interface RefreshPayload {
 }
 
 export class FarcasterStreamWebsocket extends DurableObject<Env> {
+  private config: ReturnType<typeof getConfig>;
   private ws: WebSocket | null = null;
   private backoff = 1000;
   private readonly logger: Logger;
@@ -66,6 +70,9 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
       module: 'FarcasterStreamWebsocket',
       durableObjectId: ctx.id.toString(),
     });
+
+    // Initialize configuration
+    this.config = getConfig(env);
   }
 
   // HTTP entrypoint to trigger connection
@@ -278,6 +285,38 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
           'Refresh payload missing required message data'
         );
         return;
+      }
+
+      // Fetch the conversation details
+      const { conversation } = await fetchLilNounsUnreadConversation(
+        { env: this.env, config: this.config },
+        conversationId
+      );
+
+      if (!conversation) {
+        this.logger.warn(
+          { conversationId },
+          'No conversation found for refresh'
+        );
+        return;
+      }
+
+      if (conversation.isGroup) {
+        this.logger.info(
+          { conversationId, messageId: message.messageId },
+          'Processing group conversation update'
+        );
+        // Handle group conversation updates if needed
+      } else {
+        this.logger.info(
+          { conversationId, messageId: message.messageId },
+          'Processing one-to-one conversation update'
+        );
+        // Process one-to-one conversation updates
+        await processOneToOneConversation(
+          { env: this.env, config: this.config },
+          conversationId
+        );
       }
 
       // Store relevant conversation data
