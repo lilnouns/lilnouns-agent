@@ -4,6 +4,7 @@ on:
   push: # When we push the changes.
     branches: # Only for these branches.
       - master
+      - develop
       - bugfix/*
       - hotfix/*
       - feature/*
