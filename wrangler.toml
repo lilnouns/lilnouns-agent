@@ -1,7 +1,7 @@
 name = "lilnouns-agent"
 main = "src/index.ts"
 compatibility_date = "2025-07-19"
-workers_dev = true
+workers_dev = false
 
 [observability]
 enabled = true
