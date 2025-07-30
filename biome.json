@@ -3,12 +3,12 @@
   "files": {
     "includes": [
       "**",
-      "!**/node_modules/",
-      "!**/pnpm-lock.yaml",
-      "!**/package-lock.json",
-      "!**/yarn.lock",
+      "!**/.wrangler/",
       "!**/dist/",
-      "!**/.wrangler/"
+      "!**/node_modules/",
+      "!**/package-lock.json",
+      "!**/pnpm-lock.yaml",
+      "!**/yarn.lock"
     ]
   },
   "formatter": {
