@@ -29,69 +29,80 @@ if (typeof BigInt.prototype.toJSON !== 'function') {
 
 /**
  * AI tools configuration for function calling
+ * Enhanced for better AI model detection and understanding
  */
 export const aiTools = [
   {
-    type: 'function',
     name: 'fetchLilNounsActiveProposals',
     description:
-      'Fetch Lil Nouns active proposals that are currently open for voting, ordered by creation time',
-    parameters: {},
+      'Retrieve all currently active Lil Nouns DAO governance proposals that are open for voting. Returns proposals with their IDs, titles, creation timestamps, and direct links. Use this when users ask about current proposals, what to vote on, or active governance matters.',
+    parameters: {
+      type: 'object',
+      properties: {},
+      required: [],
+    },
   },
   {
-    type: 'function',
     name: 'fetchLilNounsProposalsState',
     description:
-      'Fetch the current on-chain state of a Lil Nouns governance proposal by its ID, returning both the numeric state value and text representation (Pending, Active, Canceled, etc.)',
+      'Get the current on-chain governance state of a specific Lil Nouns proposal by its numeric ID. Returns both the numeric state value (0-8) and human-readable text (Pending, Active, Canceled, Defeated, Succeeded, Queued, Expired, Executed, Vetoed). Essential for checking if a proposal can still be voted on.',
     parameters: {
       type: 'object',
       properties: {
         proposalId: {
           type: 'number',
-          description: 'Unique identifier of the proposal to check state for',
+          description:
+            'The unique numeric identifier of the proposal to check (e.g., 123, 456)',
         },
       },
       required: ['proposalId'],
-      additionalProperties: false,
     },
   },
   {
-    type: 'function',
     name: 'fetchLilNounsCurrentAuction',
     description:
-      'Fetch details about the currently active Lil Nouns auction, including the Noun ID, current price in ETH, and auction link',
-    parameters: {},
+      'Get real-time information about the currently active Lil Nouns NFT auction, including the Noun ID being auctioned, current highest bid price in ETH, and the auction website link. Use this when users ask about current auctions, bidding, or want to participate in auctions.',
+    parameters: {
+      type: 'object',
+      properties: {},
+      required: [],
+    },
   },
   {
-    type: 'function',
     name: 'fetchLilNounsTokenTotalSupply',
     description:
-      'Fetch the total supply of Lil Nouns tokens that have been minted to date',
-    parameters: {},
+      'Retrieve the total number of Lil Nouns NFT tokens that have been minted to date. This represents the complete collection size and is useful for statistics, collection information, or when users ask about how many Lil Nouns exist.',
+    parameters: {
+      type: 'object',
+      properties: {},
+      required: [],
+    },
   },
   {
-    type: 'function',
     name: 'fetchLilNounsProposalSummary',
     description:
-      'Fetch comprehensive details about a specific Lil Nouns governance proposal by its ID, including title, description (AI-summarized), status, creation timestamp, and link to the proposal page',
+      'Get comprehensive details about a specific Lil Nouns governance proposal including title, AI-generated summary of the description, current status, creation timestamp, and direct link to the proposal page. Use this when users ask for details about a specific proposal or want to understand what a proposal is about.',
     parameters: {
       type: 'object',
       properties: {
         proposalId: {
           type: 'number',
-          description: 'Unique identifier of the proposal to fetch details for',
+          description:
+            'The unique numeric identifier of the proposal to fetch detailed information for',
         },
       },
       required: ['proposalId'],
-      additionalProperties: false,
     },
   },
   {
-    type: 'function',
     name: 'getCurrentIsoDateTimeUtc',
     description:
-      'Get the current date and time in ISO 8601 format in UTC timezone, useful for timestamping operations and determining time-based conditions',
-    parameters: {},
+      'Get the current date and time in ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ) in UTC timezone. Essential for timestamping responses, determining if proposals or auctions are still active, and providing time-sensitive information to users.',
+    parameters: {
+      type: 'object',
+      properties: {},
+      required: [],
+    },
   },
 ] as const;
 
@@ -104,7 +115,7 @@ export const aiTools = [
  */
 export async function fetchCurrentAuction(
   env: Env,
-  config: ReturnType<typeof getConfig>
+  config: ReturnType<typeof getConfig>,
 ) {
   const logger = createLogger(env).child({
     module: 'tools',
@@ -116,7 +127,7 @@ export async function fetchCurrentAuction(
   const wagmiConfig = createWagmiConfig(config);
   const [nounId, , , price] = await readLilNounsAuctionFetchNextNoun(
     wagmiConfig,
-    {}
+    {},
   );
 
   const auction = {
@@ -142,7 +153,7 @@ export async function fetchCurrentAuction(
  */
 export async function fetchActiveProposals(
   env: Env,
-  config: ReturnType<typeof getConfig>
+  config: ReturnType<typeof getConfig>,
 ) {
   const logger = createLogger(env).child({
     module: 'tools',
@@ -176,7 +187,7 @@ export async function fetchActiveProposals(
   const { proposals } = await request<Query>(
     config.lilNounsSubgraphUrl,
     getProposalsQuery,
-    { blockNumber: blockNumber.toString() }
+    { blockNumber: blockNumber.toString() },
   );
 
   // Format timestamps to ISO using luxon and remeda
@@ -185,15 +196,15 @@ export async function fetchActiveProposals(
     map(proposal => ({
       ...proposal,
       createdTimestamp: DateTime.fromSeconds(
-        Number(proposal.createdTimestamp)
+        Number(proposal.createdTimestamp),
       ).toISO(),
       link: `https://lilnouns.camp/proposals/${proposal.id}`,
-    }))
+    })),
   );
 
   logger.debug(
     { proposalCount: formattedProposals.length },
-    'Retrieved active proposals'
+    'Retrieved active proposals',
   );
 
   return { proposals: formattedProposals };
@@ -208,7 +219,7 @@ export async function fetchActiveProposals(
  */
 export async function fetchLilNounsTokenTotalSupply(
   env: Env,
-  config: ReturnType<typeof getConfig>
+  config: ReturnType<typeof getConfig>,
 ) {
   const logger = createLogger(env).child({
     module: 'tools',
@@ -223,7 +234,7 @@ export async function fetchLilNounsTokenTotalSupply(
   const formattedSupply = formatEther(totalSupply);
   logger.debug(
     { totalSupply: formattedSupply },
-    'Retrieved token total supply'
+    'Retrieved token total supply',
   );
 
   return { totalSupply: Number(totalSupply) };
@@ -240,7 +251,7 @@ export async function fetchLilNounsTokenTotalSupply(
 export async function fetchLilNounsProposalSummary(
   env: Env,
   config: ReturnType<typeof getConfig>,
-  proposalId: number
+  proposalId: number,
 ) {
   const logger = createLogger(env).child({
     module: 'tools',
@@ -262,12 +273,12 @@ export async function fetchLilNounsProposalSummary(
         }
       }
     `,
-    { proposalId }
+    { proposalId },
   );
 
   logger.debug(
     { proposalTitle: proposal?.title },
-    'Retrieved proposal summary'
+    'Retrieved proposal summary',
   );
 
   const state = await fetchLilNounsProposalsState(env, config, proposalId);
@@ -277,7 +288,7 @@ export async function fetchLilNounsProposalSummary(
       ...proposal,
       status: state.stateText,
       createdTimestamp: DateTime.fromSeconds(
-        Number(proposal?.createdTimestamp)
+        Number(proposal?.createdTimestamp),
       ).toISO(),
       link: `https://lilnouns.camp/proposals/${proposal?.id}`,
     },
@@ -319,7 +330,7 @@ export enum ProposalState {
 export async function fetchLilNounsProposalsState(
   env: Env,
   config: ReturnType<typeof getConfig>,
-  proposalId: number
+  proposalId: number,
 ) {
   const logger = createLogger(env).child({
     module: 'tools',
