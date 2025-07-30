@@ -124,16 +124,28 @@ export const aiTools = [
 ] as const;
 
 /**
+ * Provides essential environment and configuration context for tool operations.
+ * This interface encapsulates the necessary dependencies for executing tools,
+ * interacting with external APIs, and accessing blockchain data.
+ *
+ * @property {Env} env - The environment object containing runtime configurations and service connections
+ * @property {ReturnType<typeof getConfig>} config - Application configuration with agent settings and feature flags
+ */
+interface ToolContext {
+  env: Env;
+  config: ReturnType<typeof getConfig>;
+}
+
+/**
  * Fetches the current auction data for Lil Nouns.
  *
- * @param {Env} env - The environment object containing configuration and dependencies.
- * @param {ReturnType<typeof getConfig>} config - The configuration object returned by the `getConfig` function.
+ * @param {ToolContext} context - The context object containing environment and configuration.
  * @return {Promise<Object>} A promise that resolves to an object containing the current auction details.
  */
-export async function fetchCurrentAuction(
-  env: Env,
-  config: ReturnType<typeof getConfig>,
-) {
+export async function fetchCurrentAuction(context: ToolContext) {
+  const { env, config } = context;
+
+  // Create a logger instance for this function
   const logger = createLogger(env).child({
     module: 'tools',
     function: 'fetchCurrentAuction',
@@ -164,14 +176,13 @@ export async function fetchCurrentAuction(
  * Active proposals are those that have not been canceled and have an ending block greater than or equal to the current block.
  * The retrieved proposals include their id, title, and creation timestamp, with timestamps formatted to ISO format.
  *
- * @param {Env} env - The environment object containing configuration and dependencies.
- * @param {ReturnType<typeof getConfig>} config - The configuration object used to initialize the Wagmi settings and subgraph query.
- * @return {Promise<{ proposals: Array<{ id: string, title: string, createdTimestamp: string }> }>} A promise that resolves to an object containing an array of active proposals. Each proposal includes its id, title, and formatted creation timestamp.
+ * @param {ToolContext} context - The context object containing environment and configuration.
+ * @return {Promise<{ proposals: Array<{ id: string, title: string, createdTimestamp: string, link: string }> }>} A promise that resolves to an object containing an array of active proposals. Each proposal includes its id, title, formatted creation timestamp, and a link to view the proposal.
  */
-export async function fetchActiveProposals(
-  env: Env,
-  config: ReturnType<typeof getConfig>,
-) {
+export async function fetchActiveProposals(context: ToolContext) {
+  const { env, config } = context;
+
+  // Create a logger instance for this function
   const logger = createLogger(env).child({
     module: 'tools',
     function: 'fetchActiveProposals',
@@ -230,14 +241,13 @@ export async function fetchActiveProposals(
 /**
  * Fetches the total supply of Lil Nouns tokens.
  *
- * @param {Env} env - The environment object containing configuration and dependencies.
- * @param {ReturnType<typeof getConfig>} config - The configuration object obtained from the getConfig function.
- * @return {Promise<Object>} An object containing the total supply of tokens as a number.
+ * @param {ToolContext} context - The context object containing environment and configuration.
+ * @return {Promise<{ totalSupply: number }>} An object containing the total supply of tokens as a number.
  */
-export async function fetchLilNounsTokenTotalSupply(
-  env: Env,
-  config: ReturnType<typeof getConfig>,
-) {
+export async function fetchLilNounsTokenTotalSupply(context: ToolContext) {
+  const { env, config } = context;
+
+  // Create a logger instance for this function
   const logger = createLogger(env).child({
     module: 'tools',
     function: 'fetchLilNounsTokenTotalSupply',
@@ -260,8 +270,7 @@ export async function fetchLilNounsTokenTotalSupply(
 /**
  * Fetches the current real-time price of Ethereum (ETH) in USD from CoinGecko API.
  *
- * @param {Env} env - The environment object containing configuration and dependencies.
- * @param {ReturnType<typeof getConfig>} config - The configuration object obtained from the getConfig function.
+ * @param {Env} env - The environment object containing runtime configurations and service connections.
  * @return {Promise<{ ethPrice: number }>} A promise that resolves to an object containing the ETH price in USD as a float.
  * @throws {Error} When the API request fails or the response data is invalid.
  */
@@ -344,16 +353,17 @@ export async function getEthPrice(env: Env): Promise<{ ethPrice: number }> {
 /**
  * Fetches the summary of a specific "Lil Nouns" proposal by its ID.
  *
- * @param env
- * @param {object} config - The configuration object for the subgraph, obtained by calling the `getConfig` function. It contains the `lilNounsSubgraphUrl` for querying data.
+ * @param {ToolContext} context - The context object containing environment and configuration.
  * @param {number} proposalId - The unique identifier of the proposal whose summary is to be fetched.
- * @return {Promise<object>} A promise that resolves to an object containing the proposal's summary, including id, title, description, status, and a formatted `createdTimestamp`.
+ * @return {Promise<{ proposal: { id: string, title: string, description: string, status: string, createdTimestamp: string, link: string } }>} A promise that resolves to an object containing the proposal's summary, including id, title, description, status, formatted creation timestamp, and a link to view the proposal.
  */
 export async function fetchLilNounsProposalSummary(
-  env: Env,
-  config: ReturnType<typeof getConfig>,
+  context: ToolContext,
   proposalId: number,
 ) {
+  const { env, config } = context;
+
+  // Create a logger instance for this function
   const logger = createLogger(env).child({
     module: 'tools',
     function: 'fetchLilNounsProposalSummary',
@@ -382,7 +392,7 @@ export async function fetchLilNounsProposalSummary(
     'Retrieved proposal summary',
   );
 
-  const state = await fetchLilNounsProposalsState(env, config, proposalId);
+  const state = await fetchLilNounsProposalsState(context, proposalId);
 
   return {
     proposal: {
@@ -397,7 +407,7 @@ export async function fetchLilNounsProposalSummary(
 }
 
 /**
- * Gets the current date and time in ISO 8601 format in UTC.
+ * Gets the current date and time in ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ) in UTC timezone.
  *
  * @return {string} The current date and time as an ISO 8601 formatted string in UTC.
  */
@@ -422,16 +432,17 @@ export enum ProposalState {
 /**
  * Fetches the on-chain state of a specific Lil Nouns proposal.
  *
- * @param env
- * @param {Object} config - The configuration object obtained from the getConfig function.
- * @param {number} proposalId - The ID of the proposal to fetch the state for.
- * @return {Promise<Object>} An object containing the proposal state as both numeric value and string representation.
+ * @param {ToolContext} context - The context object containing environment and configuration.
+ * @param {number} proposalId - The unique identifier of the proposal to fetch the state for.
+ * @return {Promise<{ state: number, stateText: string }>} An object containing the proposal state as both numeric value and string representation.
  */
 export async function fetchLilNounsProposalsState(
-  env: Env,
-  config: ReturnType<typeof getConfig>,
+  context: ToolContext,
   proposalId: number,
 ) {
+  const { env, config } = context;
+
+  // Create a logger instance for this function
   const logger = createLogger(env).child({
     module: 'tools',
     function: 'fetchLilNounsProposalsState',
