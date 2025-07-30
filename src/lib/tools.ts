@@ -27,6 +27,13 @@ if (typeof BigInt.prototype.toJSON !== 'function') {
   };
 }
 
+// Type definition for CoinGecko API response
+interface CoinGeckoResponse {
+  ethereum: {
+    usd: number;
+  };
+}
+
 /**
  * AI tools configuration for function calling
  * Enhanced for better AI model detection and understanding
@@ -98,6 +105,16 @@ export const aiTools = [
     name: 'getCurrentIsoDateTimeUtc',
     description:
       'Get the current date and time in ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ) in UTC timezone. Essential for timestamping responses, determining if proposals or auctions are still active, and providing time-sensitive information to users.',
+    parameters: {
+      type: 'object',
+      properties: {},
+      required: [],
+    },
+  },
+  {
+    name: 'getEthPrice',
+    description:
+      'Get the current real-time price of Ethereum (ETH) in USD from CoinGecko API. Returns the current market price as a float value. Use this when users ask about ETH price, current Ethereum value, or need pricing information for calculations.',
     parameters: {
       type: 'object',
       properties: {},
@@ -241,6 +258,90 @@ export async function fetchLilNounsTokenTotalSupply(
 }
 
 /**
+ * Fetches the current real-time price of Ethereum (ETH) in USD from CoinGecko API.
+ *
+ * @param {Env} env - The environment object containing configuration and dependencies.
+ * @param {ReturnType<typeof getConfig>} config - The configuration object obtained from the getConfig function.
+ * @return {Promise<{ ethPrice: number }>} A promise that resolves to an object containing the ETH price in USD as a float.
+ * @throws {Error} When the API request fails or the response data is invalid.
+ */
+export async function getEthPrice(env: Env): Promise<{ ethPrice: number }> {
+  const logger = createLogger(env).child({
+    module: 'tools',
+    function: 'getEthPrice',
+  });
+
+  logger.debug('Fetching ETH price from CoinGecko API');
+
+  const maxRetries = 3;
+  const retryDelay = 1000; // 1 second
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(
+        'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd',
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            'User-Agent': 'lilnouns-agent/1.0',
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = (await response.json()) as unknown;
+
+      // Validate response structure
+      if (!data || typeof data !== 'object') {
+        throw new Error('Invalid response format: expected object');
+      }
+
+      const typedData = data as CoinGeckoResponse;
+
+      if (!typedData.ethereum || typeof typedData.ethereum !== 'object') {
+        throw new Error('Invalid response format: missing ethereum data');
+      }
+
+      if (typeof typedData.ethereum.usd !== 'number') {
+        throw new Error('Invalid response format: ETH price is not a number');
+      }
+
+      const ethPrice = typedData.ethereum.usd;
+
+      logger.debug({ ethPrice, attempt }, 'Successfully retrieved ETH price');
+
+      return { ethPrice };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+
+      logger.warn(
+        { attempt, maxRetries, error: errorMessage },
+        `Failed to fetch ETH price (attempt ${attempt}/${maxRetries})`,
+      );
+
+      if (attempt === maxRetries) {
+        logger.error(
+          { error: errorMessage },
+          'Failed to fetch ETH price after all retry attempts',
+        );
+        throw new Error(`Failed to fetch ETH price: ${errorMessage}`);
+      }
+
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, retryDelay * attempt));
+    }
+  }
+
+  // This should never be reached, but TypeScript requires it
+  throw new Error('Unexpected error in getEthPrice function');
+}
+
+/**
  * Fetches the summary of a specific "Lil Nouns" proposal by its ID.
  *
  * @param env
@@ -308,7 +409,6 @@ export function getCurrentIsoDateTimeUtc(): string {
  * Enum representing the different states a proposal can be in.
  */
 export enum ProposalState {
-  Pending,
   Active,
   Canceled,
   Defeated,
