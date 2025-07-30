@@ -35,7 +35,8 @@
 
   // Environment variables
   "vars": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "LOG_LEVEL": "debug"
   },
 
   // Durable Objects bindings
