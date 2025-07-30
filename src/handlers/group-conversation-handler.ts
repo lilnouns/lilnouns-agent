@@ -18,6 +18,7 @@ import { generateContextText, handleAiToolCalls } from '@/lib/ai';
 import { getLastFetchTime } from '@/lib/cache';
 import { createLogger } from '@/lib/logger';
 import { agentSystemMessage } from '@/lib/prompts';
+import { aiTools } from '@/lib/tools';
 import {
   fetchLilNounsConversationMessages,
   markLilNounsConversationAsRead,
@@ -181,6 +182,7 @@ export async function processGroupConversation(
           ),
           ...toolsMessage,
         ],
+        tools: aiTools,
       },
       {
         gateway: {

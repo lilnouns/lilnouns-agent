@@ -18,6 +18,7 @@ import { generateContextText, handleAiToolCalls } from '@/lib/ai';
 import { getLastFetchTime } from '@/lib/cache';
 import { createLogger } from '@/lib/logger';
 import { agentSystemMessage } from '@/lib/prompts';
+import { aiTools } from '@/lib/tools';
 import {
   fetchLilNounsConversationMessages,
   fetchLilNounsConversationParticipants,
@@ -35,7 +36,7 @@ import { stripMarkdown } from '@/utils/text';
  */
 export async function handleNewOneToOneMessages(
   context: ConversationContext,
-  conversations: DirectCastConversation[]
+  conversations: DirectCastConversation[],
 ) {
   const { env } = context;
 
@@ -72,7 +73,7 @@ export async function handleNewOneToOneMessages(
  */
 export async function processOneToOneConversation(
   context: ConversationContext,
-  conversationId: string
+  conversationId: string,
 ): Promise<void> {
   const { env, config } = context;
 
@@ -88,19 +89,19 @@ export async function processOneToOneConversation(
   // Fetch messages from this conversation
   const { messages } = await fetchLilNounsConversationMessages(
     context,
-    conversationId
+    conversationId,
   );
 
   const { participants } = await fetchLilNounsConversationParticipants(
     context,
-    conversationId
+    conversationId,
   );
 
   // If no messages found, skip this conversation or if the last message is from the agent
   if (last(messages)?.senderFid === config.agent.fid) {
     conversationLogger.debug(
       { agentFid: config.agent.fid },
-      'Skipping conversation already handled by the agent'
+      'Skipping conversation already handled by the agent',
     );
     return;
   }
@@ -115,8 +116,8 @@ export async function processOneToOneConversation(
       filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
       filter(m => m.senderFid !== config.agent.fid),
       flatMap(m => m.message),
-      join('\n')
-    )
+      join('\n'),
+    ),
   );
 
   // Filter messages to only include those since last and handle tool calls for the messages
@@ -130,8 +131,8 @@ export async function processOneToOneConversation(
       map(m => ({
         role: m.senderFid === config.agent.fid ? 'assistant' : 'user',
         content: m.message,
-      }))
-    )
+      })),
+    ),
   );
 
   // Generate a final AI response incorporating any tool call results
@@ -153,10 +154,11 @@ export async function processOneToOneConversation(
           map(m => ({
             role: m.senderFid === config.agent.fid ? 'assistant' : 'user',
             content: m.message,
-          }))
+          })),
         ),
         ...toolsMessage,
       ],
+      tools: aiTools,
     },
     {
       gateway: {
@@ -164,7 +166,7 @@ export async function processOneToOneConversation(
         skipCache: false,
         cacheTtl: config.agent.cacheTtl,
       },
-    }
+    },
   );
 
   conversationLogger.debug({ response }, 'AI generated response');
@@ -174,7 +176,7 @@ export async function processOneToOneConversation(
 
   conversationLogger.debug(
     { messageContent },
-    'Sending message to conversation'
+    'Sending message to conversation',
   );
 
   // Send the AI-generated response back to the conversation on Farcaster
@@ -186,8 +188,8 @@ export async function processOneToOneConversation(
           pipe(
             participants,
             filter(p => p.fid !== config.agent.fid),
-            first<Participant[]>
-          )?.fid ?? 0
+            first<Participant[]>,
+          )?.fid ?? 0,
         ),
         idempotencyKey: crypto.randomUUID(),
         message: messageContent,
@@ -197,7 +199,7 @@ export async function processOneToOneConversation(
     if (error) {
       conversationLogger.error(
         { error },
-        'Error sending message to conversation'
+        'Error sending message to conversation',
       );
     } else {
       conversationLogger.info('Message sent successfully');
@@ -210,12 +212,12 @@ export async function processOneToOneConversation(
           pipe(
             participants,
             filter(p => p.fid !== config.agent.fid),
-            first<Participant[]>
-          )?.fid ?? 0
+            first<Participant[]>,
+          )?.fid ?? 0,
         ),
         idempotencyKey: crypto.randomUUID(),
       },
-      'Would send direct cast message to one-to-one conversation (not actually sent)'
+      'Would send direct cast message to one-to-one conversation (not actually sent)',
     );
   }
 }
