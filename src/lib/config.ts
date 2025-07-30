@@ -132,7 +132,7 @@ export function getConfig(env: Env): Config {
         lastFetch: 'conversations:last-fetch',
       },
       features: {
-        handleGroupConversations: true,
+        handleGroupConversations: false,
         handleOneToOneConversations: true,
         sendDirectMessagesToGroupConversations: true,
         sendDirectMessagesToOneToOneConversations: true,
