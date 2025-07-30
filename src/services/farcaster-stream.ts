@@ -11,18 +11,24 @@ import { fetchLilNounsUnreadConversation } from '@/services/farcaster';
 interface FarcasterMessage {
   messageType:
     | 'authenticate'
-    | 'heartbeat'
     | 'unseen'
     | 'refresh-direct-cast-conversation'
+    | 'refresh-self-direct-casts-inbox'
     | 'direct-cast-read';
   data?: string;
   payload?: Record<string, any>;
+}
+
+// Define the refresh-self-direct-casts-inbox payload structure
+interface RefreshSelfDirectCastsInboxPayload {
+  conversationId: string;
 }
 
 // Possible unseen payload types based on AsyncAPI schema
 type UnseenPayload =
   | { inboxCount: number }
   | { unreadNotificationsCount: number }
+  | { warpTransactionCount: number }
   | {
       channelFeedsUnseenStatus: Array<{
         channelKey: string;
@@ -63,7 +69,7 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
   private backoff = 1000;
   private readonly logger: Logger;
   private readonly websocketUrl = 'wss://ws.farcaster.xyz/stream';
-  private readonly heartbeatInterval = 30_000;
+  private readonly healthCheckInterval = 30_000;
   private readonly maxBackoff = 30_000;
   private readonly initialBackoff = 1000;
 
@@ -88,11 +94,11 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
       .getAlarm()
       .then(existingAlarm => {
         if (existingAlarm === null) {
-          this.ctx.storage.setAlarm(Date.now() + this.heartbeatInterval);
-          this.logger.debug('Initial heartbeat alarm scheduled');
+          this.ctx.storage.setAlarm(Date.now() + this.healthCheckInterval);
+          this.logger.debug('Initial health check alarm scheduled');
         } else {
           this.logger.debug(
-            'Existing alarm found, skipping initial alarm setup'
+            'Existing alarm found, skipping initial alarm setup',
           );
         }
       })
@@ -120,27 +126,23 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
     }
   }
 
-  // Alarm handler: sends heartbeat or triggers reconnect
+  // Alarm handler: checks connection health and triggers reconnect if needed
   async alarm(): Promise<void> {
     try {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        // Send heartbeat every 30s
-        this.ws.send(
-          JSON.stringify({
-            messageType: 'heartbeat',
-          } satisfies FarcasterMessage)
-        );
-        this.logger.debug('Heartbeat sent');
+        // Connection is healthy, just log status
+        this.logger.debug('WebSocket connection is healthy');
       } else {
         // Attempt to reconnect with backoff
+        this.logger.info('WebSocket connection not open, attempting reconnect');
         await this.connect();
       }
       // Reschedule next alarm
-      await this.ctx.storage.setAlarm(Date.now() + this.heartbeatInterval);
+      await this.ctx.storage.setAlarm(Date.now() + this.healthCheckInterval);
     } catch (error) {
       this.logger.error({ error }, 'Alarm handler failed');
       // Still reschedule to prevent hanging
-      await this.ctx.storage.setAlarm(Date.now() + this.heartbeatInterval);
+      await this.ctx.storage.setAlarm(Date.now() + this.healthCheckInterval);
     }
   }
 
@@ -170,7 +172,7 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
           JSON.stringify({
             messageType: 'authenticate',
             data: `Bearer ${token}`,
-          } satisfies FarcasterMessage)
+          } satisfies FarcasterMessage),
         );
         // Reset backoff
         this.backoff = this.initialBackoff;
@@ -190,7 +192,7 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
       this.ws.addEventListener('close', event => {
         this.logger.warn(
           { code: event.code, reason: event.reason },
-          'WebSocket connection closed'
+          'WebSocket connection closed',
         );
         this.scheduleReconnect();
       });
@@ -255,22 +257,48 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
           await this.handleRefresh(msg.payload as RefreshPayload);
           break;
         }
-        case 'heartbeat': {
-          // Handle server heartbeat if needed
-          this.logger.debug('Received heartbeat from server');
+        case 'refresh-self-direct-casts-inbox': {
+          if (!msg.payload) {
+            this.logger.warn(
+              'Refresh self direct casts inbox message missing payload field',
+            );
+            return;
+          }
+          await this.handleRefreshSelfDirectCastsInbox(
+            msg.payload as RefreshSelfDirectCastsInboxPayload,
+          );
+          break;
+        }
+        case 'authenticate': {
+          // Handle authentication response
+          this.logger.info('Received authentication response');
+          break;
+        }
+        case 'direct-cast-read': {
+          // Handle direct cast read notifications
+          this.logger.debug(
+            { payload: msg.payload },
+            'Received direct-cast-read message',
+          );
           break;
         }
         default: {
-          this.logger.info(
-            { messageType: msg.messageType },
-            'Unhandled message type'
+          this.logger.warn(
+            {
+              messageType: msg.messageType,
+              payload: msg.payload,
+              data: msg.data,
+              raw,
+            },
+            'Received unknown payload from FID ' +
+              (msg.payload?.message?.senderFid || 'unknown'),
           );
         }
       }
     } catch (error) {
       this.logger.error(
         { error, messageType: msg.messageType },
-        'Failed to handle message'
+        'Failed to handle message',
       );
     }
   }
@@ -283,19 +311,25 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
     if ('inboxCount' in payload) {
       this.logger.info(
         { inboxCount: payload.inboxCount },
-        'Received inbox count update'
+        'Received inbox count update',
       );
       // Handle inbox count
     } else if ('unreadNotificationsCount' in payload) {
       this.logger.info(
         { unreadCount: payload.unreadNotificationsCount },
-        'Received notification count update'
+        'Received notification count update',
       );
       // Handle unread notifications count
+    } else if ('warpTransactionCount' in payload) {
+      this.logger.info(
+        { warpTransactionCount: payload.warpTransactionCount },
+        'Received warp transaction count update',
+      );
+      // Handle warp transaction count
     } else if ('channelFeedsUnseenStatus' in payload) {
       this.logger.info(
         { channels: payload.channelFeedsUnseenStatus.length },
-        'Received channel feeds status update'
+        'Received channel feeds status update',
       );
       // Handle channel feeds status
     }
@@ -308,7 +342,7 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
       if (!message || !message.messageId) {
         this.logger.warn(
           { payload },
-          'Refresh payload missing required message data'
+          'Refresh payload missing required message data',
         );
         return;
       }
@@ -317,7 +351,7 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
       if (this.processingConversations.has(conversationId)) {
         this.logger.info(
           { conversationId, messageId: message.messageId },
-          'Conversation is already being processed, skipping'
+          'Conversation is already being processed, skipping',
         );
         return;
       }
@@ -325,13 +359,13 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
       // Fetch the conversation details
       const { conversation } = await fetchLilNounsUnreadConversation(
         { env: this.env, config: this.config },
-        conversationId
+        conversationId,
       );
 
       if (!conversation) {
         this.logger.warn(
           { conversationId },
-          'No conversation found for refresh'
+          'No conversation found for refresh',
         );
         return;
       }
@@ -340,7 +374,7 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
       const processingPromise = this.processConversation(
         conversation,
         conversationId,
-        message
+        message,
       );
       this.processingConversations.set(conversationId, processingPromise);
 
@@ -354,11 +388,11 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
       // Store relevant conversation data
       await this.ctx.storage.put(
         `conversation:${conversationId}:lastMessageId`,
-        message.messageId
+        message.messageId,
       );
       await this.ctx.storage.put(
         `conversation:${conversationId}:timestamp`,
-        message.serverTimestamp.toString()
+        message.serverTimestamp.toString(),
       );
 
       this.logger.info(
@@ -367,10 +401,79 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
           messageId: message.messageId,
           sender: message.senderContext.username,
         },
-        'Processed conversation update'
+        'Processed conversation update',
       );
     } catch (error) {
       this.logger.error({ error, payload }, 'Failed to handle refresh message');
+      throw error;
+    }
+  }
+
+  // Handle refresh of self direct casts inbox
+  private async handleRefreshSelfDirectCastsInbox(
+    payload: RefreshSelfDirectCastsInboxPayload,
+  ): Promise<void> {
+    try {
+      const { conversationId } = payload;
+
+      this.logger.info(
+        { conversationId },
+        'Processing self direct casts inbox refresh',
+      );
+
+      // Check if this conversation is already being processed
+      if (this.processingConversations.has(conversationId)) {
+        this.logger.info(
+          { conversationId },
+          'Conversation is already being processed, skipping self inbox refresh',
+        );
+        return;
+      }
+
+      // Fetch the conversation details
+      const { conversation } = await fetchLilNounsUnreadConversation(
+        { env: this.env, config: this.config },
+        conversationId,
+      );
+
+      if (!conversation) {
+        this.logger.warn(
+          { conversationId },
+          'No conversation found for self direct casts inbox refresh',
+        );
+        return;
+      }
+
+      // Create a processing promise and add it to the map
+      const processingPromise = this.processConversation(
+        conversation,
+        conversationId,
+        null, // No specific message for this type
+      );
+      this.processingConversations.set(conversationId, processingPromise);
+
+      try {
+        await processingPromise;
+      } finally {
+        // Always clean up the processing map entry
+        this.processingConversations.delete(conversationId);
+      }
+
+      // Store conversation data
+      await this.ctx.storage.put(
+        `conversation:${conversationId}:lastRefresh`,
+        Date.now().toString(),
+      );
+
+      this.logger.info(
+        { conversationId },
+        'Processed self direct casts inbox refresh',
+      );
+    } catch (error) {
+      this.logger.error(
+        { error, payload },
+        'Failed to handle self direct casts inbox refresh',
+      );
       throw error;
     }
   }
@@ -379,40 +482,40 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
   private async processConversation(
     conversation: any,
     conversationId: string,
-    message: any
+    message: any | null,
   ): Promise<void> {
     if (conversation.isGroup) {
       if (this.config.agent.features.handleGroupConversations) {
         this.logger.info(
-          { conversationId, messageId: message.messageId },
-          'Processing group conversation update'
+          { conversationId, messageId: message?.messageId },
+          'Processing group conversation update',
         );
         // Handle group conversation updates if needed
         await processGroupConversation(
           { env: this.env, config: this.config },
-          conversationId
+          conversationId,
         );
       } else {
         this.logger.warn(
           { conversationId },
-          'Group conversations are not enabled in the configuration'
+          'Group conversations are not enabled in the configuration',
         );
       }
     } else {
       if (this.config.agent.features.handleOneToOneConversations) {
         this.logger.info(
-          { conversationId, messageId: message.messageId },
-          'Processing one-to-one conversation update'
+          { conversationId, messageId: message?.messageId },
+          'Processing one-to-one conversation update',
         );
         // Process one-to-one conversation updates
         await processOneToOneConversation(
           { env: this.env, config: this.config },
-          conversationId
+          conversationId,
         );
       } else {
         this.logger.warn(
           { conversationId },
-          'One-to-one conversations are not enabled in the configuration'
+          'One-to-one conversations are not enabled in the configuration',
         );
       }
     }
