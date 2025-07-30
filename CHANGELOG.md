@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.30] - 2025-07-30
+
+### 🐛 Bug Fixes
+
+- *(vitest)* Update config path for `wrangler` to `jsonc`
+
+### ⚙️ Miscellaneous Tasks
+
+- *(workflows)* Include `develop` in build trigger branches
+
 ## [1.0.0-alpha.29] - 2025-07-30
 
 ### 🎨 Styling
