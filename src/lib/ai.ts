@@ -10,6 +10,7 @@ import {
   fetchLilNounsProposalsState,
   fetchLilNounsTokenTotalSupply,
   getCurrentIsoDateTimeUtc,
+  getEthPrice,
 } from './tools';
 
 /**
@@ -158,6 +159,15 @@ export async function handleAiToolCalls(
                 role: 'tool',
                 name: toolCall.name,
                 content: JSON.stringify({ currentDateTime }),
+              });
+              break;
+            }
+            case 'getEthPrice': {
+              const { ethPrice } = await getEthPrice(env);
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify({ ethPrice }),
               });
               break;
             }
