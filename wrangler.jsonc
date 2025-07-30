@@ -1,0 +1,58 @@
+{
+  // Project configuration
+  "name": "lilnouns-agent",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-07-19",
+  "workers_dev": false,
+
+  // Observability settings
+  "observability": {
+    "enabled": true
+  },
+
+  // Cron triggers
+  "triggers": {
+    "crons": ["0 * * * *"]
+  },
+
+  // Placement configuration
+  "placement": {
+    "mode": "smart"
+  },
+
+  // AI binding
+  "ai": {
+    "binding": "AI"
+  },
+
+  // KV Namespace bindings
+  "kv_namespaces": [
+    {
+      "binding": "AGENT_CACHE",
+      "id": "95fdf988b59f4a2a965c39aea0934f5d"
+    }
+  ],
+
+  // Environment variables
+  "vars": {
+    "NODE_ENV": "production"
+  },
+
+  // Durable Objects bindings
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "FARCASTER_STREAM",
+        "class_name": "FarcasterStreamWebsocket"
+      }
+    ]
+  },
+
+  // Migrations
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_classes": ["FarcasterStreamWebsocket"]
+    }
+  ]
+}
