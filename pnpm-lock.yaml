@@ -67,8 +67,8 @@ importers:
         specifier: 4.20250726.0
         version: 4.20250726.0
       '@types/luxon':
-        specifier: 3.7.0
-        version: 3.7.0
+        specifier: 3.7.1
+        version: 3.7.1
       '@types/node':
         specifier: 24.1.0
         version: 24.1.0
@@ -1102,8 +1102,8 @@ packages:
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
-  '@types/luxon@3.7.0':
-    resolution: {integrity: sha512-zNduyjkTXTttOp0KUG7ueFORgq6eyFsjbCZ/B8UfrVmfkHD1V9xC9wN/Vk0XUg0R/k/aIX1NeFwZgwe5hsDXfA==}
+  '@types/luxon@3.7.1':
+    resolution: {integrity: sha512-H3iskjFIAn5SlJU7OuxUmTEpebK6TKB8rxZShDslBMZJ5u9S//KM1sbdAisiSrqwLQncVjnpi2OK2J51h+4lsg==}
 
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
@@ -4302,7 +4302,7 @@ snapshots:
 
   '@types/estree@1.0.8': {}
 
-  '@types/luxon@3.7.0': {}
+  '@types/luxon@3.7.1': {}
 
   '@types/ms@2.1.0': {}
 
