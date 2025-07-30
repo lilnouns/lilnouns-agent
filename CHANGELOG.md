@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.31] - 2025-07-30
+
+### 🐛 Bug Fixes
+
+- *(farcaster-stream)* Rename `heartbeat` to `healthCheck`
+
 ## [1.0.0-alpha.30] - 2025-07-30
 
 ### 🐛 Bug Fixes
