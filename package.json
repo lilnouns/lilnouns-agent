@@ -55,7 +55,7 @@
     "zod": "4.0.13"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,jsonc,css,scss,yaml,yml,graphql}": [
+    "*.{js,jsx,ts,tsx,json,jsonc,css,scss,graphql}": [
       "biome check --write --files-ignore-unknown=true"
     ]
   }
