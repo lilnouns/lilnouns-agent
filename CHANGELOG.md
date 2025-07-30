@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.32] - 2025-07-30
+
+### 🚀 Features
+
+- *(handlers)* Integrate `aiTools` support in conversation logic
+- *(tools)* Add `getEthPrice` for real-time ETH price fetching
+- *(ai)* Integrate `getEthPrice` into tool handling
+- *(config)* Add `LOG_LEVEL` variable to environment
+- *(config)* Add `LOG_LEVEL` to `Env` interface
+- *(config)* Add default `LOG_LEVEL` to environment schema
+
+### 🐛 Bug Fixes
+
+- *(prompts)* Refine `agentSystemMessage` guidelines
+
+### 🚜 Refactor
+
+- *(tools)* Unify function context with `ToolContext`
+- *(ai)* Improve function signatures and context handling
+
+### 🎨 Styling
+
+- *(tools)* Fix import formatting and add parameter details
+
+### ⚙️ Miscellaneous Tasks
+
+- *(gitignore)* Adjust markdown file patterns in `/docs`
+
 ## [1.0.0-alpha.31] - 2025-07-30
 
 ### 🐛 Bug Fixes
