@@ -179,6 +179,7 @@ async function handleNewMentionsInGroups(
     const conversationLogger = logger.child({ conversationId });
     conversationLogger.debug('Processing group conversation');
 
+    // Perform the actual processing of the group conversation
     await processGroupConversation(context, conversationId);
 
     // Mark the conversation as read after processing all messages
