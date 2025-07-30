@@ -325,25 +325,39 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
       }
 
       if (conversation.isGroup) {
-        this.logger.info(
-          { conversationId, messageId: message.messageId },
-          'Processing group conversation update'
-        );
-        // Handle group conversation updates if needed
-        await processGroupConversation(
-          { env: this.env, config: this.config },
-          conversationId
-        );
+        if (this.config.agent.features.handleGroupConversations) {
+          this.logger.info(
+            { conversationId, messageId: message.messageId },
+            'Processing group conversation update'
+          );
+          // Handle group conversation updates if needed
+          await processGroupConversation(
+            { env: this.env, config: this.config },
+            conversationId
+          );
+        } else {
+          this.logger.warn(
+            { conversationId },
+            'Group conversations are not enabled in the configuration'
+          );
+        }
       } else {
-        this.logger.info(
-          { conversationId, messageId: message.messageId },
-          'Processing one-to-one conversation update'
-        );
-        // Process one-to-one conversation updates
-        await processOneToOneConversation(
-          { env: this.env, config: this.config },
-          conversationId
-        );
+        if (this.config.agent.features.handleOneToOneConversations) {
+          this.logger.info(
+            { conversationId, messageId: message.messageId },
+            'Processing one-to-one conversation update'
+          );
+          // Process one-to-one conversation updates
+          await processOneToOneConversation(
+            { env: this.env, config: this.config },
+            conversationId
+          );
+        } else {
+          this.logger.warn(
+            { conversationId },
+            'One-to-one conversations are not enabled in the configuration'
+          );
+        }
       }
 
       // Store relevant conversation data

@@ -127,12 +127,12 @@ export function getConfig(env: Env): Config {
         textEmbedding: '@cf/baai/bge-m3' as const,
         translation: '@cf/meta/m2m100-1.2b@cf/meta/m2m100-1.2b' as const,
       },
-      maxTokens: 100,
+      maxTokens: 256,
       cacheKeys: {
         lastFetch: 'conversations:last-fetch',
       },
       features: {
-        handleGroupConversations: true,
+        handleGroupConversations: false,
         handleOneToOneConversations: true,
         sendDirectMessagesToGroupConversations: true,
         sendDirectMessagesToOneToOneConversations: true,

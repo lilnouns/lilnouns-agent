@@ -532,5 +532,6 @@ export async function processGroupConversation(
       );
     }
   }
+
   logger.info('Completed processing group conversation');
 }
