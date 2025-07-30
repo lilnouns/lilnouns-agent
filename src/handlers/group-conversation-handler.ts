@@ -5,6 +5,7 @@ import {
 import {
   entries,
   filter,
+  find,
   flatMap,
   groupByProp,
   isEmpty,
@@ -12,7 +13,6 @@ import {
   last,
   map,
   pipe,
-  takeLast,
 } from 'remeda';
 import { generateContextText, handleAiToolCalls } from '@/lib/ai';
 import { getLastFetchTime } from '@/lib/cache';
@@ -34,7 +34,7 @@ import { stripMarkdown } from '@/utils/text';
  */
 export async function handleNewMentionsInGroups(
   context: ConversationContext,
-  conversations: DirectCastConversation[]
+  conversations: DirectCastConversation[],
 ) {
   const { env } = context;
 
@@ -71,7 +71,7 @@ export async function handleNewMentionsInGroups(
  */
 export async function processGroupConversation(
   context: ConversationContext,
-  conversationId: string
+  conversationId: string,
 ): Promise<void> {
   const { env, config } = context;
 
@@ -86,24 +86,24 @@ export async function processGroupConversation(
   // Fetch messages from this conversation
   const { messages } = await fetchLilNounsConversationMessages(
     context,
-    conversationId
+    conversationId,
   );
 
   logger.debug(
     { messageCount: messages.length },
-    'Found unprocessed messages in conversation'
+    'Found unprocessed messages in conversation',
   );
 
   // Group messages by participants, excluding the agent's own messages
   const messageGroups = pipe(
     messages,
     filter(m => m.senderFid !== config.agent.fid),
-    groupByProp('senderFid')
+    groupByProp('senderFid'),
   );
 
   logger.debug(
     { groupCount: Object.keys(messageGroups).length },
-    'Grouped messages by sender'
+    'Grouped messages by sender',
   );
 
   for (const [senderFid, senderMessages] of entries(messageGroups)) {
@@ -115,53 +115,48 @@ export async function processGroupConversation(
     messageLogger.debug('Processing messages for sender');
 
     // Check if the current sender has any messages since last fetch
-    if (
-      !senderMessages.some(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime)
-    ) {
-      messageLogger.debug('No new messages since last fetch, skipping sender');
+    const senderNewMessages = pipe(
+      senderMessages,
+      filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
+      filter(m => m.senderFid === Number(senderFid)),
+      filter(m => {
+        const isAgentInMentions = Boolean(
+          find(
+            m.mentions ?? [],
+            mention => mention.user.fid === config.agent.fid,
+          ),
+        );
+        const isInReplyToAgent = m.inReplyTo?.senderFid === config.agent.fid;
+        return isAgentInMentions || isInReplyToAgent;
+      }),
+    );
+    if (isEmpty(senderNewMessages)) {
+      messageLogger.debug('No new messages from sender since last fetch');
       continue;
     }
 
+    // Generate context text from the sender's messages that mention the agent or are replies to the agent
     const contextText = await generateContextText(
       env,
       config,
       pipe(
-        senderMessages,
-        filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
-        filter(m => m.senderFid === Number(senderFid)),
-        filter(
-          m =>
-            (m.mentions?.some(
-              mention => mention.user.fid === config.agent.fid
-            ) ??
-              false) ||
-            m.inReplyTo?.senderFid === config.agent.fid
-        ),
+        senderNewMessages,
         flatMap(m => m.message),
-        join('\n')
-      )
+        map(m => m.replace(/^@lilnouns\s*/, '')),
+        join('\n'),
+      ),
     );
 
     const toolsMessage = await handleAiToolCalls(
       env,
       config,
       pipe(
-        senderMessages,
-        filter(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime),
-        filter(m => m.senderFid === Number(senderFid)),
-        filter(
-          m =>
-            (m.mentions?.some(
-              mention => mention.user.fid === config.agent.fid
-            ) ??
-              false) ||
-            m.inReplyTo?.senderFid === config.agent.fid
-        ),
+        senderNewMessages,
         map(m => ({
           role: 'user',
           content: m.message,
-        }))
-      )
+        })),
+      ),
     );
 
     // Generate a final AI response incorporating any tool call results
@@ -178,21 +173,11 @@ export async function processGroupConversation(
           },
           // The actual message content to respond to
           ...pipe(
-            senderMessages,
-            filter(m => m.senderFid === Number(senderFid)),
-            filter(
-              m =>
-                (m.mentions?.some(
-                  mention => mention.user.fid === config.agent.fid
-                ) ??
-                  false) ||
-                m.inReplyTo?.senderFid === config.agent.fid
-            ),
-            takeLast(10),
+            senderNewMessages,
             map(m => ({
               role: 'user',
               content: m.message,
-            }))
+            })),
           ),
           ...toolsMessage,
         ],
@@ -203,7 +188,7 @@ export async function processGroupConversation(
           skipCache: false,
           cacheTtl: config.agent.cacheTtl,
         },
-      }
+      },
     );
 
     messageLogger.debug({ response }, 'AI generated response');
@@ -231,7 +216,7 @@ export async function processGroupConversation(
       } else {
         messageLogger.info(
           { responseMessageId: data?.result?.messageId },
-          'Message sent successfully'
+          'Message sent successfully',
         );
       }
     } else {
@@ -243,7 +228,7 @@ export async function processGroupConversation(
           messageId: crypto.randomUUID().replace(/-/g, ''),
           inReplyToId: last(senderMessages).messageId,
         },
-        'Would send direct cast message to group conversation (not actually sent)'
+        'Would send direct cast message to group conversation (not actually sent)',
       );
     }
   }
