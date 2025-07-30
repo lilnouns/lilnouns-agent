@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.29] - 2025-07-30
+
+### 🎨 Styling
+
+- *(biome)* Remove `yaml` and `yml` from lint-staged patterns
+
+### ⚙️ Miscellaneous Tasks
+
+- *(workflows)* Add build and release pipeline
+- *(workflows)* Add git-flow automation workflow
+
 ## [1.0.0-alpha.28] - 2025-07-30
 
 ### 🐛 Bug Fixes
