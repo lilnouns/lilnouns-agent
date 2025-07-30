@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.28] - 2025-07-30
+
+### 🐛 Bug Fixes
+
+- *(config)* Disable `workers_dev` in configuration
+
+### 🚜 Refactor
+
+- *(config)* Migrate `wrangler.toml` to `wrangler.jsonc`
+
+### 📚 Documentation
+
+- *(readme)* Update repository setup and infrastructure
+
+### 🎨 Styling
+
+- *(biome)* Update ignored directories for consistency
+- *(biome)* Remove `md` from lint-staged patterns
+- *(biome)* Update lint-staged patterns for file types
+
 ## [1.0.0-alpha.27] - 2025-07-30
 
 ### 🚀 Features
