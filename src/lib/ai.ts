@@ -10,6 +10,7 @@ import {
   fetchLilNounsProposalsState,
   fetchLilNounsTokenTotalSupply,
   getCurrentIsoDateTimeUtc,
+  getEthPrice,
 } from './tools';
 
 /**
@@ -26,7 +27,7 @@ import {
 export async function generateContextText(
   env: Env,
   config: ReturnType<typeof getConfig>,
-  query: string
+  query: string,
 ) {
   const logger = createLogger(env).child({
     module: 'ai',
@@ -55,12 +56,12 @@ export async function generateContextText(
     flatMap(i => i.content),
     contents => filter(contents, c => c.type === 'text'),
     texts => map(texts, c => c.text),
-    join('\n')
+    join('\n'),
   );
 
   logger.debug(
     { contentLength: contextContent.length },
-    'Generated context content'
+    'Generated context content',
   );
 
   return contextContent;
@@ -81,7 +82,7 @@ export async function generateContextText(
 export async function handleAiToolCalls(
   env: Env,
   config: ReturnType<typeof getConfig>,
-  messages: { role: string; content: string }[]
+  messages: { role: string; content: string }[],
 ) {
   const logger = createLogger(env).child({
     module: 'ai',
@@ -107,12 +108,12 @@ export async function handleAiToolCalls(
           skipCache: false,
           cacheTtl: config.agent.cacheTtl,
         },
-      }
+      },
     );
 
     logger.debug(
       { tool_calls: tool_calls ? JSON.stringify(tool_calls) : 'none' },
-      'AI tool calls result'
+      'AI tool calls result',
     );
 
     // Handle any tool calls made by the AI (e.g., fetching proposals)
@@ -123,7 +124,7 @@ export async function handleAiToolCalls(
         try {
           switch (toolCall.name) {
             case 'fetchLilNounsActiveProposals': {
-              const { proposals } = await fetchActiveProposals(env, config);
+              const { proposals } = await fetchActiveProposals({ env, config });
               toolsMessage.push({
                 role: 'tool',
                 name: toolCall.name,
@@ -132,7 +133,7 @@ export async function handleAiToolCalls(
               break;
             }
             case 'fetchLilNounsCurrentAuction': {
-              const { auction } = await fetchCurrentAuction(env, config);
+              const { auction } = await fetchCurrentAuction({ env, config });
               toolsMessage.push({
                 role: 'tool',
                 name: toolCall.name,
@@ -141,10 +142,10 @@ export async function handleAiToolCalls(
               break;
             }
             case 'fetchLilNounsTokenTotalSupply': {
-              const { totalSupply } = await fetchLilNounsTokenTotalSupply(
+              const { totalSupply } = await fetchLilNounsTokenTotalSupply({
                 env,
-                config
-              );
+                config,
+              });
               toolsMessage.push({
                 role: 'tool',
                 name: toolCall.name,
@@ -161,6 +162,15 @@ export async function handleAiToolCalls(
               });
               break;
             }
+            case 'getEthPrice': {
+              const { ethPrice } = await getEthPrice(env);
+              toolsMessage.push({
+                role: 'tool',
+                name: toolCall.name,
+                content: JSON.stringify({ ethPrice }),
+              });
+              break;
+            }
             case 'fetchLilNounsProposalSummary': {
               const { proposalId } = toolCall?.arguments as {
                 proposalId: number;
@@ -168,15 +178,17 @@ export async function handleAiToolCalls(
 
               if (!proposalId) {
                 logger.debug(
-                  'fetchLilNounsProposalSummary tool call missing required argument: proposalId'
+                  'fetchLilNounsProposalSummary tool call missing required argument: proposalId',
                 );
                 break; // Skip this tool call
               }
 
               const { proposal } = await fetchLilNounsProposalSummary(
-                env,
-                config,
-                proposalId
+                {
+                  env,
+                  config,
+                },
+                proposalId,
               );
 
               const response = await env.AI.run(
@@ -191,7 +203,7 @@ export async function handleAiToolCalls(
                     skipCache: false,
                     cacheTtl: config.agent.cacheTtl,
                   },
-                }
+                },
               );
 
               toolsMessage.push({
@@ -210,15 +222,17 @@ export async function handleAiToolCalls(
 
               if (!proposalId) {
                 logger.debug(
-                  'fetchProposalsState tool call missing required argument: proposalId'
+                  'fetchProposalsState tool call missing required argument: proposalId',
                 );
                 break; // Skip this tool call
               }
 
               const result = await fetchLilNounsProposalsState(
-                env,
-                config,
-                proposalId
+                {
+                  env,
+                  config,
+                },
+                proposalId,
               );
 
               toolsMessage.push({
@@ -239,7 +253,7 @@ export async function handleAiToolCalls(
               toolName: toolCall.name,
               toolArguments: toolCall.arguments,
             },
-            'Tool call failed, skipping'
+            'Tool call failed, skipping',
           );
         }
       }
@@ -247,7 +261,7 @@ export async function handleAiToolCalls(
   } catch (error) {
     logger.error(
       { error: error instanceof Error ? error.message : String(error) },
-      'Failed to generate AI tool calls'
+      'Failed to generate AI tool calls',
     );
     // Return empty array if the initial AI call fails
     return [];

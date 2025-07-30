@@ -9,6 +9,11 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'staging', 'production'], {
     message: 'NODE_ENV must be one of: development, staging, production',
   }),
+  LOG_LEVEL: z
+    .enum(['debug', 'info', 'warn', 'error'], {
+      message: 'LOG_LEVEL must be one of: debug, info, warn, error',
+    })
+    .default('info'),
   FARCASTER_AUTH_TOKEN: z
     .string()
     .min(1, 'FARCASTER_AUTH_TOKEN cannot be empty'),
@@ -98,6 +103,7 @@ export function getConfig(env: Env): Config {
     // Use safeParse for better error handling
     const envResult = envSchema.safeParse({
       NODE_ENV: env.NODE_ENV,
+      LOG_LEVEL: env.LOG_LEVEL,
       FARCASTER_AUTH_TOKEN: env.FARCASTER_AUTH_TOKEN,
       FARCASTER_API_KEY: env.FARCASTER_API_KEY,
       LILNOUNS_SUBGRAPH_URL: env.LILNOUNS_SUBGRAPH_URL,
@@ -112,7 +118,7 @@ export function getConfig(env: Env): Config {
     }
 
     const loggerConfig = {
-      level: 'debug' as const,
+      level: envResult.data.LOG_LEVEL,
       prettyPrint: envResult.data.NODE_ENV !== 'production',
     };
 
