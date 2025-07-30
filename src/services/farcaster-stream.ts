@@ -67,6 +67,9 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
   private readonly maxBackoff = 30_000;
   private readonly initialBackoff = 1000;
 
+  // A Map to track ongoing conversation processing
+  private readonly processingConversations = new Map<string, Promise<void>>();
+
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
 
@@ -310,6 +313,15 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
         return;
       }
 
+      // Check if this conversation is already being processed
+      if (this.processingConversations.has(conversationId)) {
+        this.logger.info(
+          { conversationId, messageId: message.messageId },
+          'Conversation is already being processed, skipping'
+        );
+        return;
+      }
+
       // Fetch the conversation details
       const { conversation } = await fetchLilNounsUnreadConversation(
         { env: this.env, config: this.config },
@@ -324,40 +336,19 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
         return;
       }
 
-      if (conversation.isGroup) {
-        if (this.config.agent.features.handleGroupConversations) {
-          this.logger.info(
-            { conversationId, messageId: message.messageId },
-            'Processing group conversation update'
-          );
-          // Handle group conversation updates if needed
-          await processGroupConversation(
-            { env: this.env, config: this.config },
-            conversationId
-          );
-        } else {
-          this.logger.warn(
-            { conversationId },
-            'Group conversations are not enabled in the configuration'
-          );
-        }
-      } else {
-        if (this.config.agent.features.handleOneToOneConversations) {
-          this.logger.info(
-            { conversationId, messageId: message.messageId },
-            'Processing one-to-one conversation update'
-          );
-          // Process one-to-one conversation updates
-          await processOneToOneConversation(
-            { env: this.env, config: this.config },
-            conversationId
-          );
-        } else {
-          this.logger.warn(
-            { conversationId },
-            'One-to-one conversations are not enabled in the configuration'
-          );
-        }
+      // Create a processing promise and add it to the map
+      const processingPromise = this.processConversation(
+        conversation,
+        conversationId,
+        message
+      );
+      this.processingConversations.set(conversationId, processingPromise);
+
+      try {
+        await processingPromise;
+      } finally {
+        // Always clean up the processing map entry
+        this.processingConversations.delete(conversationId);
       }
 
       // Store relevant conversation data
@@ -381,6 +372,49 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
     } catch (error) {
       this.logger.error({ error, payload }, 'Failed to handle refresh message');
       throw error;
+    }
+  }
+
+  // Extract conversation processing logic into a separate method
+  private async processConversation(
+    conversation: any,
+    conversationId: string,
+    message: any
+  ): Promise<void> {
+    if (conversation.isGroup) {
+      if (this.config.agent.features.handleGroupConversations) {
+        this.logger.info(
+          { conversationId, messageId: message.messageId },
+          'Processing group conversation update'
+        );
+        // Handle group conversation updates if needed
+        await processGroupConversation(
+          { env: this.env, config: this.config },
+          conversationId
+        );
+      } else {
+        this.logger.warn(
+          { conversationId },
+          'Group conversations are not enabled in the configuration'
+        );
+      }
+    } else {
+      if (this.config.agent.features.handleOneToOneConversations) {
+        this.logger.info(
+          { conversationId, messageId: message.messageId },
+          'Processing one-to-one conversation update'
+        );
+        // Process one-to-one conversation updates
+        await processOneToOneConversation(
+          { env: this.env, config: this.config },
+          conversationId
+        );
+      } else {
+        this.logger.warn(
+          { conversationId },
+          'One-to-one conversations are not enabled in the configuration'
+        );
+      }
     }
   }
 }
