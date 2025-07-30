@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.27] - 2025-07-30
+
+### 🚀 Features
+
+- *(handlers)* Refactor conversation processing
+
+### 🐛 Bug Fixes
+
+- *(services)* Implement conversation processing deduplication
+- *(handlers)* Refine group conversations processing
+- *(config)* Standardize error message formatting
+
+### 🎨 Styling
+
+- *(codebase)* Standardize import formatting
+- *(biome)* Enhance linter with stricter style rules
+- *(biome)* Enforce `trailingCommas` on all multiline elements
+
 ## [1.0.0-alpha.26] - 2025-07-30
 
 ### 🐛 Bug Fixes

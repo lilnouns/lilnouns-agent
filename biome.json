@@ -7,7 +7,8 @@
       "!**/pnpm-lock.yaml",
       "!**/package-lock.json",
       "!**/yarn.lock",
-      "!**/dist/"
+      "!**/dist/",
+      "!**/.wrangler/"
     ]
   },
   "formatter": {
@@ -29,14 +30,18 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "style": {
+        "useImportType": "error",
+        "useExportType": "error"
+      }
     }
   },
   "javascript": {
     "formatter": {
       "jsxQuoteStyle": "single",
       "quoteProperties": "asNeeded",
-      "trailingCommas": "es5",
+      "trailingCommas": "all",
       "semicolons": "always",
       "arrowParentheses": "asNeeded",
       "bracketSpacing": true,

@@ -149,7 +149,7 @@ export function getConfig(env: Env): Config {
         .map(issue => `logger.${issue.path.join('.')}: ${issue.message}`)
         .join('\n  ');
       throw new Error(
-        `Logger configuration validation failed:\n  ${errorMessages}`
+        `Logger configuration validation failed:\n  ${errorMessages}`,
       );
     }
 
@@ -160,7 +160,7 @@ export function getConfig(env: Env): Config {
         .map(issue => `agent.${issue.path.join('.')}: ${issue.message}`)
         .join('\n  ');
       throw new Error(
-        `Agent configuration validation failed:\n  ${errorMessages}`
+        `Agent configuration validation failed:\n  ${errorMessages}`,
       );
     }
 
