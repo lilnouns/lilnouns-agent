@@ -28,7 +28,7 @@ Lil Nouns governance, proposals, auctions, and more.
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/lilnouns/lilnouns-agent.git
    cd lilnouns-agent
    ```
 
@@ -54,6 +54,14 @@ The following environment variables are required for the agent to function corre
 - `LILNOUNS_SUBGRAPH_URL`: The URL for the Lil Nouns GraphQL subgraph
 - `ETHEREUM_RPC_URL`: The URL for an Ethereum RPC endpoint
 
+## Infrastructure
+
+The agent uses the following Cloudflare infrastructure:
+
+- **KV Namespace**: Used for caching data (`AGENT_CACHE`)
+- **Durable Objects**: Used for managing WebSocket connections to Farcaster stream (`FARCASTER_STREAM`)
+- **Cloudflare AI**: Used for AI processing with the binding `AI`
+
 ## Available Scripts
 
 - `pnpm dev`: Starts the development server with local testing
@@ -69,9 +77,10 @@ The following environment variables are required for the agent to function corre
 
 ## How It Works
 
-1. **Scheduled Execution**: The agent runs on a schedule defined in `wrangler.toml`
-2. **Fetch Unread Messages**: It fetches unread mentions in Farcaster chats and direct messages
-3. **Process Conversations**: For each conversation, it processes the message thread and determines context
+1. **Scheduled Execution**: The agent runs on a schedule defined in `wrangler.toml` (hourly by default)
+2. **WebSocket Connection**: Maintains persistent connections to Farcaster via Durable Objects
+3. **Fetch Unread Messages**: It fetches unread mentions in Farcaster chats and direct messages
+4. **Process Conversations**: For each conversation, it processes the message thread and determines context
 4. **AI-Powered Responses**: It uses Cloudflare's AI to understand the user's message and generate appropriate responses
 5. **Tool Integration**: If the user's message requires real-time data, the AI can use functions defined in `src/lib/tools.ts` to fetch information about proposals, auctions, token supply, etc.
 6. **Context Generation**: Uses RAG to generate relevant context based on the user's query
