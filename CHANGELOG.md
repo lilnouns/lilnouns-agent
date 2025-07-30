@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.25] - 2025-07-30
+
+### 🐛 Bug Fixes
+
+- *(scheduled)* Add comment to clarify group conversation processing
+- *(scheduled)* Skip senders without new messages
+
 ## [1.0.0-alpha.24] - 2025-07-29
 
 ### ⚙️ Miscellaneous Tasks

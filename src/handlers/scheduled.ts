@@ -179,6 +179,7 @@ async function handleNewMentionsInGroups(
     const conversationLogger = logger.child({ conversationId });
     conversationLogger.debug('Processing group conversation');
 
+    // Perform the actual processing of the group conversation
     await processGroupConversation(context, conversationId);
 
     // Mark the conversation as read after processing all messages
@@ -397,6 +398,14 @@ export async function processGroupConversation(
     });
 
     messageLogger.debug('Processing messages for sender');
+
+    // Check if the current sender has any messages since last fetch
+    if (
+      !senderMessages.some(m => Number(m.serverTimestamp ?? 0n) > lastFetchTime)
+    ) {
+      messageLogger.debug('No new messages since last fetch, skipping sender');
+      continue;
+    }
 
     const contextText = await generateContextText(
       env,
