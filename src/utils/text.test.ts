@@ -4,7 +4,7 @@ import { stripMarkdown } from './text';
 describe('stripMarkdown', () => {
   it('should remove images', () => {
     const result = stripMarkdown(
-      'This is an image ![alt text](http://example.com/image.png)'
+      'This is an image ![alt text](http://example.com/image.png)',
     );
     expect(result).toBe('This is an image');
   });
@@ -21,7 +21,7 @@ describe('stripMarkdown', () => {
 
   it('should remove emphasis characters from text', () => {
     const result = stripMarkdown(
-      'This is *italic*, **bold**, and ~~strikethrough~~.'
+      'This is *italic*, **bold**, and ~~strikethrough~~.',
     );
     expect(result).toBe('This is italic, bold, and strikethrough.');
   });

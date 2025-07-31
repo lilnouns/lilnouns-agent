@@ -407,7 +407,7 @@ export async function fetchLilNounsProposalSummary(
 }
 
 /**
- * Gets the current date and time in ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ) in UTC timezone.
+ * Gets the current date and time in ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ) in the UTC timezone.
  *
  * @return {string} The current date and time as an ISO 8601 formatted string in UTC.
  */
