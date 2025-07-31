@@ -1,3 +1,4 @@
+import type { RoleScopedChatInput } from '@cloudflare/workers-types';
 import { filter, flatMap, join, map, pipe } from 'remeda';
 import type { getConfig } from './config';
 import { createLogger } from './logger';
@@ -28,7 +29,7 @@ export async function generateContextText(
   env: Env,
   config: ReturnType<typeof getConfig>,
   query: string,
-) {
+): Promise<string> {
   const logger = createLogger(env).child({
     module: 'ai',
     function: 'generateContextText',
@@ -76,19 +77,19 @@ export async function generateContextText(
  *
  * @param {Env} env - The environment object containing configuration and dependencies.
  * @param {ReturnType<typeof getConfig>} config - The configuration object with AI model settings.
- * @param {Array<{role: string, content: string}>} messages - Array of conversation messages to process.
- * @return {Promise<Array<{role: string, name?: string, content: string}>>} A promise that resolves to an array of tool response messages.
+ * @param {Array<RoleScopedChatInput>} messages - Array of conversation messages to process.
+ * @return {Promise<RoleScopedChatInput>} A promise that resolves to an array of tool response messages.
  */
 export async function handleAiToolCalls(
   env: Env,
   config: ReturnType<typeof getConfig>,
-  messages: { role: string; content: string }[],
-) {
+  messages: RoleScopedChatInput[],
+): Promise<RoleScopedChatInput[]> {
   const logger = createLogger(env).child({
     module: 'ai',
     function: 'handleAiToolCalls',
   });
-  const toolsMessage = [];
+  const toolsMessage: RoleScopedChatInput[] = [];
 
   try {
     // Generate AI response using Cloudflare AI with a specific system prompt
