@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.33] - 2025-07-31
+
+### 🚜 Refactor
+
+- *(tools)* Update `aiTools` type definitions
+- *(tools)* Standardize descriptions in `aiTools`
+- *(ai)* Update type definitions and return types
+- *(codebase)* Apply consistent formatting to imports
+- *(ai)* Simplify tool call execution logic
+- *(config)* Update cron trigger frequency to 5 minutes
+- *(config)* Comment out durable objects and migrations
+
 ## [1.0.0-alpha.32] - 2025-07-30
 
 ### 🚀 Features

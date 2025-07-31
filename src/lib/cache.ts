@@ -14,7 +14,7 @@ import { createLogger } from './logger';
  */
 export async function getLastFetchTime(
   env: Env,
-  config: ReturnType<typeof getConfig>
+  config: ReturnType<typeof getConfig>,
 ) {
   const logger = createLogger(env).child({
     module: 'cache',
@@ -30,7 +30,7 @@ export async function getLastFetchTime(
 
   logger.debug(
     { lastFetchTime: new Date(lastFetchMillis).toISOString() },
-    'Retrieved last fetch time'
+    'Retrieved last fetch time',
   );
 
   return lastFetchMillis;
@@ -50,7 +50,7 @@ export async function getLastFetchTime(
 export async function setLastFetchTime(
   env: Env,
   config: ReturnType<typeof getConfig>,
-  lastFetchDate?: string | null
+  lastFetchDate?: string | null,
 ) {
   const logger = createLogger(env).child({
     module: 'cache',

@@ -42,7 +42,7 @@ interface FarcasterContext {
  */
 export async function fetchLilNounsUnreadConversation(
   context: FarcasterContext,
-  conversationId: string
+  conversationId: string,
 ) {
   const { env, config } = context;
 
@@ -80,7 +80,7 @@ export async function fetchLilNounsUnreadConversation(
       participantsCount: conversation.activeParticipantsCount,
       isGroup: conversation.isGroup,
     },
-    'Successfully fetched conversation details'
+    'Successfully fetched conversation details',
   );
 
   return { conversation };
@@ -93,7 +93,7 @@ export async function fetchLilNounsUnreadConversation(
  * @returns An object containing an array of unread DirectCastConversations
  */
 export async function fetchLilNounsUnreadConversations(
-  context: FarcasterContext
+  context: FarcasterContext,
 ) {
   const { env, config } = context;
 
@@ -123,12 +123,12 @@ export async function fetchLilNounsUnreadConversations(
   // Sort conversations by timestamp (oldest first) to process them in chronological order
   conversations = pipe(
     data?.result?.conversations ?? [],
-    sortBy(c => c.lastMessage?.serverTimestamp ?? 0)
+    sortBy(c => c.lastMessage?.serverTimestamp ?? 0),
   );
 
   logger.debug(
     { conversationCount: conversations.length },
-    'Found unread conversations'
+    'Found unread conversations',
   );
 
   return { conversations };
@@ -143,7 +143,7 @@ export async function fetchLilNounsUnreadConversations(
  */
 export async function fetchLilNounsConversationMessages(
   context: FarcasterContext,
-  conversationId: string
+  conversationId: string,
 ) {
   const { env, config } = context;
 
@@ -174,12 +174,12 @@ export async function fetchLilNounsConversationMessages(
   messages = pipe(
     data?.result?.messages ?? [],
     filter(m => m.type === 'text'), // Only include text messages
-    sortBy(m => m.serverTimestamp) // Sort by timestamp ascending
+    sortBy(m => m.serverTimestamp), // Sort by timestamp ascending
   );
 
   logger.debug(
     { messageCount: messages.length },
-    'Retrieved messages from conversation'
+    'Retrieved messages from conversation',
   );
   return { messages };
 }
@@ -193,7 +193,7 @@ export async function fetchLilNounsConversationMessages(
  */
 export async function fetchLilNounsConversationParticipants(
   context: FarcasterContext,
-  conversationId: string
+  conversationId: string,
 ) {
   const { env, config } = context;
 
@@ -222,7 +222,7 @@ export async function fetchLilNounsConversationParticipants(
 
   logger.debug(
     { participantCount: participants.length },
-    'Retrieved conversation participants'
+    'Retrieved conversation participants',
   );
 
   return { participants };
@@ -240,7 +240,7 @@ export async function fetchLilNounsConversationParticipants(
 export async function markLilNounsConversationAsRead(
   context: FarcasterContext,
   conversationId: string,
-  retryAttempt = 0
+  retryAttempt = 0,
 ) {
   const { env, config } = context;
 
@@ -295,7 +295,7 @@ export async function markLilNounsConversationAsRead(
                 messageType: 'direct-cast-read',
                 payload: { conversationId },
                 data: conversationId,
-              })
+              }),
             );
             logger.debug('Read message sent');
 
@@ -308,8 +308,8 @@ export async function markLilNounsConversationAsRead(
           } catch (err) {
             rejectOnce(
               new Error(
-                `Failed to send read message: ${err instanceof Error ? err.message : 'Unknown error'}`
-              )
+                `Failed to send read message: ${err instanceof Error ? err.message : 'Unknown error'}`,
+              ),
             );
           }
         };
@@ -324,7 +324,7 @@ export async function markLilNounsConversationAsRead(
               JSON.stringify({
                 messageType: 'authenticate',
                 data: `Bearer ${token}`,
-              })
+              }),
             );
             logger.debug('Authentication message sent');
 
@@ -333,7 +333,7 @@ export async function markLilNounsConversationAsRead(
               if (!isResolved) {
                 isAuthenticated = true;
                 logger.debug(
-                  'Assuming authentication successful, sending read message'
+                  'Assuming authentication successful, sending read message',
                 );
                 sendReadMessage();
               }
@@ -341,8 +341,8 @@ export async function markLilNounsConversationAsRead(
           } catch (err) {
             rejectOnce(
               new Error(
-                `Failed to send authentication: ${err instanceof Error ? err.message : 'Unknown error'}`
-              )
+                `Failed to send authentication: ${err instanceof Error ? err.message : 'Unknown error'}`,
+              ),
             );
           }
         });
@@ -353,7 +353,7 @@ export async function markLilNounsConversationAsRead(
             rejectOnce(new Error('Failed to establish WebSocket connection'));
           } else if (isAuthenticated && !isResolved) {
             logger.debug(
-              'WebSocket error but authentication succeeded, assuming success'
+              'WebSocket error but authentication succeeded, assuming success',
             );
             resolveOnce(true);
           } else {
@@ -364,7 +364,7 @@ export async function markLilNounsConversationAsRead(
         ws.addEventListener('close', event => {
           logger.debug(
             { code: event.code, reason: event.reason },
-            'WebSocket closed'
+            'WebSocket closed',
           );
 
           if (!isResolved) {
@@ -373,14 +373,14 @@ export async function markLilNounsConversationAsRead(
             } else if (event.code === 1000 && isAuthenticated) {
               // Normal closure after authentication might indicate success
               logger.debug(
-                'Normal closure after authentication, assuming success'
+                'Normal closure after authentication, assuming success',
               );
               resolveOnce(true);
             } else {
               rejectOnce(
                 new Error(
-                  `WebSocket closed: ${event.code} ${event.reason || ''}`
-                )
+                  `WebSocket closed: ${event.code} ${event.reason || ''}`,
+                ),
               );
             }
           }
@@ -403,7 +403,7 @@ export async function markLilNounsConversationAsRead(
 
     logger.warn(
       { error: errorMessage, conversationId, retryAttempt },
-      'Failed to mark conversation as read via WebSocket'
+      'Failed to mark conversation as read via WebSocket',
     );
 
     // Retry logic
@@ -411,14 +411,14 @@ export async function markLilNounsConversationAsRead(
       const delay = baseDelay * 2 ** retryAttempt; // Exponential backoff
       logger.info(
         { delay, nextAttempt: retryAttempt + 1 },
-        'Retrying WebSocket operation after delay'
+        'Retrying WebSocket operation after delay',
       );
 
       await new Promise(resolve => setTimeout(resolve, delay));
       return markLilNounsConversationAsRead(
         context,
         conversationId,
-        retryAttempt + 1
+        retryAttempt + 1,
       );
     }
 
@@ -432,7 +432,7 @@ export async function markLilNounsConversationAsRead(
     // In production, log the error but don't fail the entire operation
     logger.error(
       { error: errorMessage, conversationId },
-      'WebSocket mark-as-read failed after retries, but continuing conversation processing'
+      'WebSocket mark-as-read failed after retries, but continuing conversation processing',
     );
 
     return {

@@ -1,3 +1,4 @@
+import type { RoleScopedChatInput } from '@cloudflare/workers-types';
 import { filter, flatMap, join, map, pipe } from 'remeda';
 import type { getConfig } from './config';
 import { createLogger } from './logger';
@@ -28,7 +29,7 @@ export async function generateContextText(
   env: Env,
   config: ReturnType<typeof getConfig>,
   query: string,
-) {
+): Promise<string> {
   const logger = createLogger(env).child({
     module: 'ai',
     function: 'generateContextText',
@@ -76,19 +77,19 @@ export async function generateContextText(
  *
  * @param {Env} env - The environment object containing configuration and dependencies.
  * @param {ReturnType<typeof getConfig>} config - The configuration object with AI model settings.
- * @param {Array<{role: string, content: string}>} messages - Array of conversation messages to process.
- * @return {Promise<Array<{role: string, name?: string, content: string}>>} A promise that resolves to an array of tool response messages.
+ * @param {Array<RoleScopedChatInput>} messages - Array of conversation messages to process.
+ * @return {Promise<RoleScopedChatInput>} A promise that resolves to an array of tool response messages.
  */
 export async function handleAiToolCalls(
   env: Env,
   config: ReturnType<typeof getConfig>,
-  messages: { role: string; content: string }[],
-) {
+  messages: RoleScopedChatInput[],
+): Promise<RoleScopedChatInput[]> {
   const logger = createLogger(env).child({
     module: 'ai',
     function: 'handleAiToolCalls',
   });
-  const toolsMessage = [];
+  const toolsMessage: RoleScopedChatInput[] = [];
 
   try {
     // Generate AI response using Cloudflare AI with a specific system prompt
@@ -116,146 +117,151 @@ export async function handleAiToolCalls(
       'AI tool calls result',
     );
 
+    // If the AI made no tool calls, log and return an empty array
+    if (tool_calls === undefined) {
+      logger.debug('No tool calls made by AI, skipping tool execution');
+      // If no tool calls were made, return an empty array
+      return [];
+    }
+
     // Handle any tool calls made by the AI (e.g., fetching proposals)
     // Process any tool calls requested by the AI, such as fetching current proposal information
     // This allows the AI to access real-time data about Lil Nouns governance when needed
-    if (tool_calls !== undefined) {
-      for (const toolCall of tool_calls) {
-        try {
-          switch (toolCall.name) {
-            case 'fetchLilNounsActiveProposals': {
-              const { proposals } = await fetchActiveProposals({ env, config });
-              toolsMessage.push({
-                role: 'tool',
-                name: toolCall.name,
-                content: JSON.stringify({ proposals }),
-              });
-              break;
+    for (const toolCall of tool_calls) {
+      try {
+        switch (toolCall.name) {
+          case 'fetchLilNounsActiveProposals': {
+            const { proposals } = await fetchActiveProposals({ env, config });
+            toolsMessage.push({
+              role: 'tool',
+              name: toolCall.name,
+              content: JSON.stringify({ proposals }),
+            });
+            break;
+          }
+          case 'fetchLilNounsCurrentAuction': {
+            const { auction } = await fetchCurrentAuction({ env, config });
+            toolsMessage.push({
+              role: 'tool',
+              name: toolCall.name,
+              content: JSON.stringify({ auction }),
+            });
+            break;
+          }
+          case 'fetchLilNounsTokenTotalSupply': {
+            const { totalSupply } = await fetchLilNounsTokenTotalSupply({
+              env,
+              config,
+            });
+            toolsMessage.push({
+              role: 'tool',
+              name: toolCall.name,
+              content: JSON.stringify({ totalSupply }),
+            });
+            break;
+          }
+          case 'getCurrentIsoDateTimeUtc': {
+            const currentDateTime = getCurrentIsoDateTimeUtc();
+            toolsMessage.push({
+              role: 'tool',
+              name: toolCall.name,
+              content: JSON.stringify({ currentDateTime }),
+            });
+            break;
+          }
+          case 'getEthPrice': {
+            const { ethPrice } = await getEthPrice(env);
+            toolsMessage.push({
+              role: 'tool',
+              name: toolCall.name,
+              content: JSON.stringify({ ethPrice }),
+            });
+            break;
+          }
+          case 'fetchLilNounsProposalSummary': {
+            const { proposalId } = toolCall?.arguments as {
+              proposalId: number;
+            };
+
+            if (!proposalId) {
+              logger.debug(
+                'fetchLilNounsProposalSummary tool call missing required argument: proposalId',
+              );
+              break; // Skip this tool call
             }
-            case 'fetchLilNounsCurrentAuction': {
-              const { auction } = await fetchCurrentAuction({ env, config });
-              toolsMessage.push({
-                role: 'tool',
-                name: toolCall.name,
-                content: JSON.stringify({ auction }),
-              });
-              break;
-            }
-            case 'fetchLilNounsTokenTotalSupply': {
-              const { totalSupply } = await fetchLilNounsTokenTotalSupply({
+
+            const { proposal } = await fetchLilNounsProposalSummary(
+              {
                 env,
                 config,
-              });
-              toolsMessage.push({
-                role: 'tool',
-                name: toolCall.name,
-                content: JSON.stringify({ totalSupply }),
-              });
-              break;
-            }
-            case 'getCurrentIsoDateTimeUtc': {
-              const currentDateTime = getCurrentIsoDateTimeUtc();
-              toolsMessage.push({
-                role: 'tool',
-                name: toolCall.name,
-                content: JSON.stringify({ currentDateTime }),
-              });
-              break;
-            }
-            case 'getEthPrice': {
-              const { ethPrice } = await getEthPrice(env);
-              toolsMessage.push({
-                role: 'tool',
-                name: toolCall.name,
-                content: JSON.stringify({ ethPrice }),
-              });
-              break;
-            }
-            case 'fetchLilNounsProposalSummary': {
-              const { proposalId } = toolCall?.arguments as {
-                proposalId: number;
-              };
+              },
+              proposalId,
+            );
 
-              if (!proposalId) {
-                logger.debug(
-                  'fetchLilNounsProposalSummary tool call missing required argument: proposalId',
-                );
-                break; // Skip this tool call
-              }
-
-              const { proposal } = await fetchLilNounsProposalSummary(
-                {
-                  env,
-                  config,
+            const response = await env.AI.run(
+              config.agent.aiModels.summarization,
+              {
+                input_text: `# ${proposal?.title}${proposal?.description}`,
+                max_length: 200,
+              },
+              {
+                gateway: {
+                  id: config.agent.gatewayId,
+                  skipCache: false,
+                  cacheTtl: config.agent.cacheTtl,
                 },
-                proposalId,
-              );
+              },
+            );
 
-              const response = await env.AI.run(
-                config.agent.aiModels.summarization,
-                {
-                  input_text: `# ${proposal?.title}${proposal?.description}`,
-                  max_length: 200,
-                },
-                {
-                  gateway: {
-                    id: config.agent.gatewayId,
-                    skipCache: false,
-                    cacheTtl: config.agent.cacheTtl,
-                  },
-                },
-              );
-
-              toolsMessage.push({
-                role: 'tool',
-                name: toolCall.name,
-                content: JSON.stringify({
-                  proposal: { ...proposal, description: response.summary },
-                }),
-              });
-              break;
-            }
-            case 'fetchLilNounsProposalsState': {
-              const { proposalId } = toolCall?.arguments as {
-                proposalId: number;
-              };
-
-              if (!proposalId) {
-                logger.debug(
-                  'fetchProposalsState tool call missing required argument: proposalId',
-                );
-                break; // Skip this tool call
-              }
-
-              const result = await fetchLilNounsProposalsState(
-                {
-                  env,
-                  config,
-                },
-                proposalId,
-              );
-
-              toolsMessage.push({
-                role: 'tool',
-                name: toolCall.name,
-                content: JSON.stringify(result),
-              });
-              break;
-            }
-            default:
-              logger.debug({ toolName: toolCall.name }, 'Unhandled tool call');
-              break;
+            toolsMessage.push({
+              role: 'tool',
+              name: toolCall.name,
+              content: JSON.stringify({
+                proposal: { ...proposal, description: response.summary },
+              }),
+            });
+            break;
           }
-        } catch (error) {
-          logger.error(
-            {
-              error: error instanceof Error ? error.message : String(error),
-              toolName: toolCall.name,
-              toolArguments: toolCall.arguments,
-            },
-            'Tool call failed, skipping',
-          );
+          case 'fetchLilNounsProposalsState': {
+            const { proposalId } = toolCall?.arguments as {
+              proposalId: number;
+            };
+
+            if (!proposalId) {
+              logger.debug(
+                'fetchProposalsState tool call missing required argument: proposalId',
+              );
+              break; // Skip this tool call
+            }
+
+            const result = await fetchLilNounsProposalsState(
+              {
+                env,
+                config,
+              },
+              proposalId,
+            );
+
+            toolsMessage.push({
+              role: 'tool',
+              name: toolCall.name,
+              content: JSON.stringify(result),
+            });
+            break;
+          }
+          default:
+            logger.debug({ toolName: toolCall.name }, 'Unhandled tool call');
+            break;
         }
+      } catch (error) {
+        logger.error(
+          {
+            error: error instanceof Error ? error.message : String(error),
+            toolName: toolCall.name,
+            toolArguments: toolCall.arguments,
+          },
+          'Tool call failed, skipping',
+        );
       }
     }
   } catch (error) {
