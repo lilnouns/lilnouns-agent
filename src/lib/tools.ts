@@ -1,3 +1,4 @@
+import type { AiTextGenerationToolInput } from '@cloudflare/workers-types';
 import {
   readLilNounsAuctionFetchNextNoun,
   readLilNounsGovernorState,
@@ -38,16 +39,11 @@ interface CoinGeckoResponse {
  * AI tools configuration for function calling
  * Enhanced for better AI model detection and understanding
  */
-export const aiTools = [
+export const aiTools: AiTextGenerationToolInput['function'][] = [
   {
     name: 'fetchLilNounsActiveProposals',
     description:
       'Retrieve all currently active Lil Nouns DAO governance proposals that are open for voting. Returns proposals with their IDs, titles, creation timestamps, and direct links. Use this when users ask about current proposals, what to vote on, or active governance matters.',
-    parameters: {
-      type: 'object',
-      properties: {},
-      required: [],
-    },
   },
   {
     name: 'fetchLilNounsProposalsState',
@@ -69,21 +65,11 @@ export const aiTools = [
     name: 'fetchLilNounsCurrentAuction',
     description:
       'Get real-time information about the currently active Lil Nouns NFT auction, including the Noun ID being auctioned, current highest bid price in ETH, and the auction website link. Use this when users ask about current auctions, bidding, or want to participate in auctions.',
-    parameters: {
-      type: 'object',
-      properties: {},
-      required: [],
-    },
   },
   {
     name: 'fetchLilNounsTokenTotalSupply',
     description:
       'Retrieve the total number of Lil Nouns NFT tokens that have been minted to date. This represents the complete collection size and is useful for statistics, collection information, or when users ask about how many Lil Nouns exist.',
-    parameters: {
-      type: 'object',
-      properties: {},
-      required: [],
-    },
   },
   {
     name: 'fetchLilNounsProposalSummary',
@@ -105,23 +91,13 @@ export const aiTools = [
     name: 'getCurrentIsoDateTimeUtc',
     description:
       'Get the current date and time in ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ) in UTC timezone. Essential for timestamping responses, determining if proposals or auctions are still active, and providing time-sensitive information to users.',
-    parameters: {
-      type: 'object',
-      properties: {},
-      required: [],
-    },
   },
   {
     name: 'getEthPrice',
     description:
       'Get the current real-time price of Ethereum (ETH) in USD from CoinGecko API. Returns the current market price as a float value. Use this when users ask about ETH price, current Ethereum value, or need pricing information for calculations.',
-    parameters: {
-      type: 'object',
-      properties: {},
-      required: [],
-    },
   },
-] as const;
+];
 
 /**
  * Provides essential environment and configuration context for tool operations.
