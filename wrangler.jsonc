@@ -12,7 +12,7 @@
 
   // Cron triggers
   "triggers": {
-    "crons": ["0 * * * *"]
+    "crons": ["0/5 * * * *"]
   },
 
   // Placement configuration
