@@ -37,7 +37,7 @@
   "vars": {
     "NODE_ENV": "production",
     "LOG_LEVEL": "debug",
-    "ENABLE_FARCASTER_STREAM": "true"
+    "ENABLE_FARCASTER_STREAM": "false"
   },
 
   // Durable Objects bindings
