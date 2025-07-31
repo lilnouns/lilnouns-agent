@@ -53,6 +53,7 @@ The following environment variables are required for the agent to function corre
 - `FARCASTER_AUTH_TOKEN`: Authentication token for the Farcaster API
 - `LILNOUNS_SUBGRAPH_URL`: The URL for the Lil Nouns GraphQL subgraph
 - `ETHEREUM_RPC_URL`: The URL for an Ethereum RPC endpoint
+- `ENABLE_FARCASTER_STREAM`: Set to 'true' to enable or 'false' to disable the Farcaster WebSocket Durable Object (default: 'true')
 
 ## Infrastructure
 

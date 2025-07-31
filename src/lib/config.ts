@@ -22,6 +22,7 @@ const envSchema = z.object({
     .string()
     .url('LILNOUNS_SUBGRAPH_URL must be a valid URL'),
   ETHEREUM_RPC_URL: z.string().url('ETHEREUM_RPC_URL must be a valid URL'),
+  ENABLE_FARCASTER_STREAM: z.string().optional().default('true'),
 });
 
 const loggerConfigSchema = z.object({
@@ -52,6 +53,7 @@ const agentConfigSchema = z.object({
     handleOneToOneConversations: z.boolean().default(true),
     sendDirectMessagesToGroupConversations: z.boolean().default(false),
     sendDirectMessagesToOneToOneConversations: z.boolean().default(false),
+    enableFarcasterStream: z.boolean(),
   }),
   defaults: z.object({
     fallbackDate: z
@@ -142,6 +144,8 @@ export function getConfig(env: Env): Config {
         handleOneToOneConversations: true,
         sendDirectMessagesToGroupConversations: true,
         sendDirectMessagesToOneToOneConversations: true,
+        enableFarcasterStream:
+          envResult.data.ENABLE_FARCASTER_STREAM === 'true', // Controls whether the Farcaster WebSocket Durable Object is active
       },
       defaults: {
         fallbackDate: '1970-01-01T00:00:00.000Z',
