@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.34] - 2025-07-31
+
+### 🚀 Features
+
+- *(config)* Add support for Farcaster Stream toggle
+
+### 🚜 Refactor
+
+- *(config)* Disable Farcaster Stream by default
+
+### ⚙️ Miscellaneous Tasks
+
+- *(deps)* Bump orhun/git-cliff-action from 4.5.0 to 4.5.1
+
+### ◀️ Revert
+
+- *(config)* Comment out durable objects and migrations
+
 ## [1.0.0-alpha.33] - 2025-07-31
 
 ### 🚜 Refactor
