@@ -88,6 +88,12 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
     // Initialize configuration from environment variables
     this.config = getConfig(env);
 
+    // Check if Farcaster Stream is enabled before setting up alarms
+    if (!this.config.agent.features.enableFarcasterStream) {
+      this.logger.info('Farcaster Stream is disabled in configuration');
+      return;
+    }
+
     // Schedule initial heartbeat alarm if none exists
     // Using proper promise handling with explicit logging for both success and error cases
     this.ctx.storage
@@ -114,6 +120,12 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
       timestamp: new Date().toISOString(),
     });
 
+    // Check if Farcaster Stream is enabled
+    if (!this.config.agent.features.enableFarcasterStream) {
+      logger.info('Farcaster Stream is disabled in configuration');
+      return new Response('Farcaster Stream is disabled', { status: 503 });
+    }
+
     logger.info('WebSocket fetch request started');
 
     try {
@@ -128,6 +140,12 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
 
   // Alarm handler: checks connection health and triggers reconnect if needed
   async alarm(): Promise<void> {
+    // Check if Farcaster Stream is enabled
+    if (!this.config.agent.features.enableFarcasterStream) {
+      this.logger.info('Farcaster Stream is disabled, skipping alarm');
+      return;
+    }
+
     try {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
         // Connection is healthy, just log status
@@ -148,6 +166,12 @@ export class FarcasterStreamWebsocket extends DurableObject<Env> {
 
   // Establish or re-establish WebSocket connection
   private async connect(): Promise<void> {
+    // Check if Farcaster Stream is enabled
+    if (!this.config.agent.features.enableFarcasterStream) {
+      this.logger.info('Farcaster Stream is disabled, skipping connection');
+      return;
+    }
+
     const token = this.env.FARCASTER_AUTH_TOKEN;
 
     if (!token) {

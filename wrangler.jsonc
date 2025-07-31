@@ -36,24 +36,25 @@
   // Environment variables
   "vars": {
     "NODE_ENV": "production",
-    "LOG_LEVEL": "debug"
-  }
+    "LOG_LEVEL": "debug",
+    "ENABLE_FARCASTER_STREAM": "false"
+  },
 
   // Durable Objects bindings
-  //  "durable_objects": {
-  //    "bindings": [
-  //      {
-  //        "name": "FARCASTER_STREAM",
-  //        "class_name": "FarcasterStreamWebsocket"
-  //      }
-  //    ]
-  //  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "FARCASTER_STREAM",
+        "class_name": "FarcasterStreamWebsocket"
+      }
+    ]
+  },
 
   // Migrations
-  //  "migrations": [
-  //    {
-  //      "tag": "v1",
-  //      "new_classes": ["FarcasterStreamWebsocket"]
-  //    }
-  //  ]
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_classes": ["FarcasterStreamWebsocket"]
+    }
+  ]
 }
