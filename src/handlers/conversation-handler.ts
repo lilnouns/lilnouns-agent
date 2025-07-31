@@ -14,7 +14,9 @@ import { handleNewOneToOneMessages } from './one-to-one-conversation-handler';
  * @param {ConversationContext} context - Environment and configuration context required for conversation processing
  * @return {Promise<void>} Resolves when all unread conversations have been processed successfully.
  */
-export async function handleUnreadConversations(context: ConversationContext) {
+export async function handleUnreadConversations(
+  context: ConversationContext,
+): Promise<void> {
   const { env, config } = context;
 
   const logger = createLogger(env).child({
