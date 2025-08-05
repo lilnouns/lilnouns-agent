@@ -21,8 +21,8 @@ importers:
         specifier: 0.0.109
         version: 0.0.109(@cloudflare/workers-types@4.20250803.0)(react@19.1.0)
       ai:
-        specifier: 5.0.0
-        version: 5.0.0(zod@4.0.14)
+        specifier: 5.0.2
+        version: 5.0.2(zod@4.0.14)
       graphql:
         specifier: 16.11.0
         version: 16.11.0
@@ -1302,8 +1302,8 @@ packages:
       react:
         optional: true
 
-  ai@5.0.0:
-    resolution: {integrity: sha512-F4jOhOSeiZD8lXpF4l1hRqyM1jbqoLKGVZNxAP467wmQCsWUtElMa3Ki5PrDMq6qvUNC3deUKfERDAsfj7IDlg==}
+  ai@5.0.2:
+    resolution: {integrity: sha512-Uk4lmwlr2b/4G9DUYCWYKcWz93xQ6p6AEeRZN+/AO9NbOyCm9axrDru26c83Ax8OB8IHUvoseA3CqaZkg9Z0Kg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4
@@ -5017,7 +5017,7 @@ snapshots:
     optionalDependencies:
       react: 19.1.0
 
-  ai@5.0.0(zod@4.0.14):
+  ai@5.0.2(zod@4.0.14):
     dependencies:
       '@ai-sdk/gateway': 1.0.0(zod@4.0.14)
       '@ai-sdk/provider': 2.0.0
