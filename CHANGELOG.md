@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.35] - 2025-08-06
+
+### 🚜 Refactor
+
+- *(handlers)* Update `handleUnreadConversations` return type
+- *(config)* Update message grouping for `deps`
+
 ## [1.0.0-alpha.34] - 2025-07-31
 
 ### 🚀 Features
@@ -11,10 +18,6 @@ All notable changes to this project will be documented in this file.
 ### 🚜 Refactor
 
 - *(config)* Disable Farcaster Stream by default
-
-### ⚙️ Miscellaneous Tasks
-
-- *(deps)* Bump orhun/git-cliff-action from 4.5.0 to 4.5.1
 
 ### ◀️ Revert
 
@@ -56,10 +59,6 @@ All notable changes to this project will be documented in this file.
 
 - *(tools)* Fix import formatting and add parameter details
 
-### ⚙️ Miscellaneous Tasks
-
-- *(gitignore)* Adjust markdown file patterns in `/docs`
-
 ## [1.0.0-alpha.31] - 2025-07-30
 
 ### 🐛 Bug Fixes
@@ -72,20 +71,11 @@ All notable changes to this project will be documented in this file.
 
 - *(vitest)* Update config path for `wrangler` to `jsonc`
 
-### ⚙️ Miscellaneous Tasks
-
-- *(workflows)* Include `develop` in build trigger branches
-
 ## [1.0.0-alpha.29] - 2025-07-30
 
 ### 🎨 Styling
 
 - *(biome)* Remove `yaml` and `yml` from lint-staged patterns
-
-### ⚙️ Miscellaneous Tasks
-
-- *(workflows)* Add build and release pipeline
-- *(workflows)* Add git-flow automation workflow
 
 ## [1.0.0-alpha.28] - 2025-07-30
 
@@ -140,12 +130,6 @@ All notable changes to this project will be documented in this file.
 - *(scheduled)* Add comment to clarify group conversation processing
 - *(scheduled)* Skip senders without new messages
 
-## [1.0.0-alpha.24] - 2025-07-29
-
-### ⚙️ Miscellaneous Tasks
-
-- *(config)* Enable `workers_dev` mode in wrangler configuration
-
 ## [1.0.0-alpha.23] - 2025-07-29
 
 ### 🚀 Features
@@ -157,10 +141,6 @@ All notable changes to this project will be documented in this file.
 ### 🚀 Features
 
 - *(services)* Schedule heartbeat in stream initialization
-
-### ⚙️ Miscellaneous Tasks
-
-- *(config)* Update cron schedule for triggers
 
 ## [1.0.0-alpha.21] - 2025-07-29
 
@@ -228,10 +208,6 @@ All notable changes to this project will be documented in this file.
 - *(scheduled)* Update dev mode log messages for clarity
 - *(scheduled)* Mark conversations as read post-processing
 - *(scheduled)* Fix timestamp comparison logic
-
-### ⚙️ Miscellaneous Tasks
-
-- *(config)* Update `NODE_ENV` to production
 
 ### ◀️ Revert
 
@@ -338,15 +314,6 @@ All notable changes to this project will be documented in this file.
 - Add README with project overview and guidelines
 - Improve JSDoc annotations across modules
 
-### ⚙️ Miscellaneous Tasks
-
-- *(templates)* Add bug report and feature request templates
-- *(github-actions)* Add stale issue management workflow
-- *(funding)* Add funding configuration file
-- *(dependabot)* Add dependabot configuration
-- *(config)* Update `NODE_ENV` to `development`
-- *(license)* Add Apache 2.0 license
-
 ## [1.0.0-alpha.14] - 2025-07-26
 
 ### 🚀 Features
@@ -433,16 +400,6 @@ All notable changes to this project will be documented in this file.
 - *(config)* Simplify `getConfig` logic
 - *(config)* Enhance validation and error handling
 
-### ⚙️ Miscellaneous Tasks
-
-- *(types)* Add `NODE_ENV` to `Env` interface
-
-## [1.0.0-alpha.5] - 2025-07-23
-
-### ⚙️ Miscellaneous Tasks
-
-- *(config)* Add `NODE_ENV` variable to `wrangler.toml`
-
 ## [1.0.0-alpha.4] - 2025-07-23
 
 ### 🚀 Features
@@ -470,13 +427,6 @@ All notable changes to this project will be documented in this file.
 ### 🚜 Refactor
 
 - *(index)* Update gateway `id` for improved context
-
-## [1.0.0-alpha.1] - 2025-07-23
-
-### ⚙️ Miscellaneous Tasks
-
-- *(config)* Update `wrangler.toml` settings
-- *(config)* Add `placement` configuration to `wrangler.toml`
 
 ## [1.0.0-alpha.0] - 2025-07-23
 
@@ -536,54 +486,5 @@ All notable changes to this project will be documented in this file.
 
 - *(worker)* Add unit tests for `scheduled` handler
 - *(scheduled)* Refactor tests with Cloudflare testing utilities
-
-### ⚙️ Miscellaneous Tasks
-
-- *(project)* Initialize `lilnouns-agent` project
-- *(scripts)* Add `format` and `format:check` scripts
-- *(project)* Move `keywords` to correct position
-- *(project)* Update `.gitignore` to ignore `node_modules`
-- *(project)* Add `.prettierignore` file
-- *(project)* Add `.prettierrc` configuration
-- *(scripts)* Add `prepare` script for Git hooks setup
-- *(lint-staged)* Configure linting for staged files
-- *(husky)* Add pre-commit hook to run `lint-staged`
-- *(project)* Migrate from `prettier` to `@biomejs/biome`
-- *(gitignore)* Expand ignored files and directories
-- *(scripts)* Add build, dev, deploy, and start scripts
-- *(project)* Add TypeScript configuration
-- *(project)* Add `wrangler.toml` for Cloudflare configuration
-- *(scripts)* Update `build` script to use `vite`
-- *(scripts)* Update `test` scripts to use `vitest`
-- *(tsconfig)* Update `types` and disable declarations
-- *(config)* Update `wrangler.toml` compatibility settings
-- *(config)* Add `vitest.config.ts` for test configuration
-- *(config)* Add `vite.config.mts` for build configuration
-- *(tsconfig)* Update `types` for Cloudflare worker support
-- *(config)* Update `vitest.config.ts` for worker support
-- *(config)* Add AI binding to `wrangler.toml`
-- *(tsconfig)* Remove `@cloudflare/vitest-pool-workers` type
-- *(scripts)* Add `cf-typegen` command to package scripts
-- *(types)* Add `worker-configuration.d.ts` for Cloudflare
-- *(types)* Add `env.d.ts` for Cloudflare test support
-- *(tsconfig)* Add test-specific config for bundler types
-- *(scripts)* Update `dev` and `start` scripts with test flag
-- *(package)* Mark package as private
-- *(scripts)* Update `build` script to use wrangler
-- *(config)* Update compatibility flags in `wrangler.toml`
-- *(config)* Remove unused `vite` configuration
-- *(config)* Update compatibility date in `wrangler.toml`
-- *(config)* Update `tsconfig.json` for improved clarity
-- *(config)* Add `.editorconfig` for unified coding styles
-- *(scripts)* Simplify `test` and `test:run` commands
-- *(config)* Remove `.editorconfig` file
-- *(config)* Reformat configuration files for consistency
-- *(config)* Update pnpm workspace settings
-- *(gitignore)* Add `/docs/tasks.md` to ignored files
-- *(gitignore)* Add `/docs/requirements.md` to ignored files
-- *(gitignore)* Add `/docs/plan.md` to ignored files
-- *(worker)* Update `worker-configuration` types
-- *(gitignore)* Add `schema.graphql` to `.gitignore`
-- *(tsconfig)* Update `moduleResolution` to `bundler`
 
 <!-- generated by git-cliff -->
