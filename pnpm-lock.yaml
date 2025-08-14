@@ -51,8 +51,8 @@ importers:
         specifier: 2.16.1
         version: 2.16.1(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(react@19.1.0)(typescript@5.9.2)(utf-8-validate@5.0.10)(viem@2.33.2(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@4.0.15))(zod@4.0.15)
       workers-ai-provider:
-        specifier: 0.7.2
-        version: 0.7.2(zod@4.0.15)
+        specifier: 0.7.3
+        version: 0.7.3(zod@4.0.15)
       zod:
         specifier: 4.0.15
         version: 4.0.15
@@ -3028,8 +3028,8 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  workers-ai-provider@0.7.2:
-    resolution: {integrity: sha512-5xonBXofNFlG8arl9ZPBKYgFd4yml06GiIjbHR+CHyG0wz8TIWxWMO5m7wzyb2k2l4+h4au6BwDy7xNaeMWyvQ==}
+  workers-ai-provider@0.7.3:
+    resolution: {integrity: sha512-rhunJgqT0oF13MUOwM4DISOs/oIB9D0w4eHmsFo5sb9Fe7iu8mJrQfeRuGqIiOE5cTyFKD1pKM1LY4pO9dnkQA==}
 
   wrangler@4.16.1:
     resolution: {integrity: sha512-YiLdWXcaQva2K/bqokpsZbySPmoT8TJFyJPsQPZumnkgimM9+/g/yoXArByA+pf+xU8jhw7ybQ8X1yBGXv731g==}
@@ -6900,7 +6900,7 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20250803.0
       '@cloudflare/workerd-windows-64': 1.20250803.0
 
-  workers-ai-provider@0.7.2(zod@4.0.15):
+  workers-ai-provider@0.7.3(zod@4.0.15):
     dependencies:
       '@ai-sdk/provider': 1.1.3
       '@ai-sdk/provider-utils': 2.2.8(zod@4.0.15)
