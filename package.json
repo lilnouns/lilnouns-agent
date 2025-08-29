@@ -52,7 +52,7 @@
     "viem": "2.33.2",
     "wagmi": "2.16.1",
     "workers-ai-provider": "0.7.2",
-    "zod": "4.0.15"
+    "zod": "4.1.5"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,jsonc,css,scss,graphql}": [
