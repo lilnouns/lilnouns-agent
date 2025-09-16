@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { stripMarkdown } from './text';
+import { splitMessage, stripMarkdown } from './text';
 
 describe('stripMarkdown', () => {
   it('should remove images', () => {
@@ -65,5 +65,44 @@ Blockquote here
     `.trim();
     const result = stripMarkdown(input);
     expect(result).toBe(expectedOutput);
+  });
+});
+
+describe('splitMessage', () => {
+  it('should return the original message when below the limit', () => {
+    const message = 'Short message';
+    expect(splitMessage(message, 50)).toEqual([message]);
+  });
+
+  it('should split on sentence boundaries when possible', () => {
+    const message =
+      'This is the first sentence. Here is the second one. Finally, this is the third.';
+    const chunks = splitMessage(message, 40);
+    expect(chunks).toEqual([
+      'This is the first sentence.',
+      'Here is the second one.',
+      'Finally, this is the third.',
+    ]);
+  });
+
+  it('should fall back to commas and whitespace for long sentences', () => {
+    const message =
+      'This is a very long sentence, filled with descriptive clauses, that needs careful handling to maintain readability across chunks.';
+    const chunks = splitMessage(message, 60);
+    expect(chunks).toEqual([
+      'This is a very long sentence, filled with descriptive clauses,',
+      'that needs careful handling to maintain readability across chunks.',
+    ]);
+  });
+
+  it('should handle text without punctuation by splitting on spaces', () => {
+    const message =
+      'Words separated only by spaces should still be split into readable segments without breaking any individual words.';
+    const chunks = splitMessage(message, 50);
+    expect(chunks.length).toBeGreaterThan(1);
+    for (const chunk of chunks) {
+      expect(chunk.length).toBeLessThanOrEqual(50);
+    }
+    expect(chunks.join(' ')).toBe(message);
   });
 });

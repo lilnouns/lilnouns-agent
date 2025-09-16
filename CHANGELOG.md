@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.37] - 2025-09-16
+
+### 🚀 Features
+
+- *(utils)* Add `splitMessage` utility for chunking text
+- *(handler)* Support multi-chunk message sending
+
+### 🧪 Testing
+
+- *(utils)* Add unit tests for `splitMessage`
+
 ## [1.0.0-alpha.36] - 2025-09-16
 
 ### 💼 Other
