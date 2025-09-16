@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.39] - 2025-09-16
+
+### 🚀 Features
+
+- *(handler)* Support multi-chunk message sending
+
+### 🚜 Refactor
+
+- *(index)* Comment out unused `fetch` handler
+- *(config)* Comment out unused migrations block
+- *(config)* Update `Env` namespace types
+
 ## [1.0.0-alpha.38] - 2025-09-16
 
 ### ◀️ Revert
