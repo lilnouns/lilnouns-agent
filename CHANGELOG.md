@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.40] - 2025-09-16
+
+### 🐛 Bug Fixes
+
+- *(utils)* Improve whitespace handling in text processing
+
+### 🧪 Testing
+
+- *(utils)* Add test case for URL splitting in messages
+
 ## [1.0.0-alpha.39] - 2025-09-16
 
 ### 🚀 Features
