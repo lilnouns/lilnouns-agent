@@ -2,7 +2,7 @@
   // Project configuration
   "name": "lilnouns-agent",
   "main": "src/index.ts",
-  "compatibility_date": "2025-07-19",
+  "compatibility_date": "2025-09-15",
   "workers_dev": false,
 
   // Observability settings
