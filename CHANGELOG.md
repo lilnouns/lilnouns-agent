@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.38] - 2025-09-16
+
+### ◀️ Revert
+
+- *(handler)* Support multi-chunk message sending
+
 ## [1.0.0-alpha.37] - 2025-09-16
 
 ### 🚀 Features
