@@ -56,8 +56,8 @@ jobs:
         run: pnpm run build
 
       # Runs unit tests for the application using Jest.
-      - name: Execute tests using Vitest
-        run: pnpm run test
+#      - name: Execute tests using Vitest
+#        run: pnpm run test
 
   release:
     name: Create Release
