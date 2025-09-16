@@ -21,7 +21,7 @@
     "prepare": "husky",
     "cf-typegen": "wrangler types --include-runtime=false --strict-vars=false"
   },
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@10.16.1",
   "keywords": [],
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
