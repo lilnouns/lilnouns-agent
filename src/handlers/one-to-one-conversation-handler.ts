@@ -25,7 +25,7 @@ import {
   markLilNounsConversationAsRead,
 } from '@/services/farcaster';
 import type { ConversationContext } from '@/types/conversation';
-import { stripMarkdown } from '@/utils/text';
+import { splitMessage, stripMarkdown } from '@/utils/text';
 
 /**
  * Processes new one-to-one messages from a list of conversations, generating AI responses and sending them back.
@@ -171,53 +171,59 @@ export async function processOneToOneConversation(
 
   conversationLogger.debug({ response }, 'AI generated response');
 
-  // Prepare a plain text message without Markdown
-  const messageContent = stripMarkdown(response ?? "I don't know");
+  const plainResponse = stripMarkdown(response ?? "I don't know").trim();
+  const fallbackResponse =
+    plainResponse.length > 0 ? plainResponse : "I don't know";
+  const messageChunks = splitMessage(fallbackResponse);
 
-  conversationLogger.debug(
-    { messageContent },
-    'Sending message to conversation',
+  const recipientFid = Number(
+    pipe(
+      participants,
+      filter(p => p.fid !== config.agent.fid),
+      first<Participant[]>,
+    )?.fid ?? 0,
   );
+
+  conversationLogger.debug({ messageChunks }, 'Prepared direct message chunks');
+
+  if (messageChunks.length === 0) {
+    conversationLogger.warn('No message chunks generated, skipping send');
+    return;
+  }
 
   // Send the AI-generated response back to the conversation on Farcaster
   if (config.agent.features.sendDirectMessagesToOneToOneConversations) {
-    const { error } = await sendDirectCast({
-      auth: () => config.farcasterApiKey,
-      body: {
-        recipientFid: Number(
-          pipe(
-            participants,
-            filter(p => p.fid !== config.agent.fid),
-            first<Participant[]>,
-          )?.fid ?? 0,
-        ),
-        idempotencyKey: crypto.randomUUID(),
-        message: messageContent,
-      },
-    });
+    for (const [index, chunk] of messageChunks.entries()) {
+      const idempotencyKey = crypto.randomUUID();
+      const { error } = await sendDirectCast({
+        auth: () => config.farcasterApiKey,
+        body: {
+          recipientFid,
+          idempotencyKey,
+          message: chunk,
+        },
+      });
 
-    if (error) {
-      conversationLogger.error(
-        { error },
-        'Error sending message to conversation',
+      if (error) {
+        conversationLogger.error(
+          { error, chunkIndex: index, idempotencyKey },
+          'Error sending message chunk to conversation',
+        );
+        break;
+      }
+
+      conversationLogger.info(
+        { chunkIndex: index, idempotencyKey },
+        'Message chunk sent successfully',
       );
-    } else {
-      conversationLogger.info('Message sent successfully');
     }
   } else {
     conversationLogger.info(
       {
-        messageContent,
-        recipientFid: Number(
-          pipe(
-            participants,
-            filter(p => p.fid !== config.agent.fid),
-            first<Participant[]>,
-          )?.fid ?? 0,
-        ),
-        idempotencyKey: crypto.randomUUID(),
+        messageChunks,
+        recipientFid,
       },
-      'Would send direct cast message to one-to-one conversation (not actually sent)',
+      'Would send direct cast message chunks to one-to-one conversation (not actually sent)',
     );
   }
 }
