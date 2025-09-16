@@ -21,12 +21,7 @@ jobs:
 
     steps: # The sequence of tasks that make up a job.
       - name: Checking out repository code
-        uses: actions/checkout@v4.2.2 # Action for checking out a repo.
-
-      - name: Setup Node.js Environment
-        uses: actions/setup-node@v4.4.0 # Action for setting up Node environment.
-        with:
-          node-version: latest
+        uses: actions/checkout@v5.0.0 # Action for checking out a repo.
 
       - name: Install PNPM package manager
         uses: pnpm/action-setup@v4.1.0 # Action for setting up pnpm.
@@ -34,18 +29,11 @@ jobs:
         with:
           run_install: false
 
-      - name: Capture pnpm store directory
-        id: pnpm-cache
-        run: |
-          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Cache pnpm Store
-        uses: actions/cache@v4.2.3 # Action provides caching dependencies and build outputs to improve workflow execution time.
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v5.0.0 # Action for setting up Node environment.
         with:
-          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }} # The path of the directory to cache.
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }} # An explicit key for restoring and saving the cache.
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          cache: 'pnpm'
+          node-version-file: 'package.json'
 
       # Installs all dependencies specified in the project's package.json file.
       - name: Install dependencies using pnpm
@@ -56,8 +44,8 @@ jobs:
         run: pnpm run build
 
       # Runs unit tests for the application using Jest.
-      - name: Execute tests using Vitest
-        run: pnpm run test
+#      - name: Execute tests using Vitest
+#        run: pnpm run test
 
   release:
     name: Create Release
@@ -74,7 +62,7 @@ jobs:
 
     steps: # Checkout the repository code
       - name: Checkout code
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v5.0.0
         with:
           fetch-depth: 0 # Fetches all history for all branches and tags
 

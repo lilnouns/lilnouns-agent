@@ -41,20 +41,20 @@
   },
 
   // Durable Objects bindings
-  "durable_objects": {
-    "bindings": [
-      {
-        "name": "FARCASTER_STREAM",
-        "class_name": "FarcasterStreamWebsocket"
-      }
-    ]
-  },
+  //  "durable_objects": {
+  //    "bindings": [
+  //      {
+  //        "name": "FARCASTER_STREAM",
+  //        "class_name": "FarcasterStreamWebsocket"
+  //      }
+  //    ]
+  //  },
 
   // Migrations
   "migrations": [
     {
-      "tag": "v1",
-      "new_classes": ["FarcasterStreamWebsocket"]
+      "tag": "v2",
+      "deleted_classes": ["FarcasterStreamWebsocket"]
     }
   ]
 }
