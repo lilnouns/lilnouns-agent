@@ -105,4 +105,15 @@ describe('splitMessage', () => {
     }
     expect(chunks.join(' ')).toBe(message);
   });
+
+  it('should avoid splitting inside URLs', () => {
+    const message =
+      'Check out this link https://example.com/path?query=1 for details later.';
+    const chunks = splitMessage(message, 35);
+    expect(chunks).toEqual([
+      'Check out this link',
+      'https://example.com/path?query=1',
+      'for details later.',
+    ]);
+  });
 });
