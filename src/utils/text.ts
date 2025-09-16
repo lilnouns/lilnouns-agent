@@ -98,6 +98,10 @@ function seekBoundary(
   for (let index = endIndex; index > startIndex; index -= 1) {
     const char = text[index - 1];
     if (pattern.test(char)) {
+      const nextChar = text[index] ?? '';
+      if (!/\s/.test(char) && nextChar !== '' && !/\s/.test(nextChar)) {
+        continue;
+      }
       if (/\s/.test(char)) {
         return trimTrailingWhitespace(text, startIndex, index - 1);
       }
