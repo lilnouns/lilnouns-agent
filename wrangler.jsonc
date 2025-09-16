@@ -53,8 +53,8 @@
   // Migrations
   "migrations": [
     {
-      "tag": "v1",
-      "new_classes": ["FarcasterStreamWebsocket"]
+      "tag": "v2",
+      "deleted_classes": ["FarcasterStreamWebsocket"]
     }
   ]
 }
