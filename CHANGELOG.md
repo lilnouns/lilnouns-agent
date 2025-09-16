@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0-alpha.36] - 2025-09-16
+
+### 💼 Other
+
+- *(pnpm)* Remove `onlyBuiltDependencies` from `pnpm-workspace.yaml`
+
+### 🚜 Refactor
+
+- *(config)* Update migration to `v2`
+- *(config)* Remove `FarcasterStreamWebsocket` binding
+
 ## [1.0.0-alpha.35] - 2025-08-06
 
 ### 🚜 Refactor
