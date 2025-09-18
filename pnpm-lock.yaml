@@ -21,8 +21,8 @@ importers:
         specifier: 0.1.4
         version: 0.1.4(@cloudflare/workers-types@4.20250913.0)(react@19.1.0)
       ai:
-        specifier: 5.0.44
-        version: 5.0.44(zod@4.1.9)
+        specifier: 5.0.45
+        version: 5.0.45(zod@4.1.9)
       graphql:
         specifier: 16.11.0
         version: 16.11.0
@@ -1303,6 +1303,12 @@ packages:
 
   ai@5.0.44:
     resolution: {integrity: sha512-l/rdoM4LcRpsRBVvZQBwSU73oNoFGlWj+PcH86QRzxDGJgZqgGItWO0QcKjBNcLDmUjGN1VYd/8J0TAXHJleRQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4
+
+  ai@5.0.45:
+    resolution: {integrity: sha512-go6J78B1oTXZMN2XLlNJnrFxwcqXQtpPqUVyk1wvzvpb2dk5nP9yNuxqqOX9HrrKuf5U9M6rSezEJWr1eEG9RA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4
@@ -5047,7 +5053,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       zod: 3.25.76
 
-  ai@5.0.44(zod@4.1.9):
+  ai@5.0.45(zod@4.1.9):
     dependencies:
       '@ai-sdk/gateway': 1.0.23(zod@4.1.9)
       '@ai-sdk/provider': 2.0.0
