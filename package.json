@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@cloudflare/ai-utils": "1.0.1",
-    "@nekofar/lilnouns": "1.0.0-alpha.15",
+    "@nekofar/lilnouns": "1.0.0-alpha.22",
     "@nekofar/warpcast": "2.0.0-alpha.66",
     "agents": "0.1.4",
     "ai": "5.0.46",
