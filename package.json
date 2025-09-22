@@ -26,7 +26,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
     "@cloudflare/vitest-pool-workers": "0.9.3",
-    "@cloudflare/workers-types": "4.20250918.0",
+    "@cloudflare/workers-types": "4.20250922.0",
     "@types/luxon": "3.7.1",
     "@types/node": "24.5.2",
     "husky": "9.1.7",
