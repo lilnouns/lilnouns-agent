@@ -21,8 +21,8 @@ importers:
         specifier: 0.2.2
         version: 0.2.2(@cloudflare/workers-types@4.20250924.0)(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.1.0)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       ai:
-        specifier: 5.0.54
-        version: 5.0.54(zod@4.1.11)
+        specifier: 5.0.56
+        version: 5.0.56(zod@4.1.11)
       graphql:
         specifier: 16.11.0
         version: 16.11.0
@@ -1569,8 +1569,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4
 
-  ai@5.0.54:
-    resolution: {integrity: sha512-eM3EH4VVCWRMfs17r8HF8RtCN/+vBdpWOQoHSVooIfB0BZerOHyrktrVoDP6G6xatUzGLTvJT3rMKLkbPTLPBg==}
+  ai@5.0.56:
+    resolution: {integrity: sha512-Rl++Ogg6DxzFkVHAOJZzhqcqvqtBLGOP9mMxJOGr2EJWj5HH5zjqDcnRh6x5vBoca5kj/Gd0rvUZFMnyI+sRiw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -6516,7 +6516,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       zod: 3.25.76
 
-  ai@5.0.54(zod@4.1.11):
+  ai@5.0.56(zod@4.1.11):
     dependencies:
       '@ai-sdk/gateway': 1.0.30(zod@4.1.11)
       '@ai-sdk/provider': 2.0.0
