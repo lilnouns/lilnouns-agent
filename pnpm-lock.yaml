@@ -15,8 +15,8 @@ importers:
         specifier: 1.0.0-alpha.27
         version: 1.0.0-alpha.27(@tanstack/react-query@5.83.0(react@19.1.0))(@wagmi/core@2.21.2(@tanstack/query-core@5.83.0)(react@19.1.0)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)))(graphql-request@7.2.0(graphql@16.11.0))(graphql-tag@2.12.6(graphql@16.11.0))(graphql@16.11.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.9.3)(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(wagmi@2.17.5(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(react@19.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(zod@4.1.12))
       '@nekofar/warpcast':
-        specifier: 2.0.0-alpha.72
-        version: 2.0.0-alpha.72(zod@4.1.12)
+        specifier: 2.0.0-alpha.73
+        version: 2.0.0-alpha.73(zod@4.1.12)
       agents:
         specifier: 0.2.8
         version: 0.2.8(@cloudflare/workers-types@4.20251004.0)(react@19.1.0)(typescript@5.9.3)(x402@0.6.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3))(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
@@ -862,8 +862,8 @@ packages:
       viem: ^2.27.2
       wagmi: ^2.14.16
 
-  '@nekofar/warpcast@2.0.0-alpha.72':
-    resolution: {integrity: sha512-AEY02amkEnomwsD2ssz+M9ELgj2A1p7WUNA5zKHg6fStJ2LUpk8vxgyZo69SB3lJsFbGK1/OTj1Bhl3xT38DuQ==}
+  '@nekofar/warpcast@2.0.0-alpha.73':
+    resolution: {integrity: sha512-7tGGpY6ubKNj+uYslcpsy/M8l+iAw1Kn0dOCB8mmzZc5cow5q24ucCcIho1jre6AYJllqaEusNCp5e2FskTamw==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       zod: ^4.0.10
@@ -4340,7 +4340,7 @@ snapshots:
       viem: 2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
       wagmi: 2.17.5(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(react@19.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(zod@4.1.12)
 
-  '@nekofar/warpcast@2.0.0-alpha.72(zod@4.1.12)':
+  '@nekofar/warpcast@2.0.0-alpha.73(zod@4.1.12)':
     dependencies:
       zod: 4.1.12
 
