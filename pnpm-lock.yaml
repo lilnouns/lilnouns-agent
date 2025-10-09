@@ -12,8 +12,8 @@ importers:
         specifier: 1.0.1
         version: 1.0.1
       '@nekofar/lilnouns':
-        specifier: 1.0.0-alpha.22
-        version: 1.0.0-alpha.22(@tanstack/react-query@5.83.0(react@19.1.0))(@wagmi/core@2.21.2(@tanstack/query-core@5.83.0)(react@19.1.0)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)))(graphql-request@7.2.0(graphql@16.11.0))(graphql-tag@2.12.6(graphql@16.11.0))(graphql@16.11.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.9.3)(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(wagmi@2.17.5(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(react@19.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(zod@4.1.12))
+        specifier: 1.0.0-alpha.27
+        version: 1.0.0-alpha.27(@tanstack/react-query@5.83.0(react@19.1.0))(@wagmi/core@2.21.2(@tanstack/query-core@5.83.0)(react@19.1.0)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)))(graphql-request@7.2.0(graphql@16.11.0))(graphql-tag@2.12.6(graphql@16.11.0))(graphql@16.11.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.9.3)(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(wagmi@2.17.5(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(react@19.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(zod@4.1.12))
       '@nekofar/warpcast':
         specifier: 2.0.0-alpha.72
         version: 2.0.0-alpha.72(zod@4.1.12)
@@ -847,8 +847,8 @@ packages:
     resolution: {integrity: sha512-3Y2h3MZKjec1eAqSTBclATlX+AbC6n1LgfVzRMJLt3v6w0RCYgwLrjbxPDbhsYHt6Wdqc/aCceNJYgj448ELQQ==}
     engines: {node: '>=18'}
 
-  '@nekofar/lilnouns@1.0.0-alpha.22':
-    resolution: {integrity: sha512-eBg6truLltftW+OTdgqYCU/rvIJQUiHgkxNZgPMGFfKTDtk8hOSRYVNnTUvACi4iZDlCl8wRDHrGjtQ8jwjk6g==}
+  '@nekofar/lilnouns@1.0.0-alpha.27':
+    resolution: {integrity: sha512-rHyH6TXN59OtYIVf87yxDtBXA8TNkNxVmHsscf0EqMPG3i+O0kmv/yhHFmIb74SpYVtViU3qtKfT3g0OjdT+OA==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       '@tanstack/react-query': ^5.74.4
@@ -4327,7 +4327,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@nekofar/lilnouns@1.0.0-alpha.22(@tanstack/react-query@5.83.0(react@19.1.0))(@wagmi/core@2.21.2(@tanstack/query-core@5.83.0)(react@19.1.0)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)))(graphql-request@7.2.0(graphql@16.11.0))(graphql-tag@2.12.6(graphql@16.11.0))(graphql@16.11.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.9.3)(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(wagmi@2.17.5(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(react@19.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(zod@4.1.12))':
+  '@nekofar/lilnouns@1.0.0-alpha.27(@tanstack/react-query@5.83.0(react@19.1.0))(@wagmi/core@2.21.2(@tanstack/query-core@5.83.0)(react@19.1.0)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)))(graphql-request@7.2.0(graphql@16.11.0))(graphql-tag@2.12.6(graphql@16.11.0))(graphql@16.11.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.9.3)(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(wagmi@2.17.5(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(react@19.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(zod@4.1.12))':
     dependencies:
       '@tanstack/react-query': 5.83.0(react@19.1.0)
       '@wagmi/core': 2.21.2(@tanstack/query-core@5.83.0)(react@19.1.0)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.38.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))
