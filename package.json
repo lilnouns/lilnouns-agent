@@ -43,7 +43,7 @@
     "agents": "0.2.14",
     "ai": "5.0.76",
     "graphql": "16.11.0",
-    "graphql-request": "7.3.0",
+    "graphql-request": "7.3.1",
     "luxon": "3.7.2",
     "pino": "10.0.0",
     "pino-pretty": "13.1.2",
