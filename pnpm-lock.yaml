@@ -15,8 +15,8 @@ importers:
         specifier: 1.0.0-alpha.33
         version: 1.0.0-alpha.33(@tanstack/react-query@5.83.0(react@19.1.0))(@wagmi/core@2.22.1(@tanstack/query-core@5.83.0)(react@19.1.0)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)))(graphql-request@7.3.1(graphql@16.11.0))(graphql-tag@2.12.6(graphql@16.11.0))(graphql@16.11.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.9.3)(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(wagmi@2.19.1(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.1.12))
       '@nekofar/warpcast':
-        specifier: 2.0.0-alpha.81
-        version: 2.0.0-alpha.81(zod@4.1.12)
+        specifier: 2.0.0-alpha.83
+        version: 2.0.0-alpha.83(ofetch@1.5.0)(zod@4.1.12)
       agents:
         specifier: 0.2.19
         version: 0.2.19(@cloudflare/workers-types@4.20251014.0)(react@19.1.0)(typescript@5.9.3)(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(x402@0.6.5(@solana/sysvars@3.0.3(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3))(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
@@ -877,10 +877,11 @@ packages:
       viem: ^2.27.2
       wagmi: ^2.14.16
 
-  '@nekofar/warpcast@2.0.0-alpha.81':
-    resolution: {integrity: sha512-Qc+wm47NVt0ZqOaTYtP9k2zH+WI2p7LTpasZtrjzQ6YwHdCe4tfy4bEgGaif4bBFKdUNYTQTu/tmRnwEPuE7Zw==}
+  '@nekofar/warpcast@2.0.0-alpha.83':
+    resolution: {integrity: sha512-H2mOuvYaQZPc7kdCJnEoBk7lgtqdOISTHleWD3mhrJw5fwCSE+5Gl8oc/SNPmeyHRln3t+ywWciXvNipcIVKBw==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
+      ofetch: ^1.5.0
       zod: ^4.0.10
 
   '@noble/ciphers@1.2.1':
@@ -4818,8 +4819,9 @@ snapshots:
       viem: 2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
       wagmi: 2.19.1(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.1.12)
 
-  '@nekofar/warpcast@2.0.0-alpha.81(zod@4.1.12)':
+  '@nekofar/warpcast@2.0.0-alpha.83(ofetch@1.5.0)(zod@4.1.12)':
     dependencies:
+      ofetch: 1.5.0
       zod: 4.1.12
 
   '@noble/ciphers@1.2.1': {}
