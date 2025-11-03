@@ -42,7 +42,7 @@
     "@nekofar/warpcast": "2.0.0-alpha.83",
     "agents": "0.2.19",
     "ai": "5.0.85",
-    "graphql": "16.11.0",
+    "graphql": "16.12.0",
     "graphql-request": "7.3.1",
     "luxon": "3.7.2",
     "pino": "10.1.0",
