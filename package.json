@@ -41,7 +41,7 @@
     "@nekofar/lilnouns": "1.0.0-alpha.43",
     "@nekofar/warpcast": "2.0.0-alpha.92",
     "agents": "0.2.23",
-    "ai": "5.0.100",
+    "ai": "5.0.101",
     "graphql": "16.12.0",
     "graphql-request": "7.3.4",
     "luxon": "3.7.2",
