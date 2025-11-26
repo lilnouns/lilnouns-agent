@@ -21,8 +21,8 @@ importers:
         specifier: 0.2.23
         version: 0.2.23(@cloudflare/workers-types@4.20251125.0)(react@19.1.0)(typescript@5.9.3)(viem@2.40.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.13))
       ai:
-        specifier: 5.0.101
-        version: 5.0.101(zod@4.1.13)
+        specifier: 5.0.102
+        version: 5.0.102(zod@4.1.13)
       graphql:
         specifier: 16.12.0
         version: 16.12.0
@@ -1684,8 +1684,8 @@ packages:
       x402:
         optional: true
 
-  ai@5.0.101:
-    resolution: {integrity: sha512-/P4fgs2PGYTBaZi192YkPikOudsl9vccA65F7J7LvoNTOoP5kh1yAsJPsKAy6FXU32bAngai7ft1UDyC3u7z5g==}
+  ai@5.0.102:
+    resolution: {integrity: sha512-snRK3nS5DESOjjpq7S74g8YszWVMzjagfHqlJWZsbtl9PyOS+2XUd8dt2wWg/jdaq/jh0aU66W1mx5qFjUQyEg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -6197,7 +6197,7 @@ snapshots:
       - supports-color
       - typescript
 
-  ai@5.0.101(zod@4.1.13):
+  ai@5.0.102(zod@4.1.13):
     dependencies:
       '@ai-sdk/gateway': 2.0.15(zod@4.1.13)
       '@ai-sdk/provider': 2.0.0
