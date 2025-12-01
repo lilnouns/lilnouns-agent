@@ -18,8 +18,8 @@ importers:
         specifier: 2.0.0-alpha.92
         version: 2.0.0-alpha.92(ofetch@1.5.1)(zod@4.1.13)
       agents:
-        specifier: 0.2.25
-        version: 0.2.25(@cloudflare/workers-types@4.20251128.0)(react@19.1.0)(typescript@5.9.3)(viem@2.40.3(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.13))
+        specifier: 0.2.26
+        version: 0.2.26(@cloudflare/workers-types@4.20251128.0)(react@19.1.0)(typescript@5.9.3)(viem@2.40.3(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.13))
       ai:
         specifier: 5.0.104
         version: 5.0.104(zod@4.1.13)
@@ -93,8 +93,8 @@ packages:
   '@adraffy/ens-normalize@1.11.1':
     resolution: {integrity: sha512-nhCBV3quEgesuf7c7KYfperqSS14T8bYuvJ8PcLJp6znkZpFc0AuW4qBtr8eKVyPPe/8RSr7sglCWPU5eaxwKQ==}
 
-  '@ai-sdk/gateway@2.0.15':
-    resolution: {integrity: sha512-i1YVKzC1dg9LGvt+GthhD7NlRhz9J4+ZRj3KELU14IZ/MHPsOBiFeEoCCIDLR+3tqT8/+5nIsK3eZ7DFRfMfdw==}
+  '@ai-sdk/gateway@2.0.16':
+    resolution: {integrity: sha512-qiIaVs1w1XcNiFG6cjhOwolPuMFSvy6ZxDeLaPlEK/kSmNGfd+gUA2CTpBPWWT3qN6Zxfdrwq+ti4BfkdmLIJQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -105,8 +105,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai@2.0.72':
-    resolution: {integrity: sha512-9j8Gdt9gFiUGFdQIjjynbC7+w8YQxkXje6dwAq1v2Pj17wmB3U0Td3lnEe/a+EnEysY3mdkc8dHPYc5BNev9NQ==}
+  '@ai-sdk/openai@2.0.73':
+    resolution: {integrity: sha512-TOGoxkeJMgcxq80ZfyCAqKcfvGPgFsEQEK8SgI/w3He0fqi16KlnZVMexOlg8HOLumF6szweg/YrOmQixsPVGw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1668,8 +1668,8 @@ packages:
     resolution: {integrity: sha512-kja8j7PjmncONqaTsB8fQ+wE2mSU2DJ9D4XKoJ5PFWIdRMa6SLSN1ff4mOr4jCbfRSsxR4keIiySJU0N9T5hIQ==}
     engines: {node: '>= 8.0.0'}
 
-  agents@0.2.25:
-    resolution: {integrity: sha512-Jzal8dk4ifzAbcq3GCNStquYTgrckfWYm4eBsYXDB2dkUDrKnblBF8Uptz8YGTuv0oX2lrDC+U4dHbKgBt1iMg==}
+  agents@0.2.26:
+    resolution: {integrity: sha512-0LXdFyArhCWrisCtJI4PmF6TrekuybuxMwSNCRx3T+Dl7Emxmpy24hFofJn3msYp38mBwUnGVq076ckMNRlteg==}
     hasBin: true
     peerDependencies:
       react: '*'
@@ -1681,8 +1681,8 @@ packages:
       x402:
         optional: true
 
-  ai@5.0.101:
-    resolution: {integrity: sha512-/P4fgs2PGYTBaZi192YkPikOudsl9vccA65F7J7LvoNTOoP5kh1yAsJPsKAy6FXU32bAngai7ft1UDyC3u7z5g==}
+  ai@5.0.103:
+    resolution: {integrity: sha512-TpaeKAzSFHQkUZ5cwkvGZCzElVDY0W7nJNT9Oq31R30PTmCtU8A5ll4IRm+CmolPSYbpXRHHPkgADxGyqex9eg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -2908,8 +2908,8 @@ packages:
   preact@10.27.2:
     resolution: {integrity: sha512-5SYSgFKSyhCbk6SrXyMpqjb5+MQBgfvEKE/OC+PujcY34sOpqtr+0AZQtPYx5IA6VxynQ7rUPCtKzyovpj9Bpg==}
 
-  prettier@3.7.1:
-    resolution: {integrity: sha512-RWKXE4qB3u5Z6yz7omJkjWwmTfLdcbv44jUVHC5NpfXwFGzvpQM798FGv/6WNK879tc+Cn0AAyherCl1KjbyZQ==}
+  prettier@3.7.3:
+    resolution: {integrity: sha512-QgODejq9K3OzoBbuyobZlUhznP5SKwPqp+6Q6xw6o8gnhr4O85L2U915iM2IDcfF2NPXVaM9zlo9tdwipnYwzg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -3785,7 +3785,7 @@ snapshots:
 
   '@adraffy/ens-normalize@1.11.1': {}
 
-  '@ai-sdk/gateway@2.0.15(zod@3.25.76)':
+  '@ai-sdk/gateway@2.0.16(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.17(zod@3.25.76)
@@ -3799,7 +3799,7 @@ snapshots:
       '@vercel/oidc': 3.0.5
       zod: 4.1.13
 
-  '@ai-sdk/openai@2.0.72(zod@3.25.76)':
+  '@ai-sdk/openai@2.0.73(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.17(zod@3.25.76)
@@ -6160,12 +6160,12 @@ snapshots:
     dependencies:
       humanize-ms: 1.2.1
 
-  agents@0.2.25(@cloudflare/workers-types@4.20251128.0)(react@19.1.0)(typescript@5.9.3)(viem@2.40.3(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.13)):
+  agents@0.2.26(@cloudflare/workers-types@4.20251128.0)(react@19.1.0)(typescript@5.9.3)(viem@2.40.3(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.13)):
     dependencies:
-      '@ai-sdk/openai': 2.0.72(zod@3.25.76)
+      '@ai-sdk/openai': 2.0.73(zod@3.25.76)
       '@cfworker/json-schema': 4.1.1
       '@modelcontextprotocol/sdk': 1.23.0(@cfworker/json-schema@4.1.1)(zod@3.25.76)
-      ai: 5.0.101(zod@3.25.76)
+      ai: 5.0.103(zod@3.25.76)
       cron-schedule: 6.0.0
       json-schema: 0.4.0
       json-schema-to-typescript: 15.0.4
@@ -6184,9 +6184,9 @@ snapshots:
       - supports-color
       - typescript
 
-  ai@5.0.101(zod@3.25.76):
+  ai@5.0.103(zod@3.25.76):
     dependencies:
-      '@ai-sdk/gateway': 2.0.15(zod@3.25.76)
+      '@ai-sdk/gateway': 2.0.16(zod@3.25.76)
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.17(zod@3.25.76)
       '@opentelemetry/api': 1.9.0
@@ -7029,7 +7029,7 @@ snapshots:
       js-yaml: 4.1.1
       lodash: 4.17.21
       minimist: 1.2.8
-      prettier: 3.7.1
+      prettier: 3.7.3
       tinyglobby: 0.2.15
 
   json-schema-traverse@1.0.0: {}
@@ -7487,7 +7487,7 @@ snapshots:
 
   preact@10.27.2: {}
 
-  prettier@3.7.1: {}
+  prettier@3.7.3: {}
 
   printable-characters@1.0.42: {}
 
