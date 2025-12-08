@@ -18,8 +18,8 @@ importers:
         specifier: 2.0.0-alpha.101
         version: 2.0.0-alpha.101(ofetch@1.5.1)(zod@4.1.13)
       agents:
-        specifier: 0.2.29
-        version: 0.2.29(@cloudflare/workers-types@4.20251205.0)(react@19.1.0)(typescript@5.9.3)(viem@2.41.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.13))
+        specifier: 0.2.30
+        version: 0.2.30(@cloudflare/workers-types@4.20251205.0)(react@19.1.0)(typescript@5.9.3)(viem@2.41.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.13))
       ai:
         specifier: 5.0.106
         version: 5.0.106(zod@4.1.13)
@@ -1668,8 +1668,8 @@ packages:
     resolution: {integrity: sha512-kja8j7PjmncONqaTsB8fQ+wE2mSU2DJ9D4XKoJ5PFWIdRMa6SLSN1ff4mOr4jCbfRSsxR4keIiySJU0N9T5hIQ==}
     engines: {node: '>= 8.0.0'}
 
-  agents@0.2.29:
-    resolution: {integrity: sha512-+0oCGDwCvTL6Q8m1GiFFPOuzspvurCqECTzgB8QVgk1wucUJPB9L2J7s8YtZRgTJ6tsSI4OlRL6QQbXE6ag/mQ==}
+  agents@0.2.30:
+    resolution: {integrity: sha512-lrgcaOENROLv9DInKxN2hJTAORuuVMFG/dMY00+hDS8p2/gPubQIJzVDi7hr0A8+NmKfMuGy1YQfxP1/KW0C4Q==}
     hasBin: true
     peerDependencies:
       react: '*'
@@ -6165,7 +6165,7 @@ snapshots:
     dependencies:
       humanize-ms: 1.2.1
 
-  agents@0.2.29(@cloudflare/workers-types@4.20251205.0)(react@19.1.0)(typescript@5.9.3)(viem@2.41.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.13)):
+  agents@0.2.30(@cloudflare/workers-types@4.20251205.0)(react@19.1.0)(typescript@5.9.3)(viem@2.41.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.13)):
     dependencies:
       '@ai-sdk/openai': 2.0.73(zod@3.25.76)
       '@cfworker/json-schema': 4.1.1

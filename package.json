@@ -40,7 +40,7 @@
     "@cloudflare/ai-utils": "1.0.1",
     "@nekofar/lilnouns": "1.0.0-alpha.49",
     "@nekofar/warpcast": "2.0.0-alpha.101",
-    "agents": "0.2.29",
+    "agents": "0.2.30",
     "ai": "5.0.106",
     "graphql": "16.12.0",
     "graphql-request": "7.3.5",
