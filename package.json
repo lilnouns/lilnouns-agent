@@ -28,7 +28,7 @@
     "@cloudflare/vitest-pool-workers": "0.10.3",
     "@cloudflare/workers-types": "4.20251205.0",
     "@types/luxon": "3.7.1",
-    "@types/node": "24.10.1",
+    "@types/node": "24.10.2",
     "husky": "9.1.7",
     "lint-staged": "16.2.7",
     "pino-pretty": "13.1.3",
