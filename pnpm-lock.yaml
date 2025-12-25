@@ -51,8 +51,8 @@ importers:
         specifier: 2.19.4
         version: 2.19.4(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.43.3(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)
       workers-ai-provider:
-        specifier: 2.0.2
-        version: 2.0.2(zod@4.2.1)
+        specifier: 3.0.1
+        version: 3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1)
       zod:
         specifier: 4.2.1
         version: 4.2.1
@@ -107,12 +107,6 @@ packages:
 
   '@ai-sdk/provider-utils@3.0.17':
     resolution: {integrity: sha512-TR3Gs4I3Tym4Ll+EPdzRdvo/rc8Js6c4nVhFLuvGLX/Y4V9ZcQMa/HTiYsHEgmYrf1zVi6Q145UEZUfleOwOjw==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
-
-  '@ai-sdk/provider-utils@3.0.19':
-    resolution: {integrity: sha512-W41Wc9/jbUVXVwCN/7bWa4IKe8MtxO3EyA0Hfhx6grnmiYlCvpI8neSYWFE0zScXJkgA/YK3BRybzgyiXuu6JA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3567,8 +3561,13 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  workers-ai-provider@2.0.2:
-    resolution: {integrity: sha512-8PB5O8GuRMxO37RD81TTuRp2ogrqE8Z7CfUBvys8dHoXBJhAkLbJyweukQQ7AXcjDSd52HEEXx9MG4L4SQqKNA==}
+  workers-ai-provider@3.0.1:
+    resolution: {integrity: sha512-vvDesUxmDdKk1rYCVVyCUIAzuh+3uYUyrl3i1m3WYVVYj2TO2m3inl1O9uH2Bh2kmyOLO26a0GlRcGELUjX1lw==}
+    peerDependencies:
+      '@ai-sdk/provider': ^3.0.0
+      '@ai-sdk/provider-utils': ^4.0.0
+      ai: ^6.0.0
+      zod: ^3.25.0 || ^4.0.0
 
   wrangler@4.16.1:
     resolution: {integrity: sha512-YiLdWXcaQva2K/bqokpsZbySPmoT8TJFyJPsQPZumnkgimM9+/g/yoXArByA+pf+xU8jhw7ybQ8X1yBGXv731g==}
@@ -3802,13 +3801,6 @@ snapshots:
       zod: 4.2.1
     optional: true
 
-  '@ai-sdk/provider-utils@3.0.19(zod@4.2.1)':
-    dependencies:
-      '@ai-sdk/provider': 2.0.0
-      '@standard-schema/spec': 1.1.0
-      eventsource-parser: 3.0.6
-      zod: 4.2.1
-
   '@ai-sdk/provider-utils@4.0.0(zod@4.2.1)':
     dependencies:
       '@ai-sdk/provider': 3.0.0
@@ -3819,6 +3811,7 @@ snapshots:
   '@ai-sdk/provider@2.0.0':
     dependencies:
       json-schema: 0.4.0
+    optional: true
 
   '@ai-sdk/provider@3.0.0':
     dependencies:
@@ -8210,12 +8203,12 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20251011.0
       '@cloudflare/workerd-windows-64': 1.20251011.0
 
-  workers-ai-provider@2.0.2(zod@4.2.1):
+  workers-ai-provider@3.0.1(@ai-sdk/provider-utils@4.0.0(zod@4.2.1))(@ai-sdk/provider@3.0.0)(ai@6.0.1(zod@4.2.1))(zod@4.2.1):
     dependencies:
-      '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.19(zod@4.2.1)
-    transitivePeerDependencies:
-      - zod
+      '@ai-sdk/provider': 3.0.0
+      '@ai-sdk/provider-utils': 4.0.0(zod@4.2.1)
+      ai: 6.0.1(zod@4.2.1)
+      zod: 4.2.1
 
   wrangler@4.16.1(@cloudflare/workers-types@4.20251221.0)(bufferutil@4.0.9)(utf-8-validate@5.0.10):
     dependencies:
