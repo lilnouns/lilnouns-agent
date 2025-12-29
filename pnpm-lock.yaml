@@ -15,8 +15,8 @@ importers:
         specifier: 1.0.0-alpha.49
         version: 1.0.0-alpha.49(@tanstack/react-query@5.83.0(react@19.1.0))(@wagmi/core@2.22.1(@tanstack/query-core@5.83.0)(react@19.1.0)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.43.3(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1)))(graphql-request@7.4.0(graphql@16.12.0))(graphql-tag@2.12.6(graphql@16.12.0))(graphql@16.12.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.9.3)(viem@2.43.3(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(wagmi@2.19.4(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.43.3(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1))
       '@nekofar/warpcast':
-        specifier: 2.0.0-alpha.108
-        version: 2.0.0-alpha.108(ofetch@1.5.1)(zod@4.2.1)
+        specifier: 2.0.0-alpha.109
+        version: 2.0.0-alpha.109(ofetch@1.5.1)(zod@4.2.1)
       agents:
         specifier: 0.3.0
         version: 0.3.0(@cloudflare/workers-types@4.20251225.0)(ai@6.0.3(zod@4.2.1))(react@19.1.0)(typescript@5.9.3)(viem@2.43.3(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(zod@4.2.1)
@@ -862,8 +862,8 @@ packages:
       viem: ^2.27.2
       wagmi: ^2.14.16
 
-  '@nekofar/warpcast@2.0.0-alpha.108':
-    resolution: {integrity: sha512-/ijuLoGXrRCg9TWDyKMlhiqowzxy9lQM0LUng0LaG2n6Yzqdhqc+IoELCLmvMiYRFrHo35ylS/LG0/JYfHhKIg==}
+  '@nekofar/warpcast@2.0.0-alpha.109':
+    resolution: {integrity: sha512-k/YAwSoYy4Q+iV15BSaP/txn99imS1HMFBl0Vs0rLbR1yoooeYfNtGun3DAGEyJ9TJX3tk6kP7tJ5jGwtXkUqA==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       ofetch: ^1.5.0
@@ -4492,7 +4492,7 @@ snapshots:
       viem: 2.43.3(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1)
       wagmi: 2.19.4(@tanstack/query-core@5.83.0)(@tanstack/react-query@5.83.0(react@19.1.0))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.43.3(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.2.1))(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.2.1)
 
-  '@nekofar/warpcast@2.0.0-alpha.108(ofetch@1.5.1)(zod@4.2.1)':
+  '@nekofar/warpcast@2.0.0-alpha.109(ofetch@1.5.1)(zod@4.2.1)':
     dependencies:
       ofetch: 1.5.1
       zod: 4.2.1
