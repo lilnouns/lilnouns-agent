@@ -10,7 +10,7 @@
     "dev": "wrangler dev --test-scheduled",
     "deploy": "wrangler deploy",
     "start": "wrangler dev --test-scheduled",
-    "test": "vitest",
+    "test": "vitest --run",
     "test:run": "vitest run",
     "format": "biome format --write .",
     "format:check": "biome format .",
