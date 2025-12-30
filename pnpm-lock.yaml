@@ -39,8 +39,8 @@ importers:
         specifier: 13.1.3
         version: 13.1.3
       remeda:
-        specifier: 2.32.0
-        version: 2.32.0
+        specifier: 2.32.1
+        version: 2.32.1
       type-fest:
         specifier: 5.3.1
         version: 5.3.1
@@ -2965,8 +2965,8 @@ packages:
     resolution: {integrity: sha512-57frrGM/OCTLqLOAh0mhVA9VBMHd+9U7Zb2THMGdBUoZVOtGbJzjxsYGDJ3A9AYYCP4hn6y1TVbaOfzWtm5GFg==}
     engines: {node: '>= 12.13.0'}
 
-  remeda@2.32.0:
-    resolution: {integrity: sha512-BZx9DsT4FAgXDTOdgJIc5eY6ECIXMwtlSPQoPglF20ycSWigttDDe88AozEsPPT4OWk5NujroGSBC1phw5uU+w==}
+  remeda@2.32.1:
+    resolution: {integrity: sha512-8BFAPi5G5CsfSRDjglKJ2c7VYS5ac+lBaX4rnt61gDgmr1RDBTRZR1M4RXVJoQ7fT7UuelaBIciyUFxvWETpWA==}
 
   require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
@@ -7503,7 +7503,7 @@ snapshots:
 
   real-require@0.2.0: {}
 
-  remeda@2.32.0:
+  remeda@2.32.1:
     dependencies:
       type-fest: 4.41.0
 
