@@ -19,7 +19,7 @@ importers:
         version: 2.0.0-alpha.109(ofetch@1.5.1)(zod@4.3.4)
       agents:
         specifier: 0.3.3
-        version: 0.3.3(@cloudflare/ai-chat@0.0.3)(@cloudflare/codemode@0.0.3)(@cloudflare/workers-types@4.20251230.0)(ai@6.0.5(zod@4.3.4))(react@19.2.3)(viem@2.43.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.4))(zod@4.3.4)
+        version: 0.3.3(@cloudflare/ai-chat@0.0.3)(@cloudflare/codemode@0.0.3)(@cloudflare/workers-types@4.20260101.0)(ai@6.0.5(zod@4.3.4))(react@19.2.3)(viem@2.43.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.4))(zod@4.3.4)
       ai:
         specifier: 6.0.5
         version: 6.0.5(zod@4.3.4)
@@ -62,10 +62,10 @@ importers:
         version: 2.3.10
       '@cloudflare/vitest-pool-workers':
         specifier: 0.11.1
-        version: 0.11.1(@cloudflare/workers-types@4.20251230.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.1.0)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(yaml@2.8.2))
+        version: 0.11.1(@cloudflare/workers-types@4.20260101.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.1.0)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(yaml@2.8.2))
       '@cloudflare/workers-types':
-        specifier: 4.20251230.0
-        version: 4.20251230.0
+        specifier: 4.20260101.0
+        version: 4.20260101.0
       '@types/luxon':
         specifier: 3.7.1
         version: 3.7.1
@@ -86,7 +86,7 @@ importers:
         version: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(yaml@2.8.2)
       wrangler:
         specifier: 4.16.1
-        version: 4.16.1(@cloudflare/workers-types@4.20251230.0)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+        version: 4.16.1(@cloudflare/workers-types@4.20260101.0)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
 
 packages:
 
@@ -291,8 +291,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workers-types@4.20251230.0':
-    resolution: {integrity: sha512-mTpeOLyC088fqC0hDMFFErq0C/4tLFTDgYgkBhpbM7YeoASVErhnR5irvnHFarvJ5NWXa8jY08bSaRIG8V8PAA==}
+  '@cloudflare/workers-types@4.20260101.0':
+    resolution: {integrity: sha512-C28o4U1T4dPe8avLv1xMQ4MtSE6G4skbVA3VfVZIrpTqklvO+homKB1uFEtNbuZlaKg+Znv8sjmGQUInTH17gA==}
 
   '@coinbase/cdp-sdk@1.40.1':
     resolution: {integrity: sha512-VZxAUYvWbqM4gw/ZHyr9fKBlCAKdMbBQzJxpV9rMUNkdulHIrj0cko2Mw3dyVyw+gdT62jAVxzVkPuQTRnECLw==}
@@ -4036,7 +4036,7 @@ snapshots:
 
   '@cloudflare/ai-chat@0.0.3(agents@0.3.3)(ai@6.0.5(zod@4.3.4))(react@19.2.3)(zod@4.3.4)':
     dependencies:
-      agents: 0.3.3(@cloudflare/ai-chat@0.0.3)(@cloudflare/codemode@0.0.3)(@cloudflare/workers-types@4.20251230.0)(ai@6.0.5(zod@4.3.4))(react@19.2.3)(viem@2.43.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.4))(zod@4.3.4)
+      agents: 0.3.3(@cloudflare/ai-chat@0.0.3)(@cloudflare/codemode@0.0.3)(@cloudflare/workers-types@4.20260101.0)(ai@6.0.5(zod@4.3.4))(react@19.2.3)(viem@2.43.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.4))(zod@4.3.4)
       ai: 6.0.5(zod@4.3.4)
       react: 19.2.3
       zod: 4.3.4
@@ -4048,7 +4048,7 @@ snapshots:
 
   '@cloudflare/codemode@0.0.3(agents@0.3.3)(ai@6.0.5(zod@4.3.4))(typescript@5.9.3)(zod@4.3.4)':
     dependencies:
-      agents: 0.3.3(@cloudflare/ai-chat@0.0.3)(@cloudflare/codemode@0.0.3)(@cloudflare/workers-types@4.20251230.0)(ai@6.0.5(zod@4.3.4))(react@19.2.3)(viem@2.43.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.4))(zod@4.3.4)
+      agents: 0.3.3(@cloudflare/ai-chat@0.0.3)(@cloudflare/codemode@0.0.3)(@cloudflare/workers-types@4.20260101.0)(ai@6.0.5(zod@4.3.4))(react@19.2.3)(viem@2.43.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.4))(zod@4.3.4)
       ai: 6.0.5(zod@4.3.4)
       zod: 4.3.4
       zod-to-ts: 2.0.0(typescript@5.9.3)(zod@4.3.4)
@@ -4075,7 +4075,7 @@ snapshots:
     optionalDependencies:
       workerd: 1.20251217.0
 
-  '@cloudflare/vitest-pool-workers@0.11.1(@cloudflare/workers-types@4.20251230.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.1.0)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(yaml@2.8.2))':
+  '@cloudflare/vitest-pool-workers@0.11.1(@cloudflare/workers-types@4.20260101.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(bufferutil@4.1.0)(utf-8-validate@5.0.10)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(yaml@2.8.2))':
     dependencies:
       '@vitest/runner': 3.2.4
       '@vitest/snapshot': 3.2.4
@@ -4086,7 +4086,7 @@ snapshots:
       miniflare: 4.20251217.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       semver: 7.7.3
       vitest: 3.2.4(@types/debug@4.1.12)(@types/node@25.0.3)(yaml@2.8.2)
-      wrangler: 4.56.0(@cloudflare/workers-types@4.20251230.0)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      wrangler: 4.56.0(@cloudflare/workers-types@4.20260101.0)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       zod: 3.25.76
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
@@ -4123,7 +4123,7 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20251217.0':
     optional: true
 
-  '@cloudflare/workers-types@4.20251230.0': {}
+  '@cloudflare/workers-types@4.20260101.0': {}
 
   '@coinbase/cdp-sdk@1.40.1(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.1.0)(utf-8-validate@5.0.10))':
     dependencies:
@@ -6377,7 +6377,7 @@ snapshots:
     dependencies:
       humanize-ms: 1.2.1
 
-  agents@0.3.3(@cloudflare/ai-chat@0.0.3)(@cloudflare/codemode@0.0.3)(@cloudflare/workers-types@4.20251230.0)(ai@6.0.5(zod@4.3.4))(react@19.2.3)(viem@2.43.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.4))(zod@4.3.4):
+  agents@0.3.3(@cloudflare/ai-chat@0.0.3)(@cloudflare/codemode@0.0.3)(@cloudflare/workers-types@4.20260101.0)(ai@6.0.5(zod@4.3.4))(react@19.2.3)(viem@2.43.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.4))(zod@4.3.4):
     dependencies:
       '@cfworker/json-schema': 4.1.1
       '@cloudflare/ai-chat': 0.0.3(agents@0.3.3)(ai@6.0.5(zod@4.3.4))(react@19.2.3)(zod@4.3.4)
@@ -6389,7 +6389,7 @@ snapshots:
       json-schema-to-typescript: 15.0.4
       mimetext: 3.0.27
       nanoid: 5.1.6
-      partyserver: 0.1.0(@cloudflare/workers-types@4.20251230.0)
+      partyserver: 0.1.0(@cloudflare/workers-types@4.20260101.0)
       partysocket: 1.1.10
       react: 19.2.3
       yargs: 18.0.0
@@ -7610,9 +7610,9 @@ snapshots:
 
   parseurl@1.3.3: {}
 
-  partyserver@0.1.0(@cloudflare/workers-types@4.20251230.0):
+  partyserver@0.1.0(@cloudflare/workers-types@4.20260101.0):
     dependencies:
-      '@cloudflare/workers-types': 4.20251230.0
+      '@cloudflare/workers-types': 4.20260101.0
       nanoid: 5.1.6
 
   partysocket@1.1.10:
@@ -8518,7 +8518,7 @@ snapshots:
       ai: 6.0.5(zod@4.3.4)
       zod: 4.3.4
 
-  wrangler@4.16.1(@cloudflare/workers-types@4.20251230.0)(bufferutil@4.1.0)(utf-8-validate@5.0.10):
+  wrangler@4.16.1(@cloudflare/workers-types@4.20260101.0)(bufferutil@4.1.0)(utf-8-validate@5.0.10):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.4.0
       '@cloudflare/unenv-preset': 2.3.2(unenv@2.0.0-rc.17)(workerd@1.20250508.0)
@@ -8529,14 +8529,14 @@ snapshots:
       unenv: 2.0.0-rc.17
       workerd: 1.20250508.0
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20251230.0
+      '@cloudflare/workers-types': 4.20260101.0
       fsevents: 2.3.3
       sharp: 0.33.5
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  wrangler@4.56.0(@cloudflare/workers-types@4.20251230.0)(bufferutil@4.1.0)(utf-8-validate@5.0.10):
+  wrangler@4.56.0(@cloudflare/workers-types@4.20260101.0)(bufferutil@4.1.0)(utf-8-validate@5.0.10):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.4.1
       '@cloudflare/unenv-preset': 2.7.13(unenv@2.0.0-rc.24)(workerd@1.20251217.0)
@@ -8547,7 +8547,7 @@ snapshots:
       unenv: 2.0.0-rc.24
       workerd: 1.20251217.0
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20251230.0
+      '@cloudflare/workers-types': 4.20260101.0
       fsevents: 2.3.3
     transitivePeerDependencies:
       - bufferutil
