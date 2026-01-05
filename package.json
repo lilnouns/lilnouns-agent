@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "lilnouns-agent",
-  "version": "1.0.0-alpha.48",
+  "version": "1.0.0-alpha.49",
   "description": "",
   "author": "",
   "license": "Apache-2.0",
@@ -21,12 +21,12 @@
     "prepare": "husky",
     "cf-typegen": "wrangler types --include-runtime=false --strict-vars=false"
   },
-  "packageManager": "pnpm@10.26.2",
+  "packageManager": "pnpm@10.27.0",
   "keywords": [],
   "devDependencies": {
     "@biomejs/biome": "2.3.10",
-    "@cloudflare/vitest-pool-workers": "0.10.3",
-    "@cloudflare/workers-types": "4.20251230.0",
+    "@cloudflare/vitest-pool-workers": "0.11.1",
+    "@cloudflare/workers-types": "4.20260101.0",
     "@types/luxon": "3.7.1",
     "@types/node": "25.0.3",
     "husky": "9.1.7",
@@ -38,21 +38,21 @@
   },
   "dependencies": {
     "@cloudflare/ai-utils": "1.0.1",
-    "@nekofar/lilnouns": "1.0.0-alpha.49",
+    "@nekofar/lilnouns": "1.0.0-alpha.52",
     "@nekofar/warpcast": "2.0.0-alpha.109",
     "agents": "0.3.3",
-    "ai": "6.0.3",
+    "ai": "6.0.5",
     "graphql": "16.12.0",
     "graphql-request": "7.4.0",
     "luxon": "3.7.2",
     "pino": "10.1.0",
     "pino-pretty": "13.1.3",
-    "remeda": "2.32.1",
+    "remeda": "2.33.0",
     "type-fest": "5.3.1",
-    "viem": "2.43.3",
-    "wagmi": "2.19.4",
+    "viem": "2.43.4",
+    "wagmi": "2.19.5",
     "workers-ai-provider": "3.0.2",
-    "zod": "4.2.1"
+    "zod": "4.3.4"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,jsonc,css,scss,graphql}": [
