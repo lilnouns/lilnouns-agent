@@ -51,8 +51,8 @@ importers:
         specifier: 2.19.5
         version: 2.19.5(@tanstack/query-core@5.90.15)(@tanstack/react-query@5.90.15(react@19.2.3))(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.45.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))(zod@4.3.6)
       workers-ai-provider:
-        specifier: 3.0.2
-        version: 3.0.2(@ai-sdk/provider-utils@4.0.10(zod@4.3.6))(@ai-sdk/provider@3.0.5)(ai@6.0.57(zod@4.3.6))(zod@4.3.6)
+        specifier: 3.0.3
+        version: 3.0.3(@ai-sdk/provider-utils@4.0.10(zod@4.3.6))(@ai-sdk/provider@3.0.5)(ai@6.0.57(zod@4.3.6))(zod@4.3.6)
       zod:
         specifier: 4.3.6
         version: 4.3.6
@@ -3542,8 +3542,8 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  workers-ai-provider@3.0.2:
-    resolution: {integrity: sha512-HUPu5aQrPOHHaoBiRoUiNzK5wtVtCFl0g/OO3gk9wguGEUK4m81qrqmdte6xlkWeKtujCHIDfIdIN6rZAnzVew==}
+  workers-ai-provider@3.0.3:
+    resolution: {integrity: sha512-EOd9gZhtfNVDi15gNAHBABkie1uBMjjjcn9Ts0NpwqFi1SG0U5S1CgxI8Ogm7OUrMx6LLdNIIFIRptWqEsIb9A==}
     peerDependencies:
       '@ai-sdk/provider': ^3.0.0
       '@ai-sdk/provider-utils': ^4.0.0
@@ -8159,7 +8159,7 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20260124.0
       '@cloudflare/workerd-windows-64': 1.20260124.0
 
-  workers-ai-provider@3.0.2(@ai-sdk/provider-utils@4.0.10(zod@4.3.6))(@ai-sdk/provider@3.0.5)(ai@6.0.57(zod@4.3.6))(zod@4.3.6):
+  workers-ai-provider@3.0.3(@ai-sdk/provider-utils@4.0.10(zod@4.3.6))(@ai-sdk/provider@3.0.5)(ai@6.0.57(zod@4.3.6))(zod@4.3.6):
     dependencies:
       '@ai-sdk/provider': 3.0.5
       '@ai-sdk/provider-utils': 4.0.10(zod@4.3.6)
