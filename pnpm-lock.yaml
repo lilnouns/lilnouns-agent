@@ -51,8 +51,8 @@ importers:
         specifier: 2.19.5
         version: 2.19.5(@tanstack/query-core@5.90.15)(@tanstack/react-query@5.90.15(react@19.2.3))(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.45.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))(zod@4.3.6)
       workers-ai-provider:
-        specifier: 3.0.3
-        version: 3.0.3(@ai-sdk/provider-utils@4.0.11(zod@4.3.6))(@ai-sdk/provider@3.0.6)(ai@6.0.62(zod@4.3.6))(zod@4.3.6)
+        specifier: 3.0.4
+        version: 3.0.4(@ai-sdk/provider-utils@4.0.11(zod@4.3.6))(@ai-sdk/provider@3.0.6)(ai@6.0.62(zod@4.3.6))(zod@4.3.6)
       zod:
         specifier: 4.3.6
         version: 4.3.6
@@ -2894,8 +2894,8 @@ packages:
   preact@10.24.2:
     resolution: {integrity: sha512-1cSoF0aCC8uaARATfrlz4VCBqE8LwZwRfLgkxJOQwAlQt6ayTmi0D9OF7nXid1POI5SZidFuG9CnlXbDfLqY/Q==}
 
-  preact@10.28.2:
-    resolution: {integrity: sha512-lbteaWGzGHdlIuiJ0l2Jq454m6kcpI1zNje6d8MlGAFlYvP2GO4ibnat7P74Esfz4sPTdM6UxtTwh/d3pwM9JA==}
+  preact@10.28.3:
+    resolution: {integrity: sha512-tCmoRkPQLpBeWzpmbhryairGnhW9tKV6c6gr/w+RhoRoKEJwsjzipwp//1oCpGPOchvSLaAPlpcJi9MwMmoPyA==}
 
   prettier@3.7.4:
     resolution: {integrity: sha512-v6UNi1+3hSlVvv8fSaoUbggEM5VErKmmpGA7Pl3HF8V6uKY7rvClBOJlH6yNwQtfTueNkGVpOv/mtWL9L4bgRA==}
@@ -3542,8 +3542,8 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  workers-ai-provider@3.0.3:
-    resolution: {integrity: sha512-EOd9gZhtfNVDi15gNAHBABkie1uBMjjjcn9Ts0NpwqFi1SG0U5S1CgxI8Ogm7OUrMx6LLdNIIFIRptWqEsIb9A==}
+  workers-ai-provider@3.0.4:
+    resolution: {integrity: sha512-ieDdAyGwg4AF3jKS1aP8fhhEZv7rh8fuWPCcEz0DjOYkvgCtcklx1BLofdmbmi7eLDPjjul38tlnN8/45EFwNg==}
     peerDependencies:
       '@ai-sdk/provider': ^3.0.0
       '@ai-sdk/provider-utils': ^4.0.0
@@ -3954,7 +3954,7 @@ snapshots:
       eth-json-rpc-filters: 6.0.1
       eventemitter3: 5.0.4
       keccak: 3.0.4
-      preact: 10.28.2
+      preact: 10.28.3
       sha.js: 2.4.12
     transitivePeerDependencies:
       - supports-color
@@ -7408,7 +7408,7 @@ snapshots:
 
   preact@10.24.2: {}
 
-  preact@10.28.2: {}
+  preact@10.28.3: {}
 
   prettier@3.7.4: {}
 
@@ -8159,7 +8159,7 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20260128.0
       '@cloudflare/workerd-windows-64': 1.20260128.0
 
-  workers-ai-provider@3.0.3(@ai-sdk/provider-utils@4.0.11(zod@4.3.6))(@ai-sdk/provider@3.0.6)(ai@6.0.62(zod@4.3.6))(zod@4.3.6):
+  workers-ai-provider@3.0.4(@ai-sdk/provider-utils@4.0.11(zod@4.3.6))(@ai-sdk/provider@3.0.6)(ai@6.0.62(zod@4.3.6))(zod@4.3.6):
     dependencies:
       '@ai-sdk/provider': 3.0.6
       '@ai-sdk/provider-utils': 4.0.11(zod@4.3.6)
