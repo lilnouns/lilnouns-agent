@@ -13,7 +13,7 @@ importers:
         version: 1.0.1
       '@nekofar/lilnouns':
         specifier: 1.0.0-alpha.52
-        version: 1.0.0-alpha.52(@tanstack/react-query@5.90.15(react@19.2.3))(@wagmi/core@2.22.1(@tanstack/query-core@5.90.15)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.45.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)))(graphql-request@7.4.0(graphql@16.12.0))(graphql-tag@2.12.6(graphql@16.12.0))(graphql@16.12.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(viem@2.45.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))(wagmi@2.19.5(@tanstack/query-core@5.90.15)(@tanstack/react-query@5.90.15(react@19.2.3))(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.45.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))(zod@4.3.6))
+        version: 1.0.0-alpha.52(@tanstack/react-query@5.90.15(react@19.2.3))(@wagmi/core@2.22.1(@tanstack/query-core@5.90.15)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.45.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)))(graphql-request@7.4.0(graphql@16.14.2))(graphql-tag@2.12.6(graphql@16.14.2))(graphql@16.14.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(viem@2.45.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))(wagmi@2.19.5(@tanstack/query-core@5.90.15)(@tanstack/react-query@5.90.15(react@19.2.3))(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.45.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))(zod@4.3.6))
       '@nekofar/warpcast':
         specifier: 2.0.0-alpha.109
         version: 2.0.0-alpha.109(ofetch@1.5.1)(zod@4.3.6)
@@ -24,11 +24,11 @@ importers:
         specifier: 6.0.62
         version: 6.0.62(zod@4.3.6)
       graphql:
-        specifier: 16.12.0
-        version: 16.12.0
+        specifier: 16.14.2
+        version: 16.14.2
       graphql-request:
         specifier: 7.4.0
-        version: 7.4.0(graphql@16.12.0)
+        version: 7.4.0(graphql@16.14.2)
       luxon:
         specifier: 3.7.2
         version: 3.7.2
@@ -2324,8 +2324,8 @@ packages:
     peerDependencies:
       graphql: ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
 
-  graphql@16.12.0:
-    resolution: {integrity: sha512-DKKrynuQRne0PNpEbzuEdHlYOMksHSUI8Zc9Unei5gTsMNA2/vMpoMz/yKba50pejK56qj98qM0SjYxAKi13gQ==}
+  graphql@16.14.2:
+    resolution: {integrity: sha512-Chq1s4CY7jmh8gO2qvLIJyfCDIN+EHLFW/9iShnp1z8FjBQMoodWP1kDC36VAMXXIvAjj4ARa7ntfAV2BrjsbA==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
 
   h3@1.15.4:
@@ -4191,9 +4191,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@graphql-typed-document-node/core@3.2.0(graphql@16.12.0)':
+  '@graphql-typed-document-node/core@3.2.0(graphql@16.14.2)':
     dependencies:
-      graphql: 16.12.0
+      graphql: 16.14.2
 
   '@hono/node-server@1.19.9(hono@4.11.3)':
     dependencies:
@@ -4521,13 +4521,13 @@ snapshots:
       - hono
       - supports-color
 
-  '@nekofar/lilnouns@1.0.0-alpha.52(@tanstack/react-query@5.90.15(react@19.2.3))(@wagmi/core@2.22.1(@tanstack/query-core@5.90.15)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.45.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)))(graphql-request@7.4.0(graphql@16.12.0))(graphql-tag@2.12.6(graphql@16.12.0))(graphql@16.12.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(viem@2.45.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))(wagmi@2.19.5(@tanstack/query-core@5.90.15)(@tanstack/react-query@5.90.15(react@19.2.3))(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.45.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))(zod@4.3.6))':
+  '@nekofar/lilnouns@1.0.0-alpha.52(@tanstack/react-query@5.90.15(react@19.2.3))(@wagmi/core@2.22.1(@tanstack/query-core@5.90.15)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.45.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)))(graphql-request@7.4.0(graphql@16.14.2))(graphql-tag@2.12.6(graphql@16.14.2))(graphql@16.14.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)(viem@2.45.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))(wagmi@2.19.5(@tanstack/query-core@5.90.15)(@tanstack/react-query@5.90.15(react@19.2.3))(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.45.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))(zod@4.3.6))':
     dependencies:
       '@tanstack/react-query': 5.90.15(react@19.2.3)
       '@wagmi/core': 2.22.1(@tanstack/query-core@5.90.15)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(viem@2.45.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))
-      graphql: 16.12.0
-      graphql-request: 7.4.0(graphql@16.12.0)
-      graphql-tag: 2.12.6(graphql@16.12.0)
+      graphql: 16.14.2
+      graphql-request: 7.4.0(graphql@16.14.2)
+      graphql-tag: 2.12.6(graphql@16.14.2)
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
       typescript: 5.9.3
@@ -6800,17 +6800,17 @@ snapshots:
 
   gopd@1.2.0: {}
 
-  graphql-request@7.4.0(graphql@16.12.0):
+  graphql-request@7.4.0(graphql@16.14.2):
     dependencies:
-      '@graphql-typed-document-node/core': 3.2.0(graphql@16.12.0)
-      graphql: 16.12.0
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.14.2)
+      graphql: 16.14.2
 
-  graphql-tag@2.12.6(graphql@16.12.0):
+  graphql-tag@2.12.6(graphql@16.14.2):
     dependencies:
-      graphql: 16.12.0
+      graphql: 16.14.2
       tslib: 2.8.1
 
-  graphql@16.12.0: {}
+  graphql@16.14.2: {}
 
   h3@1.15.4:
     dependencies:
