@@ -51,8 +51,8 @@ importers:
         specifier: 2.19.5
         version: 2.19.5(@tanstack/query-core@5.90.15)(@tanstack/react-query@5.90.15(react@19.2.3))(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.2.3)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.54.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.4.3))(ws@8.21.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))(zod@4.4.3)
       workers-ai-provider:
-        specifier: 3.0.3
-        version: 3.0.3(@ai-sdk/provider-utils@4.0.34(zod@4.4.3))(@ai-sdk/provider@3.0.13)(ai@6.0.217(zod@4.4.3))(zod@4.4.3)
+        specifier: 3.3.0
+        version: 3.3.0(@ai-sdk/provider@3.0.13)(ai@6.0.217(zod@4.4.3))
       zod:
         specifier: 4.4.3
         version: 4.4.3
@@ -3904,13 +3904,21 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  workers-ai-provider@3.0.3:
-    resolution: {integrity: sha512-EOd9gZhtfNVDi15gNAHBABkie1uBMjjjcn9Ts0NpwqFi1SG0U5S1CgxI8Ogm7OUrMx6LLdNIIFIRptWqEsIb9A==}
+  workers-ai-provider@3.3.0:
+    resolution: {integrity: sha512-x5GnN07O3O+3qiXzraMRLNbM34gDuQvnn+Xgw4Xqmhka+StgIWQp8dEQZ/70nVd+rOT75dEZ3/c9JGG/kDyzkw==}
     peerDependencies:
+      '@ai-sdk/anthropic': ^3.0.0
+      '@ai-sdk/google': ^3.0.0
+      '@ai-sdk/openai': ^3.0.0
       '@ai-sdk/provider': ^3.0.0
-      '@ai-sdk/provider-utils': ^4.0.0
       ai: ^6.0.0
-      zod: ^3.25.0 || ^4.0.0
+    peerDependenciesMeta:
+      '@ai-sdk/anthropic':
+        optional: true
+      '@ai-sdk/google':
+        optional: true
+      '@ai-sdk/openai':
+        optional: true
 
   wrangler@4.59.3:
     resolution: {integrity: sha512-zl+nqoGzWJ4K+NEMjy4GiaIi9ix59FkOzd7UsDb8CQADwy3li1DSNAzHty/BWYa3ZvMxr/G4pogMBb5vcSrNvQ==}
@@ -8848,12 +8856,10 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20260128.0
       '@cloudflare/workerd-windows-64': 1.20260128.0
 
-  workers-ai-provider@3.0.3(@ai-sdk/provider-utils@4.0.34(zod@4.4.3))(@ai-sdk/provider@3.0.13)(ai@6.0.217(zod@4.4.3))(zod@4.4.3):
+  workers-ai-provider@3.3.0(@ai-sdk/provider@3.0.13)(ai@6.0.217(zod@4.4.3)):
     dependencies:
       '@ai-sdk/provider': 3.0.13
-      '@ai-sdk/provider-utils': 4.0.34(zod@4.4.3)
       ai: 6.0.217(zod@4.4.3)
-      zod: 4.4.3
 
   wrangler@4.59.3(@cloudflare/workers-types@4.20260131.0)(bufferutil@4.1.0)(utf-8-validate@5.0.10):
     dependencies:
